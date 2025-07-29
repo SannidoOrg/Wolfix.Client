@@ -3,7 +3,6 @@ import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import Banner from '../components/Banner';
 import FeaturedProducts from '../components/FeaturedProducts';
-import SupportChat from '../components/SupportChat';
 import styles from '../styles/Home.module.css';
 
 const HomePage: FC = () => {
@@ -17,7 +16,6 @@ const HomePage: FC = () => {
           <FeaturedProducts />
         </div>
       </div>
-      <SupportChat />
     </div>
   );
 };
