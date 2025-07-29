@@ -1,0 +1,81 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  background-color: #1a2e3d;
+  color: white;
+  padding: 10px 20px;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+}
+
+.brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.slogan {
+  font-size: 1rem;
+  color: #d3d3d3;
+  margin-left: 5px;
+}
+
+.navContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search {
+  padding: 8px 15px;
+  border-radius: 5px;
+  border: none;
+  width: 300px;
+  background-color: #2a4d66;
+  color: white;
+}
+
+.icons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.icon {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.language {
+  padding: 5px;
+  background-color: #2a4d66;
+  color: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.promoBanner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffcc00;
+  color: #1a2e3d;
+  padding: 5px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.discount {
+  margin-left: 10px;
+  color: #ff4444;
+}
