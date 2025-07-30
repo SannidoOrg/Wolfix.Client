@@ -1,0 +1,17 @@
+.sidebar {
+  width: 200px;
+  padding: 10px;
+  background-color: #2a5c5c;
+  color: white;
+}
+
+.sidebar-link {
+  display: block;
+  color: white;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+
+.sidebar-link:hover {
+  color: #f4a261;
+}

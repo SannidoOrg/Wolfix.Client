@@ -1,0 +1,107 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #1A3C3C;
+  color: #FFFFFF;
+  font-family: Arial, sans-serif;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo {
+  height: 40px;
+  margin-right: 30px;
+  width: auto;
+}
+
+.nav {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-link {
+  color: #FFFFFF;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-link:hover {
+  color: #F4A261;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.promo-banner {
+  background-color: #F4A261;
+  color: #FFFFFF;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #FFFFFF;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.search-input {
+  padding: 5px 10px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  width: 200px;
+}
+
+.search-button {
+  padding: 5px 10px;
+  background-color: #2A5C5C;
+  color: #FFFFFF;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.search-button:hover {
+  background-color: #1A3C3C;
+}
+
+.user-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.language {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.icon-group {
+  display: flex;
+  gap: 15px;
+}
+
+.icon {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.icon:hover {
+  color: #F4A261;
+}

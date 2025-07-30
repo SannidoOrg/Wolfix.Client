@@ -1,0 +1,29 @@
+.banner {
+  background-color: #f4a261;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.banner-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.banner-discount {
+  font-weight: bold;
+  color: white;
+}
+
+.banner-text {
+  color: white;
+}
+
+.banner-timer {
+  color: white;
+  background-color: #e76f51;
+  padding: 5px;
+  border-radius: 5px;
+}
