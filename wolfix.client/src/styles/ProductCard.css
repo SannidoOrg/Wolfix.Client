@@ -2,11 +2,16 @@
   border: 1px solid #ccc;
   padding: 10px;
   text-align: center;
+  background-color: #ffffff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 200px;
 }
 
 .product-image {
   width: 100%;
   height: auto;
+  margin-bottom: 10px;
 }
 
 .product-info {
@@ -16,22 +21,54 @@
 .product-name {
   font-size: 14px;
   margin-bottom: 5px;
+  color: #333;
+  font-weight: 500;
 }
 
-.product-price {
+.product-details {
+  margin-bottom: 10px;
+}
+
+.product-rating {
+  font-size: 14px;
+  color: #ffcc00;
+  margin-bottom: 5px;
+}
+
+.product-prices {
+  margin-bottom: 5px;
+}
+
+.product-old-price {
+  font-size: 14px;
+  color: #888;
+  text-decoration: line-through;
+  margin-right: 5px;
+}
+
+.product-new-price {
+  font-size: 16px;
   font-weight: bold;
+  color: #000;
+}
+
+.product-fee {
+  font-size: 12px;
+  color: #666;
   margin-bottom: 10px;
 }
 
 .add-to-cart {
-  background-color: #2a5c5c;
+  background-color: #1A3C34;
   color: white;
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
+  font-size: 14px;
+  width: 100%;
 }
 
 .add-to-cart:hover {
-  background-color: #1a3c3c;
+  background-color: #2A5C5C;
 }

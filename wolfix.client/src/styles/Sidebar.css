@@ -1,13 +1,13 @@
 .sidebar {
-  width: 200px;
+  width: 320px;
   padding: 10px;
-  background-color: #2a5c5c;
-  color: white;
+  background-color: #F9F9F9;
+  color: rgb(0, 0, 0);
 }
 
 .sidebar-link {
   display: block;
-  color: white;
+  color: rgb(0, 0, 0);
   text-decoration: none;
   margin-bottom: 10px;
 }
