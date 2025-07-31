@@ -7,7 +7,6 @@ const Footer: FC<IFooterProps> = () => {
     <footer className="footer">
       <div className="footer-content">
         <p>© 2025 Wolfix. Усі права захищені.</p>
-        <p>Контакти: support@wolfix.com | +38 (XXX) XXX-XX-XX</p>
       </div>
     </footer>
   );

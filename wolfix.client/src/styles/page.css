@@ -1,0 +1,31 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  display: flex;
+  flex: 1;
+  position: relative;
+}
+
+.sidebar {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.divider {
+  border-left: 1px solid #000;
+  height: 525px;
+  position: absolute;
+  left: 330px;
+  top: 10px;
+}
+
+.content-area {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  margin-left: 10px;
+}

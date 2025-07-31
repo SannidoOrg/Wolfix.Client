@@ -12,7 +12,7 @@ interface ILayoutProps {
 
 const Layout: FC<ILayoutProps> = ({ children }) => {
   return (
-    <html lang="uk">
+    <html lang="en">
       <body>
         {children}
       </body>

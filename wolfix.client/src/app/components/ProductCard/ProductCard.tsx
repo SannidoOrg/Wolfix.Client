@@ -3,7 +3,7 @@ import { FC } from "react";
 interface IProductCardProps {
   name: string;
   oldPrice: number;
-  price: number;
+  price: string;
   rating: number;
   additionalFee: number;
   imageSrc: string;

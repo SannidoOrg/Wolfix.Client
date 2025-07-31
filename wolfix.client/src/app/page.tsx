@@ -1,21 +1,21 @@
-import Header from './components/Header/Header.client'
-import Sidebar from './components/Sidebar/Sidebar'
-// import Banner from './components/Banner/Banner'
-import ProductList from './components/ProductList/ProductList'
-import Footer from './components/Footer/Footer'
+import Header from './components/Header/Header.client';
+import Sidebar from './components/Sidebar/Sidebar';
+import ProductList from './components/ProductList/ProductList';
+import Footer from './components/Footer/Footer';
+import '../styles/page.css';
 
-interface HomeProps {
+interface IHomeProps {
   logoAlt: string;
 }
 
-const Home: React.FC<HomeProps> = ({ logoAlt }) => {
+const Home: React.FC<IHomeProps> = ({ logoAlt }) => {
   return (
     <div className="page-container">
       <Header logoAlt={logoAlt} />
       <div className="main-content">
-        <Sidebar />
+        <Sidebar className="sidebar" />
+        <div className="divider" />
         <div className="content-area">
-          {/* <Banner /> */}
           <ProductList />
         </div>
       </div>

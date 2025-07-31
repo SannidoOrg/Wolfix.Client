@@ -1,6 +1,8 @@
 .product-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   padding: 10px;
+  justify-content: flex-start;
+  max-width: 100%;
 }

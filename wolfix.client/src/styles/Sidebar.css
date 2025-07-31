@@ -1,8 +1,8 @@
 .sidebar {
   width: 320px;
   padding: 10px;
-  background-color: #F9F9F9;
   color: rgb(0, 0, 0);
+  min-height: calc(100vh - 200px);
 }
 
 .sidebar-link {
