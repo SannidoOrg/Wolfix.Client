@@ -6,12 +6,20 @@
 }
 
 .sidebar-link {
-  display: block;
-  color: rgb(0, 0, 0);
+  display: flex;
+  align-items: center;
+  color: #2C2C2C;
   text-decoration: none;
   margin-bottom: 10px;
 }
 
+.sidebar-icons {
+  width: 35px;
+  height: 35px;
+  margin-right: 10px;
+  object-fit: contain;
+}
+
 .sidebar-link:hover {
-  color: #f4a261;
+  color: #f4a261; 
 }

@@ -1,18 +1,11 @@
-'use client';
-
-import { FC, useState } from "react";
+import { FC } from "react";
+import "../../../styles/Header.css";
 
 interface IHeaderProps {
   logoAlt: string;
 }
 
 const Header: FC<IHeaderProps> = ({ logoAlt }) => {
-  const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
   return (
     <header className="header">
       <div className="header-left">
@@ -24,14 +17,13 @@ const Header: FC<IHeaderProps> = ({ logoAlt }) => {
         </nav>
       </div>
       <div className="header-right">
-        <div className="promo-banner">Великий літній розпродаж ДО -60%</div>
+        <div className="promo-banner"><img src="/banners/banner.png" alt="Promo Banner" /></div>
         <div className="search-bar">
           <input
             type="text"
-            value={searchQuery}
-            onChange={handleSearchChange}
             placeholder="Я шукаю..."
             className="search-input"
+            readOnly
           />
           <button className="search-button">🔍</button>
         </div>

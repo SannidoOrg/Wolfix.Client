@@ -2,15 +2,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 0;
   background-color: #1A3C3C;
   color: #FFFFFF;
   font-family: Arial, sans-serif;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  height: 60px;
 }
 
 .header-left {
   display: flex;
   align-items: center;
+  padding-left: 20px;
 }
 
 .header-logo {
@@ -41,15 +46,18 @@
   display: flex;
   align-items: center;
   gap: 20px;
+  padding-right: 20px;
 }
 
 .promo-banner {
-  background-color: #F4A261;
-  color: #FFFFFF;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 12px;
-  font-weight: 600;
+  height: 40px;
+  width: 450px;
+}
+
+.promo-banner img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
 }
 
 .search-bar {
