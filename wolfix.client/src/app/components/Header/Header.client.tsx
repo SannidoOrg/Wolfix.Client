@@ -8,8 +8,11 @@ interface IHeaderProps {
 const Header: FC<IHeaderProps> = ({ logoAlt }) => {
   return (
     <header className="header">
+      <div className="logo-block">
+        <img src="/logo/wolfix-logo.png" alt={logoAlt} className="header-logo" />
+        <img src="/logo/Wolfix.png" alt="Second Logo"/>
+      </div>
       <div className="header-left">
-        <img src="/wolfix-logo.png" alt={logoAlt} className="header-logo" />
         <nav className="nav">
           <a href="/" className="nav-link">Про нас</a>
           <a href="/about" className="nav-link">Продавати на Wolfix</a>
