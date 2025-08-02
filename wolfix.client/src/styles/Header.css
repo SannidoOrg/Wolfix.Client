@@ -1,3 +1,63 @@
+.header-container {
+  width: 100%;
+}
+
+.top-bar {
+  width: 100%;
+  height: 45px;
+  background-color: #0C3C3E;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.top-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.top-nav .nav-link {
+  color: #FFFFFF;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.top-nav .nav-link:hover {
+  color: #F4A261;
+}
+
+.top-banner {
+  height: 45px;
+  width: 200px;
+}
+
+.top-banner img {
+  height: 100%;
+  width: 540px;
+  object-fit: contain;
+}
+
+.user-profile-icon {
+  font-size: 20px;
+  color: #FFFFFF;
+  cursor: pointer;
+}
+
+.user-profile-icon img {
+  width: 27px;
+  height: 27px;
+  object-fit: contain;
+}
+
+.user-profile-icon:hover {
+  color: #F4A261;
+}
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -16,6 +76,7 @@
   display: flex;
   align-items: center;
   padding-left: 20px;
+  background-color: #0C3C3E;
 }
 
 .header-logo {
@@ -24,17 +85,14 @@
   margin-right: 10px;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
+.logo-block img:last-child {
+  height: 20px;
+  width: auto;
+  margin-left: 10px;
+  margin-right: 20px;
 }
 
-.nav {
-  display: flex;
-  gap: 20px;
-}
-
-.nav-link {
+.catalog-link {
   color: #FFFFFF;
   text-decoration: none;
   font-size: 14px;
@@ -43,7 +101,7 @@
   letter-spacing: 1px;
 }
 
-.nav-link:hover {
+.catalog-link:hover {
   color: #F4A261;
 }
 
@@ -54,44 +112,39 @@
   padding-right: 20px;
 }
 
-.promo-banner {
-  height: 40px;
-  width: 300px;
-}
-
-.promo-banner img {
-  height: 100%;
-  width: 100%;
-  object-fit: contain;
-}
-
 .search-bar {
   display: flex;
   align-items: center;
-  background-color: #FFFFFF;
-  border-radius: 5px;
+  background-color: #1A3C34;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .search-input {
   padding: 5px 10px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   outline: none;
   font-size: 14px;
-  width: 180px;
+  width: 400px;
+  height: 25px;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  border-radius: 10px;
 }
 
 .search-button {
-  padding: 5px 10px;
-  background-color: #2A5C5C;
-  color: #FFFFFF;
+  background-color: #00000000;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  border-radius: 10px;
+  position: absolute;
+  margin-left: 25%;
 }
 
-.search-button:hover {
-  background-color: #1A3C3C;
+.search-button img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .user-icons {
@@ -107,12 +160,18 @@
 
 .icon-group {
   display: flex;
-  gap: 10px;
+  gap: 20px;
 }
 
 .icon {
   font-size: 18px;
   cursor: pointer;
+}
+
+.icon img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .icon:hover {

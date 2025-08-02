@@ -1,4 +1,6 @@
-import { FC } from "react";
+"use client";
+
+import { FC, useState } from "react";
 import "../../../styles/Header.css";
 
 interface IHeaderProps {
@@ -6,42 +8,55 @@ interface IHeaderProps {
 }
 
 const Header: FC<IHeaderProps> = ({ logoAlt }) => {
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const handleSearch = () => {
+    console.log('Searching for:', searchQuery);
+  };
+
   return (
-    <header className="header">
-      <div className="logo-block">
-        <img src="/logo/wolfix-logo.png" alt={logoAlt} className="header-logo" />
-        <img src="/logo/Wolfix.png" alt="Second Logo"/>
-      </div>
-      <div className="header-left">
-        <nav className="nav">
+    <div className="header-container">
+      <div className="top-bar">
+        <nav className="top-nav">
           <a href="/" className="nav-link">Про нас</a>
           <a href="/about" className="nav-link">Продавати на Wolfix</a>
           <a href="/akcii" className="nav-link">Акції</a>
         </nav>
+        <div className="top-banner"><img src="/banners/banner.png" alt="Promo Banner" /></div>
+        <div className="user-profile-icon"><img src="/icons/Profile.png" alt="Profile Icon" /></div>
       </div>
-      <div className="header-right">
-        <div className="promo-banner"><img src="/banners/banner.png" alt="Promo Banner" /></div>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Я шукаю..."
-            className="search-input"
-            readOnly
-          />
-          <button className="search-button">🔍</button>
+      <header className="header">
+        <div className="logo-block">
+          <img src="/logo/wolfix-logo.png" alt={logoAlt} className="header-logo" />
+          <img src="/logo/Wolfix.png" alt="Second Logo" />
         </div>
-        <div className="user-icons">
-          <a href="/catalog" className="nav-link">Каталог</a>
-          <span className="language">UA</span>
-          <div className="icon-group">
-            <span className="icon">🔔</span>
-            <span className="icon">❤️</span>
-            <span className="icon">⚖️</span>
-            <span className="icon">🛒</span>
+        <div>
+          <a href="/catalog" className="catalog-link">Каталог</a>
+        </div>
+        <div className="header-right">
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Я шукаю..."
+              className="search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button className="search-button" onClick={handleSearch}>
+              <img src="/icons/Search.png" alt="Search Icon" />
+            </button>
+          </div>
+          <div className="user-icons">
+            <div className="icon-group">
+              <span className="icon"><img src="/icons/notification.png" alt="Notification Icon" /></span>
+              <span className="icon"><img src="/icons/selected.png" alt="Selected Icon" /></span>
+              <span className="icon"><img src="/icons/comparison.png" alt="Comparison Icon" /></span>
+              <span className="icon"><img src="/icons/cart.png" alt="Cart Icon" /></span>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 };
 
