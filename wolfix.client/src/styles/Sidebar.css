@@ -3,6 +3,7 @@
   padding: 10px;
   color: rgb(0, 0, 0);
   min-height: calc(100vh - 200px);
+  background-color: #F9F9F9;
 }
 
 .sidebar-link {

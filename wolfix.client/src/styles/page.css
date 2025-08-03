@@ -8,6 +8,7 @@
   display: flex;
   flex: 1;
   position: relative;
+  background-color: #F9F9F9;
 }
 
 .sidebar {
@@ -17,6 +18,7 @@
 
 .divider {
   border-left: 1px solid #000;
+  background-color: #F9F9F9;
   height: 750px;
   position: absolute;
   left: 330px;
@@ -26,6 +28,6 @@
 .content-area {
   flex: 1;
   padding: 20px;
-  background-color: #fff;
+  background-color: #F9F9F9;
   margin-left: 10px;
 }

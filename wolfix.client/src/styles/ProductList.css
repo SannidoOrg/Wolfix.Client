@@ -15,22 +15,23 @@
 
 .separator-text {
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
+  font-weight: medium;
   font-size: 24px;
   color: #FF6B00;
-  width: 170px;
+  width: 177px;
   height: 30px;
   display: block;
   margin-bottom: 5px;
   position: relative;
   z-index: 1;
+  padding-top: 20px;
 }
 
 .separator-line {
-  width: calc(100% - 88.5px);
+  width: calc(870px - 88.5px);
   height: 2px;
   background: linear-gradient(to right, #FF6B00 0%, #FFD8BC 100%);
   position: absolute;
   top: 35px;
-  left: 88.5px;
+  left: 170px; 
 }

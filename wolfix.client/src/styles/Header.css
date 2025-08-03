@@ -72,7 +72,7 @@
   padding: 0;
   background-color: rgb(26, 67, 69);
   color: #FFFFFF;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
   width: 100%;
   margin: 0;
   box-sizing: border-box;
@@ -82,7 +82,7 @@
 .logo-block {
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding-left: 20px;
   background-color: #0C3C3E;
   width: 180px;
   height: 63px;
@@ -96,14 +96,13 @@
 .header-logo {
   height: 40px;
   width: 40px;
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .logo-block img:last-child {
   height: 20px;
   width: auto;
   margin-left: 10px;
-  margin-right: 20px;
 }
 
 .catalog-container {
