@@ -72,8 +72,8 @@
 .social-links-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin-bottom: 5px;
 }
 
 .social-links-container .footer-link {
@@ -97,4 +97,7 @@
 
 .footer-download-links .footer-link.app-store img {
   margin-left: 150px;
+  width: 70px;
+  height: 22px;
+  border-radius: 5px;
 }

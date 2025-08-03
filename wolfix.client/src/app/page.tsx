@@ -2,6 +2,7 @@ import Header from './components/Header/Header.client';
 import Sidebar from './components/Sidebar/Sidebar';
 import ProductList from './components/ProductList/ProductList';
 import Footer from './components/Footer/Footer';
+import Banner from './components/Banner/Banner';
 import '../styles/page.css';
 
 interface IHomeProps {
@@ -16,6 +17,7 @@ const Home: React.FC<IHomeProps> = ({ logoAlt }) => {
         <Sidebar className="sidebar" />
         <div className="divider" />
         <div className="content-area">
+          <Banner />
           <ProductList />
         </div>
       </div>

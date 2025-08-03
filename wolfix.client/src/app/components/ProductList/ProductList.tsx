@@ -19,6 +19,10 @@ const ProductList: FC<IProductListProps> = () => {
 
   return (
     <div className="product-list">
+      <div className="separator-container">
+        <span className="separator-text">Акційні товари</span>
+        <div className="separator-line" />
+      </div>
       {productData.map((product) => (
         <ProductCard
           key={product.id}

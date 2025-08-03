@@ -30,8 +30,8 @@ const Header: FC<IHeaderProps> = ({ logoAlt }) => {
           <img src="/logo/wolfix-logo.png" alt={logoAlt} className="header-logo" />
           <img src="/logo/Wolfix.png" alt="Second Logo" />
         </div>
-        <div>
-          <a href="/catalog" className="catalog-link">Каталог</a>
+        <div className="catalog-container">
+          <a href="/catalog" className="catalog-link"><img src="/icons/Cataloge.png" alt="Cataloge Icon" />Каталог</a>
         </div>
         <div className="header-right">
           <div className="search-bar">

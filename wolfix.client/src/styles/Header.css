@@ -7,15 +7,18 @@
   height: 45px;
   background-color: #0C3C3E;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 40px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .top-nav {
   display: flex;
-  gap: 10px;
+  gap: 20px;
+  position: absolute;
+  left: 40px;
 }
 
 .top-nav .nav-link {
@@ -25,6 +28,8 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-family: 'Inter', sans-serif;
+  line-height: 20px;
 }
 
 .top-nav .nav-link:hover {
@@ -46,6 +51,8 @@
   font-size: 20px;
   color: #FFFFFF;
   cursor: pointer;
+  position: absolute;
+  right: 20px;
 }
 
 .user-profile-icon img {
@@ -63,20 +70,27 @@
   justify-content: space-between;
   align-items: center;
   padding: 0;
-  background: linear-gradient(to right, #1A3C3C, #2A5C5C);
+  background-color: rgb(26, 67, 69);
   color: #FFFFFF;
   font-family: Arial, sans-serif;
   width: 100%;
   margin: 0;
   box-sizing: border-box;
-  height: 115px;
+  height: 70px;
 }
 
 .logo-block {
   display: flex;
   align-items: center;
-  padding-left: 20px;
+  padding: 0 20px;
   background-color: #0C3C3E;
+  width: 180px;
+  height: 63px;
+  border-radius: 10px;
+  margin-top: -20px;
+  margin-left: 40px;
+  position: relative;
+  z-index: 1; 
 }
 
 .header-logo {
@@ -92,6 +106,10 @@
   margin-right: 20px;
 }
 
+.catalog-container {
+  margin-left: 60px;
+}
+
 .catalog-link {
   color: #FFFFFF;
   text-decoration: none;
@@ -99,6 +117,14 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+}
+
+.catalog-link img {
+  width: 30px;
+  height: 30px;
+  margin-right: 2px;
 }
 
 .catalog-link:hover {
@@ -110,12 +136,13 @@
   align-items: center;
   gap: 15px;
   padding-right: 20px;
+  margin-left: 200px;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
-  background-color: #1A3C34;
+  background-color: #3c5e60;
   border-radius: 10px;
   overflow: hidden;
 }
@@ -130,6 +157,10 @@
   background-color: rgba(255, 255, 255, 0.15);
   color: #FFFFFF;
   border-radius: 10px;
+}
+
+.search-input::placeholder {
+  color: #FFFFFF;
 }
 
 .search-button {
@@ -177,3 +208,5 @@
 .icon:hover {
   color: #F4A261;
 }
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');

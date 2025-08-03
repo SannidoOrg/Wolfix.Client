@@ -51,8 +51,8 @@ const Footer: FC<IFooterProps> = () => {
             <a href="https://t.me/wolfix" className="footer-link social-icon"><img src="/icons/Telegram.png" alt="Telegram" /></a>
           </div>
           <div className="footer-download-links">
-            <a href="https://play.google.com/store/apps/details?id=com.wolfix.app" className="footer-link app-store"><img src="/icons/GooglePlay.png" alt="Google Play" /></a>
-            <a href="https://www.apple.com/app-store/" className="footer-link app-store"><img src="/icons/AppStore.png" alt="App Store" /></a>
+            <a href="https://play.google.com/store/apps/details?id=com.wolfix.app" className="footer-link app-store"><img src="/icons/GooglePlay.jpg" alt="Google Play" /></a>
+            <a href="https://www.apple.com/app-store/" className="footer-link app-store"><img src="/icons/AppStore.jpg" alt="App Store" /></a>
           </div>
         </div>
       </div>
