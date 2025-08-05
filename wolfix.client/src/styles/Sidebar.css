@@ -12,6 +12,8 @@
   color: #2C2C2C;
   text-decoration: none;
   margin-bottom: 10px;
+  font-family: 'Inter', sans-serif; 
+  font-weight: 400;
 }
 
 .sidebar-icons {

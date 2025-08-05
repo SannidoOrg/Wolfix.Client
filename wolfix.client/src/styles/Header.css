@@ -25,7 +25,7 @@
   color: #FFFFFF;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-family: 'Inter', sans-serif;
@@ -53,6 +53,7 @@
   cursor: pointer;
   position: absolute;
   right: 20px;
+  margin-top: 5px;
 }
 
 .user-profile-icon img {
@@ -106,7 +107,8 @@
 }
 
 .catalog-container {
-  margin-left: 60px;
+  margin-left: -250px;
+  margin-bottom: 10px;
 }
 
 .catalog-link {
