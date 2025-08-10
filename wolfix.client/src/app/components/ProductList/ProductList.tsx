@@ -1,5 +1,6 @@
 import { FC } from "react";
 import ProductCard from "../ProductCard/ProductCard";
+import ProductCarousel from "../ProductCarousel/ProductCarousel";
 
 interface IProductListProps {}
 
@@ -17,12 +18,19 @@ const ProductList: FC<IProductListProps> = () => {
     { id: "10", name: "Автокрісло Britax-Römer KidFix Pro M Style Dusty Rose", price: "10 540 грн", oldPrice: 12999, rating: 5, additionalFee: 105, imageUrl: "/test.png" },
   ];
 
+    const productData2 = [
+    { id: "1", name: "Ноутбук Apple MacBook Air 13 M1 (MGN63) Space Grey", price: "30 999 грн", oldPrice: 34999, rating: 4.61, additionalFee: 310, imageUrl: "/test.png" },
+    { id: "2", name: "Подушка класична Кримдур Мамонт Базальт", price: "2 000 грн", oldPrice: 2500, rating: 5, additionalFee: 20, imageUrl: "/test.png" },
+    { id: "3", name: "Пральна машина Samsung WW60A2100WW", price: "13 999 грн", oldPrice: 15999, rating: 4.5, additionalFee: 140, imageUrl: "/test.png" },
+  ];
+
   return (
     <div className="product-list">
       <div className="separator-container">
         <span className="separator-text">Акційні товари</span>
         <div className="separator-line" />
       </div>
+      <ProductCarousel products={productData2} />
       {productData.map((product) => (
         <ProductCard
           key={product.id}

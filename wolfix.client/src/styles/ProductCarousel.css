@@ -1,0 +1,23 @@
+.product-carousel {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  padding: 10px;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 350px;
+  margin: 0 auto;
+  margin-bottom: 10px;
+  margin-left: -10px;
+  margin-top: -15px;
+}
+
+.product-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.product-carousel {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

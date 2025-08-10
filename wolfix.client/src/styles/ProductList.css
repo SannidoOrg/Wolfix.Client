@@ -1,7 +1,7 @@
 .product-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 10px;
   padding: 10px;
   justify-content: flex-start;
   max-width: 100%;
