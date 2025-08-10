@@ -33,5 +33,22 @@
   background: linear-gradient(to right, #FF6B00 0%, #FFD8BC 100%);
   position: absolute;
   top: 35px;
-  left: 170px; 
+  left: 170px;
+}
+
+.progress-bar {
+  width: 85%;
+  height: 2px;
+  background-color: #e0e0e0;
+  margin: 10px auto 20px;
+  border-radius: 2px;
+  margin-left: 15px;
+  margin-top: -10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #000;
+  transition: width 0.5s ease-in-out;
+  border-radius: 2px;
 }
