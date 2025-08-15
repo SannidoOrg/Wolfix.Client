@@ -8,8 +8,7 @@ interface IHeaderProps {
 }
 
 const Header: FC<IHeaderProps> = ({ logoAlt }) => {
-  const [searchQuery, setSearchQuery] = useState<string>(''); // Изначально пустое значение, что безопасно
-
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const handleSearch = () => {
     console.log('Searching for:', searchQuery);
   };
