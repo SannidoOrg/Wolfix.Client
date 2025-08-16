@@ -28,6 +28,7 @@ const ProductList: FC<IProductListProps> = () => {
     { id: "17", name: "Игровой ноутбук ASUS ROG Strix", price: "55 999 грн", oldPrice: 62999, rating: 4.6, additionalFee: 560, imageUrl: "/test.png" },
     { id: "18", name: "Пылесос Dyson V15 Detect", price: "19 999 грн", oldPrice: 22999, rating: 4.9, additionalFee: 200, imageUrl: "/test.png" },
     { id: "24", name: "Смартфон Samsung Galaxy Z Fold 6", price: "65 000 грн", oldPrice: 74999, rating: 4.7, additionalFee: 650, imageUrl: "/test.png" },
+    { id: "25", name: "Смартфон Apple iPhone 15 256Gb Black", price: "39 000 грн", oldPrice: 45999, rating: 4.8, additionalFee: 390, imageUrl: "/test.png" },
   ];
 
   const productData2 = [
@@ -39,6 +40,13 @@ const ProductList: FC<IProductListProps> = () => {
     { id: "6", name: "Камін електричний 3kW Art-Flamme Fashion", price: "39 000 грн", oldPrice: 45000, rating: 5, additionalFee: 390, imageUrl: "/test.png" },
     { id: "7", name: "Смартфон Apple iPhone 16 Pro Max 512Gb Desert Titanium", price: "73 000 грн", oldPrice: 79999, rating: 4.6, additionalFee: 730, imageUrl: "/test.png" },
     { id: "8", name: "Смартфон Apple iPhone 15 256Gb Pink", price: "39 000 грн", oldPrice: 45999, rating: 4.8, additionalFee: 390, imageUrl: "/test.png" },
+    { id: "9", name: "Ігрова приставка Sony PlayStation 5 Slim Blu-ray", price: "29 999 грн", oldPrice: 34999, rating: 4.75, additionalFee: 300, imageUrl: "/test.png" },
+    { id: "10", name: "Автокрісло Britax-Römer KidFix Pro M Style Dusty Rose", price: "10 540 грн", oldPrice: 12999, rating: 5, additionalFee: 105, imageUrl: "/test.png" },
+    { id: "11", name: "Телевизор Samsung QLED 55Q70A", price: "25 000 грн", oldPrice: 27999, rating: 4.7, additionalFee: 250, imageUrl: "/test.png" },
+    { id: "12", name: "Наушники Sony WH-1000XM5", price: "7 999 грн", oldPrice: 8999, rating: 4.9, additionalFee: 80, imageUrl: "/test.png" },
+    { id: "13", name: "Холодильник Bosch Serie 6", price: "18 999 грн", oldPrice: 20999, rating: 4.6, additionalFee: 190, imageUrl: "/test.png" },
+    { id: "14", name: "Фотокамера Canon EOS R6", price: "45 000 грн", oldPrice: 49999, rating: 4.8, additionalFee: 450, imageUrl: "/test.png" },
+    { id: "15", name: "Смартфон Apple iPhone 15 256Gb Black", price: "39 000 грн", oldPrice: 45999, rating: 4.8, additionalFee: 390, imageUrl: "/test.png" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -79,35 +87,41 @@ const ProductList: FC<IProductListProps> = () => {
       </div>
       <div className="custom-product-list2">
         {firstSection.map((product) => (
-        <ProductCard
-          key={product.id}
-          name={product.name}
-          oldPrice={product.oldPrice}
-          price={product.price}
-          rating={product.rating}
-          additionalFee={product.additionalFee}
-          imageSrc={product.imageUrl}
-        />
-      ))}
+          <ProductCard
+            key={product.id}
+            name={product.name}
+            oldPrice={product.oldPrice}
+            price={product.price}
+            rating={product.rating}
+            additionalFee={product.additionalFee}
+            imageSrc={product.imageUrl}
+          />
+        ))}
       </div>
       <div className="custom-product-list">
-      <div className="custom-separator" />
-      <div className="custom-banner">
-        <img src="/banners/Banner_4.png" alt="Banner" style={{ width: '950px', height: '225px' }} />
-      </div>
-      <div className="custom-separator" />
+        <div className="custom-separator" />
+        <div className="custom-banner">
+          <img src="/banners/Banner_4.png" alt="Banner" />
+        </div>
+        <div className="custom-separator" />
         {remainingSection.map((product) => (
-        <ProductCard
-          key={product.id}
-          name={product.name}
-          oldPrice={product.oldPrice}
-          price={product.price}
-          rating={product.rating}
-          additionalFee={product.additionalFee}
-          imageSrc={product.imageUrl}
-        />
-      ))}
+          <ProductCard
+            key={product.id}
+            name={product.name}
+            oldPrice={product.oldPrice}
+            price={product.price}
+            rating={product.rating}
+            additionalFee={product.additionalFee}
+            imageSrc={product.imageUrl}
+          />
+        ))}
       </div>
+        <div className="button_more">
+          <button>
+            Показати ще
+            <img src="/icons/arrow.png" alt="Arrow" />
+          </button>
+        </div>
     </div>
   );
 };
