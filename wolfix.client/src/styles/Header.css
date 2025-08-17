@@ -1,5 +1,6 @@
 .header-container {
   width: 100%;
+  position: relative;
 }
 
 .top-bar {
@@ -54,6 +55,9 @@
   position: absolute;
   right: 20px;
   margin-top: 5px;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .user-profile-icon img {
@@ -92,6 +96,10 @@
   margin-left: 40px;
   position: relative;
   z-index: 1; 
+}
+
+.logo-block a {
+  text-decoration: none;
 }
 
 .header-logo {
