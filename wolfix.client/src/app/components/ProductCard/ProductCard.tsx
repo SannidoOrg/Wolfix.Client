@@ -25,7 +25,7 @@ const ProductCard: FC<IProductCardProps> = ({ name, oldPrice, price, rating, add
               <img src="/icons/Vector.jpg" alt="Star" className="rating-star" />
               <span className="rating-value">{rating}</span>
             </div>
-            <div className="product-old-price">{oldPrice} грн</div>
+            {oldPrice > 0 && <div className="product-old-price">{oldPrice} грн</div>}
             <div className="product-new-price">{price}</div>
           </div>
         </div>

@@ -2,35 +2,17 @@
 
 import { FC } from "react";
 import ProductCard from "../ProductCard/ProductCard";
+import { Product } from "../../data/products";
 import "../../../styles/ProductCarousel.css";
 
 interface IProductCarouselProps {
-  products: {
-    id: string;
-    name: string;
-    oldPrice: number;
-    price: string;
-    rating: number;
-    additionalFee: number;
-    imageUrl: string;
-  }[];
+  products: Product[];
   currentIndex: number;
   onPrev: () => void;
   onNext: () => void;
 }
 
 const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, onPrev, onNext }) => {
-  const handleNext = () => {
-    const nextIndex = (currentIndex + 1) % products.length;
-    onNext();
-    if (nextIndex === 0) {
-      // Если вернулись к началу, сбрасываем индекс вручную для корректной анимации
-      setTimeout(() => {
-        onNext(); // Вызываем onNext еще раз, чтобы завершить цикл
-      }, 500); // Задержка для соответствия анимации (0.5s)
-    }
-  };
-
   return (
     <div className="product-carousel">
       <div className="carousel-content">
@@ -39,8 +21,8 @@ const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, on
             <div key={product.id} className="carousel-item">
               <ProductCard
                 name={product.name}
-                oldPrice={product.oldPrice}
-                price={product.price}
+                oldPrice={product.oldPrice || 0}
+                price={`${new Intl.NumberFormat('uk-UA').format(product.price)} грн`}
                 rating={product.rating}
                 additionalFee={product.additionalFee}
                 imageSrc={product.imageUrl}
@@ -52,7 +34,7 @@ const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, on
       <button className="carousel-prev" onClick={onPrev}>
         <img src="/icons/Group164.png" alt="Previous" />
       </button>
-      <button className="carousel-next" onClick={handleNext}>
+      <button className="carousel-next" onClick={onNext}>
         <img src="/icons/Group164.png" alt="Next" />
       </button>
     </div>

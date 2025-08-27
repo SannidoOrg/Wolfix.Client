@@ -14,13 +14,13 @@ interface IBrandCardProps {
 const BrandCard: FC<IBrandCardProps> = ({ category, brandName, models, imageUrl }) => {
   const router = useRouter();
 
-  const handleModelSelect = (model: string) => {
-    const modelPath = model.replace(/\s+/g, '-').toLowerCase();
-    router.push(`/product/${category}/${modelPath}`);
+  const handleBrandClick = () => {
+    const brandSlug = brandName.split(' ')[1].toLowerCase();
+    router.push(`/categories/${category}/${brandSlug}`);
   };
 
   return (
-    <div className="brand-card">
+    <div className="brand-card" onClick={handleBrandClick}>
       <div className="brand-card-image-container">
         <img src={imageUrl} alt={brandName} className="brand-card-image" />
       </div>
@@ -28,13 +28,7 @@ const BrandCard: FC<IBrandCardProps> = ({ category, brandName, models, imageUrl 
       <div className="brand-card-divider"></div>
       <div className="model-list">
         {models.map((model) => (
-          <div
-            key={model}
-            className="model-item-text"
-            onClick={() => handleModelSelect(model)}
-          >
-            {model}
-          </div>
+          <div key={model} className="model-item-text">{model}</div>
         ))}
       </div>
     </div>
