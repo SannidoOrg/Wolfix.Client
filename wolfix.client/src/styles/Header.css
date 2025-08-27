@@ -1,63 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
 .header-container {
   width: 100%;
   position: relative;
+  font-family: 'Inter', sans-serif;
 }
 
 .top-bar {
-  width: 100%;
   height: 45px;
   background-color: #0C3C3E;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 0 40px;
-  box-sizing: border-box;
-  position: relative;
+  color: #FFFFFF;
 }
 
 .top-nav {
   display: flex;
   gap: 20px;
-  position: absolute;
-  left: 40px;
 }
 
-.top-nav .nav-link {
+.nav-link {
   color: #FFFFFF;
   text-decoration: none;
   font-size: 14px;
-  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  font-family: 'Inter', sans-serif;
-  line-height: 20px;
 }
 
-.top-nav .nav-link:hover {
+.nav-link:hover {
   color: #F4A261;
 }
 
-.top-banner {
-  height: 45px;
-  width: 200px;
-}
-
 .top-banner img {
-  height: 100%;
-  width: 540px;
+  height: 45px;
+  width: auto;
   object-fit: contain;
 }
 
 .user-profile-icon {
-  font-size: 20px;
-  color: #FFFFFF;
-  cursor: pointer;
-  position: absolute;
-  right: 20px;
-  margin-top: 5px;
-  border: none;
   background: none;
-  padding: 0;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-profile-icon img {
@@ -66,40 +53,27 @@
   object-fit: contain;
 }
 
-.user-profile-icon:hover {
-  color: #F4A261;
-}
-
 .header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0;
+  gap: 40px;
+  padding: 0 40px;
   background-color: rgb(26, 67, 69);
   color: #FFFFFF;
-  font-family: 'Inter', sans-serif;
-  width: 100%;
-  margin: 0;
-  box-sizing: border-box;
   height: 70px;
 }
 
 .logo-block {
   display: flex;
   align-items: center;
-  padding-left: 20px;
   background-color: #0C3C3E;
-  width: 180px;
   height: 63px;
+  padding: 0 20px;
   border-radius: 10px;
   margin-top: -20px;
-  margin-left: 40px;
   position: relative;
-  z-index: 1; 
-}
-
-.logo-block a {
-  text-decoration: none;
+  z-index: 1;
+  flex-shrink: 0;
 }
 
 .header-logo {
@@ -115,8 +89,7 @@
 }
 
 .catalog-container {
-  margin-left: -250px;
-  margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .catalog-link {
@@ -125,15 +98,14 @@
   font-size: 14px;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 1px;
   display: flex;
   align-items: center;
+  gap: 5px;
 }
 
 .catalog-link img {
   width: 30px;
   height: 30px;
-  margin-right: 2px;
 }
 
 .catalog-link:hover {
@@ -143,59 +115,55 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding-right: 20px;
-  margin-left: 200px;
+  gap: 20px;
+  width: 100%;
+  flex-grow: 1;
 }
 
 .search-bar {
-  display: flex;
-  align-items: center;
-  background-color: #3c5e60;
-  border-radius: 10px;
-  overflow: hidden;
+  position: relative;
+  flex-grow: 1;
+  max-width: 700px;
 }
 
 .search-input {
-  padding: 5px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  outline: none;
-  font-size: 14px;
-  width: 400px;
-  height: 25px;
-  background-color: rgba(255, 255, 255, 0.15);
+  width: 100%;
+  height: 44px;
+  padding: 10px 45px 10px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background-color: #4b7a7d;
   color: #FFFFFF;
-  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-input::placeholder {
-  color: #FFFFFF;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input:focus {
+  border-color: #FF6B00;
+  box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.3);
 }
 
 .search-button {
-  background-color: #00000000;
-  border: none;
-  cursor: pointer;
-  border-radius: 10px;
   position: absolute;
-  margin-left: 25%;
-}
-
-.search-button img {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
 }
 
 .user-icons {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.language {
-  font-size: 14px;
-  font-weight: 500;
+  margin-left: auto;
 }
 
 .icon-group {
@@ -204,7 +172,6 @@
 }
 
 .icon {
-  font-size: 18px;
   cursor: pointer;
 }
 
@@ -213,9 +180,3 @@
   height: 30px;
   object-fit: contain;
 }
-
-.icon:hover {
-  color: #F4A261;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');

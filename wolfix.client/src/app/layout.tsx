@@ -5,6 +5,7 @@ import '../styles/Banner.css'
 import '../styles/ProductList.css'
 import '../styles/ProductCard.css'
 import '../styles/Footer.css'
+import '../styles/globals.css';
 
 interface ILayoutProps {
   children: ReactNode;

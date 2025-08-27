@@ -12,16 +12,19 @@ const Header: FC<IHeaderProps> = ({ logoAlt }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const profileButtonRef = useRef<HTMLButtonElement | null>(null);
+
   const handleSearch = () => {
     console.log('Searching for:', searchQuery);
   };
 
   const handleProfileClick = () => {
     setIsModalOpen(true);
+    document.body.style.overflow = 'hidden';
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    document.body.style.overflow = 'auto';
   };
 
   return (

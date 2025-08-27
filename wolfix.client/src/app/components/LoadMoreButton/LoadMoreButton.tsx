@@ -1,4 +1,5 @@
-import { FC, useState } from "react";
+import { FC } from "react";
+import "../../../styles/LoadMoreButton.css";
 
 interface ILoadMoreButtonProps {
   onLoadMore: () => void;
