@@ -1,6 +1,6 @@
 import Header from '../../components/Header/Header.client';
 import Sidebar from '../../components/Sidebar/Sidebar';
-import ProductList from '../../components/ProductList/ProductList';
+import CategorySelection from '../../components/CategorySelection/CategorySelection';
 import Footer from '../../components/Footer/Footer';
 import { getCategoryName } from './utils';
 import '../../../styles/[category].css';
@@ -26,8 +26,9 @@ const CategoryPage = ({ params, logoAlt }: ICategoryProps) => {
         <Sidebar className="sidebar" />
         <div className="divider" />
         <div className="content-area">
+          <div className="breadcrumbs">Головна / {categoryName}</div>
           <h1 className="category-title">{categoryName}</h1>
-          <ProductList />
+          <CategorySelection category={params.category} />
         </div>
       </div>
       <Footer />
