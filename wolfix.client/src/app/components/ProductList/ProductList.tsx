@@ -50,15 +50,7 @@ const ProductList: FC = () => {
       </div>
       <div className="products-grid">
         {initialGridProducts.map((product: Product) => (
-          <ProductCard
-            key={product.id}
-            name={product.name}
-            oldPrice={product.oldPrice || 0}
-            price={`${new Intl.NumberFormat('uk-UA').format(product.price)} грн`}
-            rating={product.rating}
-            additionalFee={product.additionalFee}
-            imageSrc={product.imageUrl}
-          />
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
 
@@ -72,15 +64,7 @@ const ProductList: FC = () => {
 
           <div className="products-grid">
             {remainingProducts.map((product: Product) => (
-              <ProductCard
-                key={product.id}
-                name={product.name}
-                oldPrice={product.oldPrice || 0}
-                price={`${new Intl.NumberFormat('uk-UA').format(product.price)} грн`}
-                rating={product.rating}
-                additionalFee={product.additionalFee}
-                imageSrc={product.imageUrl}
-              />
+              <ProductCard key={product.id} product={product} />
             ))}
           </div>
         </>

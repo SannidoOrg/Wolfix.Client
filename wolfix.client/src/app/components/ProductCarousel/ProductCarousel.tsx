@@ -19,14 +19,7 @@ const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, on
         <div className="carousel-track" style={{ transform: `translateX(-${currentIndex * 230}px)` }}>
           {products.map((product) => (
             <div key={product.id} className="carousel-item">
-              <ProductCard
-                name={product.name}
-                oldPrice={product.oldPrice || 0}
-                price={`${new Intl.NumberFormat('uk-UA').format(product.price)} грн`}
-                rating={product.rating}
-                additionalFee={product.additionalFee}
-                imageSrc={product.imageUrl}
-              />
+              <ProductCard product={product} />
             </div>
           ))}
         </div>

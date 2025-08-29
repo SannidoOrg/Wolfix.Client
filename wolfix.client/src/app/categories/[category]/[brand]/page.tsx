@@ -1,10 +1,15 @@
 import { allProducts } from '../../../data/products';
 import BrandPageClient from './BrandPageClient';
+import { getCategoryName } from '../utils';
 
-export default function BrandPage({ params }: { params: { brand: string } }) {
-  const { brand } = params;
+export default function BrandPage({ params }: { params: { category: string, brand: string } }) {
+  const { category, brand } = params;
   
-  const initialProducts = allProducts.filter(p => p.brand.toLowerCase() === brand.toLowerCase());
+  const categoryName = getCategoryName(category);
 
-  return <BrandPageClient initialProducts={initialProducts} brand={brand} />;
+  const categoryProducts = allProducts.filter(product => {
+    return categoryName.startsWith(product.category);
+  });
+
+  return <BrandPageClient initialProducts={categoryProducts} brand={brand} categoryName={categoryName} />;
 }
