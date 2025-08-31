@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background-color: #F9F9F9;
 }
 main {
   flex-grow: 1;
@@ -11,7 +12,7 @@ main {
   margin: 0 auto;
   padding: 20px;
   font-family: 'Inter', sans-serif;
-  background-color: #fff;
+  background-color: #F9F9F9;
 }
 .breadcrumbs {
   font-size: 14px;
