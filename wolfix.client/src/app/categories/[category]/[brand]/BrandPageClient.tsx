@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Product } from '../../../data/products';
 import Header from '../../../components/Header/Header.client';
 import Footer from '../../../components/Footer/Footer';
@@ -15,6 +15,7 @@ export interface Filters {
   series: string[];
   ram: string[];
   storage: string[];
+  colors: string[];
   onSale: boolean;
 }
 
@@ -35,8 +36,17 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
     series: [],
     ram: [],
     storage: [],
+    colors: [],
     onSale: false,
   });
+
+  useEffect(() => {
+    const validSeries = new Set(initialProducts.filter(p => filters.brands.includes(p.brand)).map(p => p.series));
+    const selectedSeriesAreValid = filters.series.every(s => validSeries.has(s));
+    if (!selectedSeriesAreValid) {
+      setFilters(prev => ({ ...prev, series: [] }));
+    }
+  }, [filters.brands, initialProducts, filters.series]);
 
   const pageTitle = filters.brands.length === 1 
     ? `${categoryName} ${filters.brands[0]}` 
@@ -44,13 +54,14 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
 
   const filteredProducts = useMemo(() => {
     return initialProducts.filter(product => {
-      const { seller, brands, price, series, ram, storage, onSale } = filters;
+      const { seller, brands, price, series, ram, storage, colors, onSale } = filters;
       if (brands.length > 0 && !brands.includes(product.brand)) return false;
       if (seller.length > 0 && !seller.includes(product.seller)) return false;
       if (product.price < price.min || product.price > price.max) return false;
       if (series.length > 0 && !series.includes(product.series || '')) return false;
       if (ram.length > 0 && !ram.includes(product.specs?.ram || '')) return false;
       if (storage.length > 0 && !storage.includes(product.specs?.storage || '')) return false;
+      if (colors.length > 0 && !colors.includes(product.specs?.color || '')) return false;
       if (onSale && !product.onSale) return false;
       return true;
     });
@@ -76,7 +87,7 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
   const clearFilters = () => {
     setFilters({
       seller: [], brands: [], price: { min: 0, max: 200000 }, series: [],
-      ram: [], storage: [], onSale: false,
+      ram: [], storage: [], colors: [], onSale: false,
     });
   };
 
@@ -92,6 +103,7 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
               filters={filters} 
               onFilterChange={handleFilterChange}
               setFilters={setFilters}
+              products={initialProducts}
             />
             <div className="product-listing">
               <div className="listing-header">

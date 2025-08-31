@@ -1,6 +1,6 @@
 import { allProducts } from '../../../data/products';
-import BrandPageClient from './BrandPageClient';
 import { getCategoryName } from '../utils';
+import BrandPageClient from './BrandPageClient';
 
 export default function BrandPage({ params }: { params: { category: string, brand: string } }) {
   const { category, brand } = params;
@@ -11,5 +11,11 @@ export default function BrandPage({ params }: { params: { category: string, bran
     return categoryName.startsWith(product.category);
   });
 
-  return <BrandPageClient initialProducts={categoryProducts} brand={brand} categoryName={categoryName} />;
+  return (
+    <BrandPageClient 
+      initialProducts={categoryProducts} 
+      brand={brand} 
+      categoryName={categoryName} 
+    />
+  );
 }
