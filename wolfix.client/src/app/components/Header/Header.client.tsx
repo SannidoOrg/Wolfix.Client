@@ -2,13 +2,13 @@
 
 import { FC, useState, useRef } from "react";
 import "../../../styles/Header.css";
-import ProfileModal from "../ProfileModal/ProfileModal";
+import ProfileModal from "../ProfileModal/ProfileModal.client";
 
-interface IHeaderProps {
+interface IHeaderClientProps {
   logoAlt: string;
 }
 
-const Header: FC<IHeaderProps> = ({ logoAlt }) => {
+const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const profileButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -78,4 +78,4 @@ const Header: FC<IHeaderProps> = ({ logoAlt }) => {
   );
 };
 
-export default Header;
+export default HeaderClient;

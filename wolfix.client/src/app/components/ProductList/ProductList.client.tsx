@@ -1,21 +1,23 @@
 "use client";
 
 import { FC, useState } from "react";
-import ProductCard from "../ProductCard/ProductCard";
-import ProductCarousel from "../ProductCarousel/ProductCarousel";
-import LoadMoreButton from "../LoadMoreButton/LoadMoreButton";
-import { allProducts, promoProducts, Product } from "../../data/products";
+import ProductCard from "../ProductCard/ProductCard.server";
+import ProductCarousel from "../ProductCarousel/ProductCarousel.client";
+import LoadMoreButton from "../LoadMoreButton/LoadMoreButton.client";
+import { Product } from "../../data/products";
 
-const ProductList: FC = () => {
+interface IProductListClientProps {
+  promoProducts: Product[];
+  allProducts: Product[];
+}
+
+const ProductListClient: FC<IProductListClientProps> = ({ promoProducts, allProducts }) => {
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
   const [visibleProductsCount, setVisibleProductsCount] = useState<number>(12);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const safePromoProducts = promoProducts || [];
-  const safeAllProducts = allProducts || [];
-
-  const handlePrev = () => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : safePromoProducts.length - 4));
-  const handleNext = () => setCarouselIndex((prev) => (prev < safePromoProducts.length - 4 ? prev + 1 : 0));
+  const handlePrev = () => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : promoProducts.length - 4));
+  const handleNext = () => setCarouselIndex((prev) => (prev < promoProducts.length - 4 ? prev + 1 : 0));
 
   const handleLoadMore = () => {
     setIsLoading(true);
@@ -25,11 +27,11 @@ const ProductList: FC = () => {
     }, 1000);
   };
   
-  const totalSteps = safePromoProducts.length > 4 ? safePromoProducts.length - 4 : 0;
+  const totalSteps = promoProducts.length > 4 ? promoProducts.length - 4 : 0;
   const progressWidth = totalSteps > 0 ? `${(carouselIndex / totalSteps) * 100}%` : "0%";
 
-  const initialGridProducts = safeAllProducts.slice(0, 12);
-  const remainingProducts = safeAllProducts.slice(12, visibleProductsCount);
+  const initialGridProducts = allProducts.slice(0, 12);
+  const remainingProducts = allProducts.slice(12, visibleProductsCount);
 
   return (
     <div className="product-list-wrapper">
@@ -38,7 +40,7 @@ const ProductList: FC = () => {
         <div className="separator-line" />
       </div>
       <ProductCarousel
-        products={safePromoProducts}
+        products={promoProducts}
         currentIndex={carouselIndex}
         onPrev={handlePrev}
         onNext={handleNext}
@@ -57,7 +59,7 @@ const ProductList: FC = () => {
         ))}
       </div>
 
-      {safeAllProducts.length > 12 && (
+      {allProducts.length > 12 && (
         <>
           <div className="custom-separator" />
           <div className="custom-banner">
@@ -73,7 +75,7 @@ const ProductList: FC = () => {
         </>
       )}
 
-      {visibleProductsCount < safeAllProducts.length && (
+      {visibleProductsCount < allProducts.length && (
         <div className="load-more-container">
           <LoadMoreButton onLoadMore={handleLoadMore} isLoading={isLoading} />
         </div>
@@ -82,4 +84,4 @@ const ProductList: FC = () => {
   );
 };
 
-export default ProductList;
+export default ProductListClient;

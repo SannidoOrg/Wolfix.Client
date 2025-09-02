@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import ProductCard from "../ProductCard/ProductCard";
+import ProductCard from "../ProductCard/ProductCard.server";
 import { Product } from "../../data/products";
 import "../../../styles/ProductCarousel.css";
 
@@ -13,9 +13,7 @@ interface IProductCarouselProps {
 }
 
 const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, onPrev, onNext }) => {
-  const safeProducts = products || [];
-
-  if (safeProducts.length === 0) {
+  if (!products || products.length === 0) {
     return null;
   }
 
@@ -23,7 +21,7 @@ const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, on
     <div className="product-carousel">
       <div className="carousel-content">
         <div className="carousel-track" style={{ transform: `translateX(-${currentIndex * 230}px)` }}>
-          {safeProducts.map((product) => (
+          {products.map((product) => (
             <div key={product.id} className="carousel-item">
               <ProductCard product={product} />
             </div>

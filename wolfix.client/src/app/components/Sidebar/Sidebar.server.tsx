@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { categoriesConfig } from "../../(utils)/categories.config";
+import "../../../styles/Sidebar.css";
 
 interface ISidebarProps {
   style?: React.CSSProperties;

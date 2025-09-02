@@ -4,14 +4,14 @@ import { FC } from "react";
 import { useRouter } from "next/navigation";
 import "../../../styles/BrandCard.css";
 
-interface IBrandCardProps {
+export interface IBrandCardProps {
   category: string;
   brandName: string;
   models: string[];
   imageUrl: string;
 }
 
-const BrandCard: FC<IBrandCardProps> = ({ category, brandName, models, imageUrl }) => {
+const BrandCardClient: FC<IBrandCardProps> = ({ category, brandName, models, imageUrl }) => {
   const router = useRouter();
 
   const handleBrandClick = () => {
@@ -35,4 +35,4 @@ const BrandCard: FC<IBrandCardProps> = ({ category, brandName, models, imageUrl 
   );
 };
 
-export default BrandCard;
+export default BrandCardClient;

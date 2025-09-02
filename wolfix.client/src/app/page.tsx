@@ -1,8 +1,8 @@
 import Header from './components/Header/Header.client';
-import Sidebar from './components/Sidebar/Sidebar';
-import ProductList from './components/ProductList/ProductList';
-import Footer from './components/Footer/Footer';
-import Banner from './components/Banner/Banner';
+import Sidebar from './components/Sidebar/Sidebar.server';
+import ProductList from './components/ProductList/ProductList.server';
+import Footer from './components/Footer/Footer.server';
+import Banner from './components/Banner/Banner.server';
 import '../styles/page.css';
 
 interface IHomeProps {

@@ -3,17 +3,15 @@
 import { FC, useState, useEffect } from "react";
 import "../../../styles/Banner.css";
 
-interface IBannerProps {}
+interface IBannerClientProps {
+    banners: string[];
+}
 
-const Banner: FC<IBannerProps> = () => {
+const BannerClient: FC<IBannerClientProps> = ({ banners }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const banners = [
-    "/banners/Banner_1.png",
-    "/banners/Banner_2.png",
-    "/banners/Banner_3.png",
-  ];
 
   useEffect(() => {
+    if (banners.length === 0) return;
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % banners.length);
     }, 5000);
@@ -21,12 +19,18 @@ const Banner: FC<IBannerProps> = () => {
   }, [banners.length]);
 
   const handlePrev = () => {
+    if (banners.length === 0) return;
     setCurrentIndex((prevIndex) => (prevIndex - 1 + banners.length) % banners.length);
   };
 
   const handleNext = () => {
+    if (banners.length === 0) return;
     setCurrentIndex((prevIndex) => (prevIndex + 1) % banners.length);
   };
+
+  if (banners.length === 0) {
+    return null;
+  }
 
   return (
     <div className="banner">
@@ -60,4 +64,4 @@ const Banner: FC<IBannerProps> = () => {
   );
 };
 
-export default Banner;
+export default BannerClient;
