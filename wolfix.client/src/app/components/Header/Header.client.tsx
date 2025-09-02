@@ -3,19 +3,17 @@
 import { FC, useState, useRef } from "react";
 import "../../../styles/Header.css";
 import ProfileModal from "../ProfileModal/ProfileModal.client";
+import Search from "./Search.client";
 
 interface IHeaderClientProps {
   logoAlt: string;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
-const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt }) => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchChange }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const profileButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  const handleSearch = () => {
-    console.log('Searching for:', searchQuery);
-  };
 
   const handleProfileClick = () => {
     setIsModalOpen(true);
@@ -51,18 +49,7 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt }) => {
           <a href="/catalog" className="catalog-link"><img src="/icons/Cataloge.png" alt="Cataloge Icon" />Каталог</a>
         </div>
         <div className="header-right">
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Я шукаю..."
-              className="search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button className="search-button" onClick={handleSearch}>
-              <img src="/icons/Search.png" alt="Search Icon" />
-            </button>
-          </div>
+          <Search query={searchQuery} onQueryChange={onSearchChange} />
           <div className="user-icons">
             <div className="icon-group">
               <span className="icon"><img src="/icons/notification.png" alt="Notification Icon" /></span>
