@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { FC, ReactNode } from "react";
 import '../styles/Header.css'
 import '../styles/Sidebar.css'
@@ -7,13 +8,18 @@ import '../styles/ProductCard.css'
 import '../styles/Footer.css'
 import '../styles/globals.css';
 
+export const metadata: Metadata = {
+  title: 'Інтернет-магазин: Wolfix',
+  description: 'Онлайн-магазин Wolfix',
+};
+
 interface ILayoutProps {
   children: ReactNode;
 }
 
-const Layout: FC<ILayoutProps> = ({ children }) => {
+const RootLayout: FC<ILayoutProps> = ({ children }) => {
   return (
-    <html lang="en">
+    <html lang="uk">
       <body>
         {children}
       </body>
@@ -21,4 +27,4 @@ const Layout: FC<ILayoutProps> = ({ children }) => {
   );
 };
 
-export default Layout;
+export default RootLayout;
