@@ -13,11 +13,17 @@ interface IProductCarouselProps {
 }
 
 const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, onPrev, onNext }) => {
+  const safeProducts = products || [];
+
+  if (safeProducts.length === 0) {
+    return null;
+  }
+
   return (
     <div className="product-carousel">
       <div className="carousel-content">
         <div className="carousel-track" style={{ transform: `translateX(-${currentIndex * 230}px)` }}>
-          {products.map((product) => (
+          {safeProducts.map((product) => (
             <div key={product.id} className="carousel-item">
               <ProductCard product={product} />
             </div>

@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Filters } from '../../categories/[category]/[brand]/BrandPageClient';
 import { Product } from '../../data/products';
+import { categoryFilters, FilterConfig } from '../../(utils)/filter.config';
 
 interface FilterSidebarProps {
   filters: Filters;
@@ -10,21 +11,8 @@ interface FilterSidebarProps {
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
   products: Product[];
   filteredProducts: Product[];
+  categoryName: string;
 }
-
-export const DIAGONAL_RANGES = {
-  '7" та більше': { min: 7, max: Infinity },
-  '6,5"–6,9"': { min: 6.5, max: 7 },
-  '6"–6,4"': { min: 6, max: 6.5 },
-};
-
-export const MEGAPIXEL_RANGES = {
-  '100 Мп і більше': { min: 100, max: Infinity },
-  '49 - 64 Мп': { min: 49, max: 64 },
-  '21 - 48 Мп': { min: 21, max: 48 },
-  '16 - 20.7 Мп': { min: 16, max: 20.7 },
-  '15 Мп і менше': { min: 0, max: 15 },
-};
 
 const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
   const [isOpen, setIsOpen] = useState(true);
@@ -39,7 +27,34 @@ const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   );
 };
 
-const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange, setFilters, products, filteredProducts }) => {
+const CheckboxFilter: React.FC<{
+  title: string;
+  filterKey: keyof Filters;
+  options: (string | number)[];
+  counts: { [key: string]: number };
+  selectedValues: readonly (string | number)[];
+  onFilterChange: (filterType: keyof Filters, value: any) => void;
+}> = ({ title, filterKey, options, counts, selectedValues, onFilterChange }) => {
+  if (options.length === 0) return null;
+  return (
+    <FilterSection title={title}>
+      {options.map(option => (
+        (counts[option] > 0 || selectedValues.includes(option)) &&
+        <div key={option} className="filter-item">
+          <input
+            type="checkbox"
+            id={`${filterKey}-${option}`}
+            checked={selectedValues.includes(option)}
+            onChange={() => onFilterChange(filterKey, option)}
+          />
+          <label htmlFor={`${filterKey}-${option}`}>{option} ({counts[option] || 0})</label>
+        </div>
+      ))}
+    </FilterSection>
+  );
+};
+
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange, setFilters, products, categoryName }) => {
 
   const calculateCounts = (filterKeyToCount: keyof Filters) => {
     const counts: { [key: string]: number } = {};
@@ -58,11 +73,28 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange, 
                     case 'brands': productValue = product.brand; break;
                     case 'seller': productValue = product.seller; break;
                     case 'country': productValue = product.country; break;
+                    case 'series': productValue = product.series; break;
                     case 'ram': productValue = product.specs.ram; break;
                     case 'storage': productValue = product.specs.storage; break;
                     case 'colors': productValue = product.specs.color; break;
-                    case 'series': productValue = product.series; break;
                     case 'camera_modules': productValue = product.specs.camera_modules; break;
+                    case 'type': productValue = product.specs.type; break;
+                    case 'purpose': productValue = product.specs.purpose; break;
+                    case 'material': productValue = product.specs.material; break;
+                    case 'powerSource': productValue = product.specs.powerSource; break;
+                    case 'gender': productValue = product.specs.gender; break;
+                    case 'ageRange': productValue = product.specs.ageRange; break;
+                    case 'petType': productValue = product.specs.petType; break;
+                    case 'size': productValue = product.specs.size; break;
+                    case 'compatibility': productValue = product.specs.compatibility; break;
+                    case 'strapMaterial': productValue = product.specs.strapMaterial; break;
+                    case 'powerOutput': productValue = product.specs.powerOutput; break;
+                    case 'batteryCapacity': productValue = product.specs.batteryCapacity; break;
+                    case 'maxSpeed': productValue = product.specs.maxSpeed; break;
+                    case 'range': productValue = product.specs.range; break;
+                    case 'productType': productValue = product.specs.productType; break;
+                    case 'volume': productValue = product.specs.volume; break;
+                    case 'subCategory': productValue = product.specs.subCategory; break;
                     case 'nfc': productValue = product.specs.nfc === true ? 'Так' : 'Ні'; break;
                     case 'sd_slot': productValue = product.specs.sd_slot === true ? 'Є' : 'Немає'; break;
                     default: productValue = null;
@@ -75,242 +107,209 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, onFilterChange, 
         }
         
         if (isVisible) {
+            let value: any;
             switch(filterKeyToCount) {
-                case 'brands': if(product.brand) counts[product.brand] = (counts[product.brand] || 0) + 1; break;
-                case 'seller': if(product.seller) counts[product.seller] = (counts[product.seller] || 0) + 1; break;
-                case 'country': if(product.country) counts[product.country] = (counts[product.country] || 0) + 1; break;
-                case 'ram': if(product.specs.ram) counts[product.specs.ram] = (counts[product.specs.ram] || 0) + 1; break;
-                case 'storage': if(product.specs.storage) counts[product.specs.storage] = (counts[product.specs.storage] || 0) + 1; break;
-                case 'colors': if(product.specs.color) counts[product.specs.color] = (counts[product.specs.color] || 0) + 1; break;
-                case 'series': if(product.series) counts[product.series] = (counts[product.series] || 0) + 1; break;
-                case 'camera_modules': if(product.specs.camera_modules) counts[product.specs.camera_modules] = (counts[product.specs.camera_modules] || 0) + 1; break;
-                case 'nfc': if(product.specs.nfc !== undefined) { const val = product.specs.nfc ? 'Так' : 'Ні'; counts[val] = (counts[val] || 0) + 1; } break;
-                case 'sd_slot': if(product.specs.sd_slot !== undefined) { const val = product.specs.sd_slot ? 'Є' : 'Немає'; counts[val] = (counts[val] || 0) + 1; } break;
+                case 'brands': value = product.brand; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'seller': value = product.seller; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'country': value = product.country; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'ram': value = product.specs.ram; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'storage': value = product.specs.storage; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'colors': value = product.specs.color; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'series': value = product.series; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'camera_modules': value = product.specs.camera_modules; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'type': value = product.specs.type; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'purpose': value = product.specs.purpose; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'material': value = product.specs.material; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'powerSource': value = product.specs.powerSource; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'gender': value = product.specs.gender; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'ageRange': value = product.specs.ageRange; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'petType': value = product.specs.petType; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'size': value = product.specs.size; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'compatibility': value = product.specs.compatibility; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'strapMaterial': value = product.specs.strapMaterial; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'powerOutput': value = product.specs.powerOutput; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'batteryCapacity': value = product.specs.batteryCapacity; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'maxSpeed': value = product.specs.maxSpeed; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'range': value = product.specs.range; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'productType': value = product.specs.productType; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'volume': value = product.specs.volume; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'subCategory': value = product.specs.subCategory; if(value) counts[value] = (counts[value] || 0) + 1; break;
+                case 'nfc': if(product.specs.nfc !== undefined) { value = product.specs.nfc ? 'Так' : 'Ні'; counts[value] = (counts[value] || 0) + 1; } break;
+                case 'sd_slot': if(product.specs.sd_slot !== undefined) { value = product.specs.sd_slot ? 'Є' : 'Немає'; counts[value] = (counts[value] || 0) + 1; } break;
                 case 'camera_features': if (product.specs.camera_features) { product.specs.camera_features.forEach(f => { counts[f] = (counts[f] || 0) + 1; }); } break;
-                case 'camera_mp':
-                    const productMp = product.specs.camera_mp || 0;
-                    if (productMp > 0) {
-                        for (const [key, range] of Object.entries(MEGAPIXEL_RANGES)) {
-                            if (productMp >= range.min && productMp <= range.max) { counts[key] = (counts[key] || 0) + 1; break; }
-                        }
-                    }
-                    break;
             }
         }
     });
     return counts;
   };
   
-  const brandCounts = useMemo(() => calculateCounts('brands'), [products, filters]);
-  const sellerCounts = useMemo(() => calculateCounts('seller'), [products, filters]);
-  const countryCounts = useMemo(() => calculateCounts('country'), [products, filters]);
-  const seriesCounts = useMemo(() => calculateCounts('series'), [products, filters]);
-  const storageCounts = useMemo(() => calculateCounts('storage'), [products, filters]);
-  const ramCounts = useMemo(() => calculateCounts('ram'), [products, filters]);
-  const colorCounts = useMemo(() => calculateCounts('colors'), [products, filters]);
-  const nfcCounts = useMemo(() => calculateCounts('nfc'), [products, filters]);
-  const sdSlotCounts = useMemo(() => calculateCounts('sd_slot'), [products, filters]);
-  const cameraModuleCounts = useMemo(() => calculateCounts('camera_modules'), [products, filters]);
-  const megapixelCounts = useMemo(() => calculateCounts('camera_mp'), [products, filters]);
-  const cameraFeatureCounts = useMemo(() => calculateCounts('camera_features'), [products, filters]);
-
-  const onSaleCount = useMemo(() => {
-    const tempFilters = { ...filters, onSale: false };
-    return products.filter(product => {
-        if (!product.onSale) return false;
-        
-        const { seller, brands, country, series, ram, storage, colors, nfc, sd_slot, camera_modules } = tempFilters;
-        if (brands.length > 0 && !brands.includes(product.brand)) return false;
-        if (seller.length > 0 && !seller.includes(product.seller)) return false;
-        if (country.length > 0 && !country.includes(product.country)) return false;
-        if (series.length > 0 && !series.includes(product.series || '')) return false;
-        if (ram.length > 0 && !ram.includes(product.specs.ram || '')) return false;
-        if (storage.length > 0 && !storage.includes(product.specs.storage || '')) return false;
-        if (colors.length > 0 && !colors.includes(product.specs.color || '')) return false;
-        if (nfc.length > 0) { const p = product.specs.nfc === true; if (!nfc.includes(p ? 'Так' : 'Ні')) return false; }
-        if (sd_slot.length > 0) { const p = product.specs.sd_slot === true; if (!sd_slot.includes(p ? 'Є' : 'Немає')) return false; }
-        if (camera_modules.length > 0) { if (!product.specs.camera_modules || !camera_modules.includes(product.specs.camera_modules)) return false; }
-        
-        return true;
-    }).length;
+  const allCounts = useMemo(() => {
+    const counts: { [key: string]: { [value: string]: number } } = {};
+    const filterKeys: (keyof Filters)[] = [
+        'brands', 'seller', 'country', 'series', 'storage', 'ram', 'colors', 'nfc', 'sd_slot', 
+        'camera_modules', 'camera_mp', 'camera_features', 'type', 'purpose', 'material',
+        'powerSource', 'gender', 'ageRange', 'petType', 'size', 'compatibility', 'strapMaterial',
+        'powerOutput', 'batteryCapacity', 'maxSpeed', 'range', 'productType', 'volume', 'subCategory'
+    ];
+    filterKeys.forEach(key => {
+        counts[key] = calculateCounts(key);
+    });
+    return counts;
   }, [products, filters]);
 
-  const allBrands = useMemo(() => [...new Set(products.map(p => p.brand))].sort(), [products]);
-  const allCountries = useMemo(() => [...new Set(products.map(p => p.country))].sort(), [products]);
-  const allCameraFeatures = useMemo(() => [...new Set(products.flatMap(p => p.specs.camera_features || []))].sort(), [products]);
-  const availableSeries = useMemo(() => {
-    if (filters.brands.length === 0) return [];
-    return [...new Set(products.filter(p=>p.series && filters.brands.includes(p.brand)).map(p => p.series!))].sort();
-  }, [products, filters.brands]);
-  const availableStorage = useMemo(() => [...new Set(products.filter(p=>p.specs.storage).map(p => p.specs.storage!))].sort((a, b) => parseInt(a, 10) - parseInt(b, 10)), [products]);
-  const availableRam = useMemo(() => [...new Set(products.filter(p=>p.specs.ram).map(p => p.specs.ram!))].sort((a, b) => parseInt(a, 10) - parseInt(b, 10)), [products]);
-  const availableColors = useMemo(() => [...new Set(products.filter(p=>p.specs.color).map(p => p.specs.color!))].sort(), [products]);
-  const availableCameraModules = useMemo(() => [...new Set(products.filter(p=>p.specs.camera_modules).map(p => p.specs.camera_modules!))].sort((a, b) => a - b), [products]);
+  const onSaleCount = useMemo(() => {
+    return products.filter(p => p.onSale).length;
+  }, [products]);
 
-  const [visibleBrands, setVisibleBrands] = useState(7);
+  const getAvailableOptions = (key: keyof Filters): (string | number)[] => {
+    if (key === 'camera_features') {
+        return [...new Set(products.flatMap(p => p.specs.camera_features || []))].sort();
+    }
+
+    const values = products.map(p => {
+        switch (key) {
+            case 'brands': return p.brand;
+            case 'country': return p.country;
+            case 'series': return p.series;
+            case 'ram': return p.specs.ram;
+            case 'storage': return p.specs.storage;
+            case 'colors': return p.specs.color;
+            case 'camera_modules': return p.specs.camera_modules;
+            case 'type': return p.specs.type;
+            case 'purpose': return p.specs.purpose;
+            case 'material': return p.specs.material;
+            case 'powerSource': return p.specs.powerSource;
+            case 'gender': return p.specs.gender;
+            case 'ageRange': return p.specs.ageRange;
+            case 'petType': return p.specs.petType;
+            case 'size': return p.specs.size;
+            case 'compatibility': return p.specs.compatibility;
+            case 'strapMaterial': return p.specs.strapMaterial;
+            case 'powerOutput': return p.specs.powerOutput;
+            case 'batteryCapacity': return p.specs.batteryCapacity;
+            case 'maxSpeed': return p.specs.maxSpeed;
+            case 'range': return p.specs.range;
+            case 'productType': return p.specs.productType;
+            case 'volume': return p.specs.volume;
+            case 'subCategory': return p.specs.subCategory;
+            default: return undefined;
+        }
+    });
+
+    const filteredValues = values.filter((v): v is string | number => v !== undefined && v !== null);
+    const uniqueValues = [...new Set(filteredValues)];
+
+    return uniqueValues.sort((a, b) => {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return a - b;
+      }
+      return String(a).localeCompare(String(b));
+    });
+  };
   
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'min' | 'max') => {
     const value = e.target.value === '' ? (type === 'min' ? 0 : 200000) : Number(e.target.value);
     setFilters(prev => ({ ...prev, price: { ...prev.price, [type]: value } }));
   };
 
+  const renderFilter = (config: FilterConfig) => {
+    const { id, title, type } = config;
+    
+    switch (type) {
+        case 'checkbox': {
+            const selectedValues = filters[id];
+            if (Array.isArray(selectedValues)) {
+                return (
+                    <CheckboxFilter
+                        key={id}
+                        title={title}
+                        filterKey={id}
+                        onFilterChange={onFilterChange}
+                        options={getAvailableOptions(id)}
+                        counts={allCounts[id] || {}}
+                        selectedValues={selectedValues}
+                    />
+                );
+            }
+            return null;
+        }
+        case 'range':
+            return (
+                <FilterSection title={title} key={id}>
+                    <div className="price-inputs">
+                        <input type="number" placeholder="від" value={filters.price.min || ''} onChange={e => handlePriceChange(e, 'min')} />
+                        <span>–</span>
+                        <input type="number" placeholder="до" value={filters.price.max || ''} onChange={e => handlePriceChange(e, 'max')} />
+                    </div>
+                </FilterSection>
+            );
+        case 'binary': {
+            const options = id === 'sd_slot' ? ['Є', 'Немає'] : ['Так', 'Ні'];
+            const currentFilter = filters[id];
+            return (
+                <FilterSection title={title} key={id}>
+                    {options.map(option => {
+                        //@ts-ignore
+                        const isChecked = Array.isArray(currentFilter) && currentFilter.includes(option);
+                        return(
+                        (allCounts[id]?.[option] > 0 || isChecked) &&
+                        <div key={option} className="filter-item">
+                            <input type="checkbox" id={`${id}-${option}`} checked={isChecked} onChange={() => onFilterChange(id, option)} />
+                            <label htmlFor={`${id}-${option}`}>{option} ({allCounts[id]?.[option] || 0})</label>
+                        </div>
+                    )})}
+                </FilterSection>
+            )
+        }
+        case 'special':
+            switch(id) {
+                case 'series': {
+                    if (filters.brands.length === 0) return null;
+                    const availableSeries = [...new Set(products.filter(p=>p.series && filters.brands.includes(p.brand)).map(p => p.series!))].sort();
+                    if (availableSeries.length === 0) return null;
+                    
+                    return (
+                        <CheckboxFilter 
+                            key={id} 
+                            title={title} 
+                            filterKey={id} 
+                            onFilterChange={onFilterChange} 
+                            options={availableSeries} 
+                            counts={allCounts.series || {}} 
+                            selectedValues={filters.series}
+                        />
+                    );
+                }
+                case 'onSale':
+                     return (
+                        <FilterSection title={title} key={id}>
+                            <div className="filter-item">
+                            <input type="checkbox" id="sale" checked={filters.onSale} onChange={() => onFilterChange('onSale', !filters.onSale)} />
+                            <label htmlFor="sale">Акційні ({onSaleCount})</label>
+                            </div>
+                        </FilterSection>
+                     );
+                default: return null;
+            }
+        default: return null;
+    }
+  }
+
+  const activeFilters = categoryFilters[categoryName] || [];
+
   return (
     <aside className="filter-sidebar">
       <FilterSection title="Продавець">
         {['Wolfix', 'Інші'].map(seller => (
-          (sellerCounts[seller] > 0 || filters.seller.includes(seller)) &&
+          (allCounts.seller?.[seller] > 0 || filters.seller.includes(seller)) &&
           <div key={seller} className="filter-item">
             <input type="checkbox" id={`seller-${seller}`} checked={filters.seller.includes(seller)} onChange={() => onFilterChange('seller', seller)} />
-            <label htmlFor={`seller-${seller}`}>{seller} ({sellerCounts[seller] || 0})</label>
+            <label htmlFor={`seller-${seller}`}>{seller} ({allCounts.seller?.[seller] || 0})</label>
           </div>
         ))}
-      </FilterSection>
-
-      <FilterSection title="Бренд">
-        {allBrands.slice(0, visibleBrands).map(brand => (
-          (brandCounts[brand] > 0 || filters.brands.includes(brand)) &&
-          <div key={brand} className="filter-item">
-            <input type="checkbox" id={`brand-${brand}`} checked={filters.brands.includes(brand)} onChange={() => onFilterChange('brands', brand)} />
-            <label htmlFor={`brand-${brand}`}>{brand} ({brandCounts[brand] || 0})</label>
-          </div>
-        ))}
-      </FilterSection>
-
-      <FilterSection title="Ціна">
-        <div className="price-inputs">
-          <input type="number" placeholder="від" value={filters.price.min || ''} onChange={e => handlePriceChange(e, 'min')} />
-          <span>–</span>
-          <input type="number" placeholder="до" value={filters.price.max || ''} onChange={e => handlePriceChange(e, 'max')} />
-        </div>
       </FilterSection>
       
-      {filters.brands.length > 0 && availableSeries.length > 0 && (
-        <FilterSection title="Серія">
-          {availableSeries.map(series => (
-            (seriesCounts[series] > 0 || filters.series.includes(series)) &&
-            <div key={series} className="filter-item">
-              <input type="checkbox" id={`series-${series}`} checked={filters.series.includes(series)} onChange={() => onFilterChange('series', series)} />
-              <label htmlFor={`series-${series}`}>{series} ({seriesCounts[series] || 0})</label>
-            </div>
-          ))}
-        </FilterSection>
-      )}
-
-      {availableColors.length > 0 && (
-        <FilterSection title="Колір">
-          {availableColors.map(color => (
-             (colorCounts[color] > 0 || filters.colors.includes(color)) &&
-            <div key={color} className="filter-item">
-              <input type="checkbox" id={`color-${color}`} checked={filters.colors.includes(color)} onChange={() => onFilterChange('colors', color)} />
-              <label htmlFor={`color-${color}`}>{color} ({colorCounts[color] || 0})</label>
-            </div>
-          ))}
-        </FilterSection>
-      )}
-
-      {availableStorage.length > 0 && (
-        <FilterSection title="Вбудована пам’ять">
-          {availableStorage.map(storage => (
-             (storageCounts[storage] > 0 || filters.storage.includes(storage)) &&
-            <div key={storage} className="filter-item">
-              <input type="checkbox" id={`storage-${storage}`} checked={filters.storage.includes(storage)} onChange={() => onFilterChange('storage', storage)} />
-              <label htmlFor={`storage-${storage}`}>{storage} ({storageCounts[storage] || 0})</label>
-            </div>
-          ))}
-        </FilterSection>
-      )}
-
-      {availableRam.length > 0 && (
-        <FilterSection title="Оперативна пам’ять">
-          {availableRam.map(ram => (
-             (ramCounts[ram] > 0 || filters.ram.includes(ram)) &&
-            <div key={ram} className="filter-item">
-              <input type="checkbox" id={`ram-${ram}`} checked={filters.ram.includes(ram)} onChange={() => onFilterChange('ram', ram)} />
-              <label htmlFor={`ram-${ram}`}>{ram} ({ramCounts[ram] || 0})</label>
-            </div>
-          ))}
-        </FilterSection>
-      )}
-
-      <FilterSection title="Діагональ екрану">
-        {Object.keys(DIAGONAL_RANGES).map(rangeKey => (
-          (true) &&
-            <div key={rangeKey} className="filter-item">
-              <input type="checkbox" id={`diagonal-${rangeKey}`} checked={filters.diagonal.includes(rangeKey)} onChange={() => onFilterChange('diagonal', rangeKey)} />
-              <label htmlFor={`diagonal-${rangeKey}`}>{rangeKey}</label>
-            </div>
-          ))}
-      </FilterSection>
-      
-      <FilterSection title="NFC">
-        {['Так', 'Ні'].map(nfcOption => (
-           (nfcCounts[nfcOption] > 0 || filters.nfc.includes(nfcOption)) &&
-          <div key={nfcOption} className="filter-item">
-            <input type="checkbox" id={`nfc-${nfcOption}`} checked={filters.nfc.includes(nfcOption)} onChange={() => onFilterChange('nfc', nfcOption)} />
-            <label htmlFor={`nfc-${nfcOption}`}>{nfcOption} ({nfcCounts[nfcOption] || 0})</label>
-          </div>
-        ))}
-      </FilterSection>
-
-      <FilterSection title="Окремий слот для картки пам’яті">
-        {['Є', 'Немає'].map(option => (
-            (sdSlotCounts[option] > 0 || filters.sd_slot.includes(option)) &&
-            <div key={option} className="filter-item">
-                <input type="checkbox" id={`sd-slot-${option}`} checked={filters.sd_slot.includes(option)} onChange={() => onFilterChange('sd_slot', option)} />
-                <label htmlFor={`sd-slot-${option}`}>{option} ({sdSlotCounts[option] || 0})</label>
-            </div>
-        ))}
-      </FilterSection>
-
-      {availableCameraModules.length > 0 && (
-          <FilterSection title="Кількість модулів основної камери">
-              {availableCameraModules.map(moduleCount => (
-                  (cameraModuleCounts[moduleCount] > 0 || filters.camera_modules.includes(moduleCount)) &&
-                  <div key={moduleCount} className="filter-item">
-                      <input type="checkbox" id={`cam-module-${moduleCount}`} checked={filters.camera_modules.includes(moduleCount)} onChange={() => onFilterChange('camera_modules', moduleCount)} />
-                      <label htmlFor={`cam-module-${moduleCount}`}>{moduleCount} ({cameraModuleCounts[moduleCount] || 0})</label>
-                  </div>
-              ))}
-          </FilterSection>
-      )}
-
-      <FilterSection title="Основна камера">
-        {Object.keys(MEGAPIXEL_RANGES).map(rangeKey => (
-          (megapixelCounts[rangeKey] > 0 || filters.camera_mp.includes(rangeKey)) &&
-          <div key={rangeKey} className="filter-item">
-            <input type="checkbox" id={`mp-${rangeKey}`} checked={filters.camera_mp.includes(rangeKey)} onChange={() => onFilterChange('camera_mp', rangeKey)} />
-            <label htmlFor={`mp-${rangeKey}`}>{rangeKey} ({megapixelCounts[rangeKey] || 0})</label>
-          </div>
-        ))}
-      </FilterSection>
-
-      <FilterSection title="Особливості основної камери">
-        {allCameraFeatures.map(feature => (
-          (cameraFeatureCounts[feature] > 0 || filters.camera_features.includes(feature)) &&
-          <div key={feature} className="filter-item">
-            <input type="checkbox" id={`feature-${feature}`} checked={filters.camera_features.includes(feature)} onChange={() => onFilterChange('camera_features', feature)} />
-            <label htmlFor={`feature-${feature}`}>{feature} ({cameraFeatureCounts[feature] || 0})</label>
-          </div>
-        ))}
-      </FilterSection>
-
-      <FilterSection title="Країна-виробник">
-        {allCountries.map(country => (
-          (countryCounts[country] > 0 || filters.country.includes(country)) &&
-          <div key={country} className="filter-item">
-            <input type="checkbox" id={`country-${country}`} checked={filters.country.includes(country)} onChange={() => onFilterChange('country', country)} />
-            <label htmlFor={`country-${country}`}>{country} ({countryCounts[country] || 0})</label>
-          </div>
-        ))}
-      </FilterSection>
-
-      <FilterSection title="Вигідні пропозиції">
-        <div className="filter-item">
-          <input type="checkbox" id="sale" checked={filters.onSale} onChange={() => onFilterChange('onSale', !filters.onSale)} />
-          <label htmlFor="sale">Акційні ({onSaleCount})</label>
-        </div>
-      </FilterSection>
-
+      {activeFilters.map(config => renderFilter(config))}
     </aside>
   );
 };

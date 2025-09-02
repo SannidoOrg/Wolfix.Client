@@ -4,9 +4,10 @@ import { useState, useMemo, useEffect } from 'react';
 import { Product } from '../../../data/products';
 import Header from '../../../components/Header/Header.client';
 import Footer from '../../../components/Footer/Footer';
-import FilterSidebar, { DIAGONAL_RANGES, MEGAPIXEL_RANGES } from '../../../components/FilterSidebar/FilterSidebar';
+import FilterSidebar from '../../../components/FilterSidebar/FilterSidebar';
 import ProductCard from '../../../components/ProductCard/ProductCard';
 import '../../../../styles/ProductPage.css';
+import { categoryNameMap } from '../../../(utils)/categories.config';
 
 export interface Filters {
   seller: string[];
@@ -23,7 +24,24 @@ export interface Filters {
   camera_mp: string[];
   camera_features: string[];
   country: string[];
+  type: string[];
   onSale: boolean;
+  purpose: string[];
+  material: string[];
+  powerSource: string[];
+  gender: string[];
+  ageRange: string[];
+  petType: string[];
+  size: string[];
+  compatibility: string[];
+  strapMaterial: string[];
+  powerOutput: string[];
+  batteryCapacity: string[];
+  maxSpeed: string[];
+  range: string[];
+  productType: string[];
+  volume: string[];
+  subCategory: string[];
 }
 
 interface BrandPageClientProps {
@@ -32,97 +50,86 @@ interface BrandPageClientProps {
   categoryName: string;
 }
 
+const filterConfig: { key: keyof Filters; getValue: (p: Product) => any }[] = [
+    { key: 'brands', getValue: p => p.brand }, 
+    { key: 'seller', getValue: p => p.seller },
+    { key: 'country', getValue: p => p.country }, 
+    { key: 'series', getValue: p => p.series },
+    { key: 'ram', getValue: p => p.specs.ram }, 
+    { key: 'storage', getValue: p => p.specs.storage },
+    { key: 'colors', getValue: p => p.specs.color }, 
+    { key: 'camera_modules', getValue: p => p.specs.camera_modules },
+    { key: 'type', getValue: p => p.specs.type },
+    { key: 'purpose', getValue: p => p.specs.purpose },
+    { key: 'material', getValue: p => p.specs.material },
+    { key: 'powerSource', getValue: p => p.specs.powerSource },
+    { key: 'gender', getValue: p => p.specs.gender },
+    { key: 'ageRange', getValue: p => p.specs.ageRange },
+    { key: 'petType', getValue: p => p.specs.petType },
+    { key: 'size', getValue: p => p.specs.size },
+    { key: 'compatibility', getValue: p => p.specs.compatibility },
+    { key: 'strapMaterial', getValue: p => p.specs.strapMaterial },
+    { key: 'powerOutput', getValue: p => p.specs.powerOutput },
+    { key: 'batteryCapacity', getValue: p => p.specs.batteryCapacity },
+    { key: 'maxSpeed', getValue: p => p.specs.maxSpeed },
+    { key: 'range', getValue: p => p.specs.range },
+    { key: 'productType', getValue: p => p.specs.productType },
+    { key: 'volume', getValue: p => p.specs.volume },
+    { key: 'subCategory', getValue: p => p.specs.subCategory },
+];
+
 export default function BrandPageClient({ initialProducts, brand, categoryName }: BrandPageClientProps) {
-  const brandName = brand.charAt(0).toUpperCase() + brand.slice(1);
-  const [view, setView] = useState<'grid' | 'list'>('grid');
-  
   const [filters, setFilters] = useState<Filters>({
-    seller: [],
-    brands: brand ? [brandName] : [],
-    price: { min: 0, max: 200000 },
-    series: [],
-    ram: [],
-    storage: [],
-    colors: [],
-    diagonal: [],
-    nfc: [],
-    sd_slot: [],
-    camera_modules: [],
-    camera_mp: [],
-    camera_features: [],
-    country: [],
-    onSale: false,
+    seller: [], brands: [], price: { min: 0, max: 200000 }, series: [], ram: [],
+    storage: [], colors: [], diagonal: [], nfc: [], sd_slot: [], camera_modules: [],
+    camera_mp: [], camera_features: [], country: [], type: [], onSale: false,
+    purpose: [], material: [], powerSource: [], gender: [], ageRange: [],
+    petType: [], size: [], compatibility: [], strapMaterial: [],
+    powerOutput: [], batteryCapacity: [], maxSpeed: [], range: [], 
+    productType: [], volume: [], subCategory: [],
   });
 
+  const internalCategoryName = categoryNameMap[categoryName] || categoryName;
+
+  const categoryProducts = useMemo(() => {
+    return initialProducts.filter(p => p.category === internalCategoryName);
+  }, [initialProducts, internalCategoryName]);
+
   useEffect(() => {
-    const validSeries = new Set(initialProducts.filter(p => filters.brands.includes(p.brand)).map(p => p.series));
+    const validSeries = new Set(categoryProducts.filter(p => filters.brands.includes(p.brand)).map(p => p.series));
     const selectedSeriesAreValid = filters.series.every(s => validSeries.has(s));
     if (!selectedSeriesAreValid) {
       setFilters(prev => ({ ...prev, series: [] }));
     }
-  }, [filters.brands, initialProducts, filters.series]);
+  }, [filters.brands, categoryProducts, filters.series]);
 
   const pageTitle = filters.brands.length === 1 
     ? `${categoryName} ${filters.brands[0]}` 
     : categoryName;
 
   const filteredProducts = useMemo(() => {
-    return initialProducts.filter(product => {
-      const { seller, brands, price, series, ram, storage, colors, diagonal, nfc, sd_slot, camera_modules, camera_mp, camera_features, country, onSale } = filters;
-      if (brands.length > 0 && !brands.includes(product.brand)) return false;
-      if (seller.length > 0 && !seller.includes(product.seller)) return false;
-      if (country.length > 0 && !country.includes(product.country)) return false;
-      if (product.price < price.min || product.price > price.max) return false;
-      if (series.length > 0 && !series.includes(product.series || '')) return false;
-      if (ram.length > 0 && !ram.includes(product.specs?.ram || '')) return false;
-      if (storage.length > 0 && !storage.includes(product.specs?.storage || '')) return false;
-      if (colors.length > 0 && !colors.includes(product.specs?.color || '')) return false;
-      if (onSale && !product.onSale) return false;
+    return categoryProducts.filter(product => {
+      const f = filters;
+      if (product.price < f.price.min || product.price > f.price.max) return false;
+      if (f.onSale && !product.onSale) return false;
 
-      if (nfc.length > 0) {
-        const productHasNfc = product.specs?.nfc === true;
-        if (!nfc.includes(productHasNfc ? 'Так' : 'Ні')) return false;
-      }
-      
-      if (sd_slot.length > 0) {
-        const productHasSdSlot = product.specs?.sd_slot === true;
-        if (!sd_slot.includes(productHasSdSlot ? 'Є' : 'Немає')) return false;
-      }
-      
-      if (camera_modules.length > 0) {
-        if (!product.specs?.camera_modules || !camera_modules.includes(product.specs.camera_modules)) {
+      for (const config of filterConfig) {
+        const filterValues = f[config.key] as any[];
+        if (filterValues && filterValues.length > 0) {
+          const productValue = config.getValue(product);
+          if (productValue === undefined || !filterValues.includes(productValue)) {
             return false;
+          }
         }
       }
 
-      if (camera_features.length > 0) {
-        if (!product.specs.camera_features || !camera_features.every(feat => product.specs.camera_features!.includes(feat as any))) return false;
-      }
-
-      if (diagonal.length > 0) {
-        const productDiagonal = parseFloat(product.specs?.diagonal || '0');
-        if (!productDiagonal) return false;
-        const matches = diagonal.some(rangeKey => {
-          const range = DIAGONAL_RANGES[rangeKey as keyof typeof DIAGONAL_RANGES];
-          if (!range) return false;
-          return productDiagonal >= range.min && productDiagonal < range.max;
-        });
-        if (!matches) return false;
-      }
-      if (camera_mp.length > 0) {
-        const productMp = product.specs.camera_mp || 0;
-        if (!productMp) return false;
-        const matches = camera_mp.some(rangeKey => {
-          const range = MEGAPIXEL_RANGES[rangeKey as keyof typeof MEGAPIXEL_RANGES];
-          if (!range) return false;
-          return productMp >= range.min && productMp <= range.max;
-        });
-        if (!matches) return false;
-      }
-
+      if (f.nfc.length > 0) { const p = product.specs.nfc === true; if (!f.nfc.includes(p ? 'Так' : 'Ні')) return false; }
+      if (f.sd_slot.length > 0) { const p = product.specs.sd_slot === true; if (!f.sd_slot.includes(p ? 'Є' : 'Немає')) return false; }
+      if (f.camera_features.length > 0) { if (!product.specs.camera_features || !f.camera_features.every(feat => product.specs.camera_features!.includes(feat as any))) return false; }
+      
       return true;
     });
-  }, [filters, initialProducts]);
+  }, [filters, categoryProducts]);
   
   const handleFilterChange = (filterType: keyof Filters, value: any) => {
     setFilters(prevFilters => {
@@ -143,9 +150,13 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
 
   const clearFilters = () => {
     setFilters({
-      seller: [], brands: [], price: { min: 0, max: 200000 }, series: [],
-      ram: [], storage: [], colors: [], diagonal: [], nfc: [], sd_slot: [],
-      camera_modules: [], camera_mp: [], camera_features: [], country: [], onSale: false,
+        seller: [], brands: [], price: { min: 0, max: 200000 }, series: [], ram: [],
+        storage: [], colors: [], diagonal: [], nfc: [], sd_slot: [], camera_modules: [],
+        camera_mp: [], camera_features: [], country: [], type: [], onSale: false,
+        purpose: [], material: [], powerSource: [], gender: [], ageRange: [],
+        petType: [], size: [], compatibility: [], strapMaterial: [],
+        powerOutput: [], batteryCapacity: [], maxSpeed: [], range: [], 
+        productType: [], volume: [], subCategory: [],
     });
   };
 
@@ -161,8 +172,9 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
               filters={filters} 
               onFilterChange={handleFilterChange}
               setFilters={setFilters}
-              products={initialProducts}
+              products={categoryProducts}
               filteredProducts={filteredProducts}
+              categoryName={internalCategoryName}
             />
             <div className="product-listing">
               <div className="listing-header">
@@ -173,17 +185,8 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
                     {filters.brands.map(b => <span key={b} className="filter-tag">{b} <button onClick={() => handleFilterChange('brands', b)}>×</button></span>)}
                   </div>
                 </div>
-                <div className="listing-header-right">
-                    <select className="sort-dropdown">
-                      <option>На основі рейтингу</option>
-                    </select>
-                    <div className="view-switcher">
-                        <button className={`view-btn grid-view ${view === 'grid' ? 'active' : ''}`} onClick={() => setView('grid')}></button>
-                        <button className={`view-btn list-view ${view === 'list' ? 'active' : ''}`} onClick={() => setView('list')}></button>
-                    </div>
-                </div>
               </div>
-              <div className={`product-grid ${view === 'list' ? 'list-view' : ''}`}>
+              <div className={`product-grid`}>
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

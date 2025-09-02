@@ -2,118 +2,109 @@ import { FC } from 'react';
 import Header from '../../components/Header/Header.client';
 import Footer from '../../components/Footer/Footer';
 import BrandCard from '../../components/BrandCard/BrandCard';
-import { getCategoryName } from './utils';
+import { categorySlugMap } from '../../(utils)/categories.config';
 import '../../../styles/CategoryPage.css';
+import { notFound } from 'next/navigation';
 
-interface ICategoryPageProps {
-  params: {
-    category: string;
-  };
+interface BrandInfo {
+  displayName: string;
+  brandSlug: string;
+  models: string[];
+  imageUrl: string;
 }
 
-interface BrandData {
-  [key: string]: {
-    [brand: string]: {
-      models: string[];
-      imageUrl: string;
-    };
-  };
-}
-
-const brandData: BrandData = {
-  smartfony: {
-    'Смартфони Apple': { models: ["iPhone 16 Pro", "iPhone 15"], imageUrl: "/Categoryes/image8.png" },
-    'Смартфони Samsung': { models: ["Galaxy S25", "Galaxy Fold"], imageUrl: "/Categoryes/samsung.png" },
-    'Смартфони Xiaomi': { models: ["Xiaomi 14T Pro", "Redmi Note 14"], imageUrl: "/Categoryes/xiaomi.png" },
-    'Смартфони Google': { models: ["Pixel 9 Pro", "Pixel 8a"], imageUrl: "/Categoryes/google.png" },
-  },
-  notebook: {
-    'Ноутбуки Apple': { models: ["MacBook Pro", "MacBook Air"], imageUrl: "/Categoryes/apple-notebook.png" },
-    'Ноутбуки ASUS': { models: ["ROG Strix", "Zenbook"], imageUrl: "/Categoryes/asus-notebook.png" },
-    'Ноутбуки Lenovo': { models: ["Legion", "IdeaPad"], imageUrl: "/Categoryes/lenovo-notebook.png" },
-    'Ноутбуки HP': { models: ["Pavilion", "Spectre"], imageUrl: "/Categoryes/hp-notebook.png" },
-  },
-  televizory: {
-    'Телевізори Samsung': { models: ["Neo QLED 8K", "OLED 4K"], imageUrl: "/Categoryes/samsung-tv.png" },
-    'Телевізори LG': { models: ["OLED evo", "QNED"], imageUrl: "/Categoryes/lg-tv.png" },
-    'Телевізори Sony': { models: ["BRAVIA 9", "BRAVIA 7"], imageUrl: "/Categoryes/sony-tv.png" },
-  },
-  'smart-godinniki': {
-    'Годинники Apple': { models: ["Watch Series 9", "Watch Ultra 2"], imageUrl: "/Categoryes/apple-watch.png" },
-    'Годинники Samsung': { models: ["Galaxy Watch 6", "Galaxy Fit 3"], imageUrl: "/Categoryes/samsung-watch.png" },
-    'Годинники Garmin': { models: ["Fenix 7", "Epix Pro"], imageUrl: "/Categoryes/garmin-watch.png" },
-  },
-  'tovary-dlya-domu': {
-    'Техніка Dyson': { models: ["Пилососи", "Очищувачі повітря"], imageUrl: "/Categoryes/dyson-tech.png" },
-    'Техніка Philips': { models: ["Парові системи", "Лампи Hue"], imageUrl: "/Categoryes/philips-tech.png" },
-  },
-  'tovary-dlya-kuxni': {
-    'Техніка Samsung': { models: ["Мікрохвильові печі", "Духові шафи"], imageUrl: "/Categoryes/samsung-tech.png" },
-    'Техніка Bosch': { models: ["Посудомийні машини", "Холодильники"], imageUrl: "/Categoryes/bosch-tech.png" },
-    'Техніка TEFAL': { models: ["Мультипечі", "Грилі"], imageUrl: "/Categoryes/tefal-tech.png" },
-  },
-  'audio-foto-video': {
-    'Аудіо Apple': { models: ["AirPods Max", "HomePod"], imageUrl: "/Categoryes/apple-audio.png" },
-    'Аудіо Sony': { models: ["WH-1000XM5", "SRS-XG500"], imageUrl: "/Categoryes/sony-audio.png" },
-    'Аудіо Marshall': { models: ["Stanmore III", "Major V"], imageUrl: "/Categoryes/marshall-audio.png" },
-  },
-  'gaming-pro-konsoli': {
-      'Консолі Sony': { models: ["PlayStation 5", "PS Portal"], imageUrl: "/Categoryes/sony-console.png" },
-      'Консолі Microsoft': { models: ["Xbox Series X", "Xbox Series S"], imageUrl: "/Categoryes/xbox-console.png" },
-      'Консолі Nintendo': { models: ["Switch OLED", "Switch Lite"], imageUrl: "/Categoryes/nintendo-console.png" },
-  },
-  'krasa-i-zdorovya': {
-    'Догляд Dyson': { models: ["Стайлери", "Фени"], imageUrl: "/Categoryes/dyson-tech.png" },
-    'Догляд Philips': { models: ["Електробритви", "Зубні щітки"], imageUrl: "/Categoryes/philips-tech.png" },
-  },
-  'dityachi-tovary': {
-      'Товари Chicco': { models: ["Автокрісла", "Коляски"], imageUrl: "/Categoryes/default.png" },
-      'Товари LEGO': { models: ["Technic", "Star Wars"], imageUrl: "/Categoryes/default.png" },
-  },
-  zootovary: {
-      'Корм Royal Canin': { models: ["Для котів", "Для собак"], imageUrl: "/Categoryes/default.png" },
-      'Корм Acana': { models: ["Для котів", "Для собак"], imageUrl: "/Categoryes/default.png" },
-  },
-  'odjag-vzuttya-ta-prykrasy': {
-      'Бренди Nike': { models: ["Кросівки", "Одяг"], imageUrl: "/Categoryes/default.png" },
-      'Бренди Adidas': { models: ["Кросівки", "Одяг"], imageUrl: "/Categoryes/default.png" },
-  },
-  'dim-ta-vydpohnok': {
-      'Меблі JYSK': { models: ["Ліжка", "Столи"], imageUrl: "/Categoryes/default.png" },
-  },
-  'ixa-ta-napoi': {
-      'Продукти': { models: ["Кава", "Чай"], imageUrl: "/Categoryes/default.png" },
-  },
-  'instrumenty-ta-avtovary': {
-      'Інструменти Bosch': { models: ["Дрилі", "Шліфмашини"], imageUrl: "/Categoryes/bosch-tech.png" },
-      'Інструменти Makita': { models: ["Перфоратори", "Пилки"], imageUrl: "/Categoryes/default.png" },
-  },
-  'persolalnyj-transpor': {
-      'Транспорт': { models: ["Електросамокати", "Велосипеди"], imageUrl: "/Categoryes/default.png" },
-  },
-  Energozabezpechennya: {
-      'Станції EcoFlow': { models: ["RIVER 2", "DELTA Pro"], imageUrl: "/Categoryes/default.png" },
-      'Станції Bluetti': { models: ["AC200P", "EB3A"], imageUrl: "/Categoryes/default.png" },
-  }
+const brandData: { [key: string]: BrandInfo[] } = {
+  smartfony: [
+    { displayName: 'Смартфони Apple', brandSlug: 'apple', models: ["iPhone 16 Pro", "iPhone 15"], imageUrl: "/Categoryes/image8.png" },
+    { displayName: 'Смартфони Samsung', brandSlug: 'samsung', models: ["Galaxy S24", "Galaxy Fold"], imageUrl: "/Categoryes/samsung.png" },
+  ],
+  noutbuky: [
+    { displayName: 'Ноутбуки Apple', brandSlug: 'apple', models: ["MacBook Pro", "MacBook Air"], imageUrl: "/Categoryes/apple-notebook.png" },
+    { displayName: 'Ноутбуки ASUS', brandSlug: 'asus', models: ["TUF Gaming", "Zenbook"], imageUrl: "/Categoryes/asus-notebook.png" },
+  ],
+  televizory: [
+    { displayName: 'Телевізори Samsung', brandSlug: 'samsung', models: ["Neo QLED 8K", "OLED 4K"], imageUrl: "/Categoryes/samsung-tv.png" },
+    { displayName: 'Телевізори LG', brandSlug: 'lg', models: ["OLED evo", "QNED"], imageUrl: "/Categoryes/lg-tv.png" },
+  ],
+  'smart-godynnyky': [
+    { displayName: 'Годинники Apple', brandSlug: 'apple', models: ["Watch Series 9", "Watch Ultra 2"], imageUrl: "/Categoryes/apple-watch.png" },
+    { displayName: 'Годинники Samsung', brandSlug: 'samsung', models: ["Galaxy Watch 6", "Galaxy Fit 3"], imageUrl: "/Categoryes/samsung-watch.png" },
+  ],
+  'tovary-dlya-domu': [
+      { displayName: 'Техніка Roborock', brandSlug: 'roborock', models: ["Роботи-пилососи"], imageUrl: "/Categoryes/roborock.png" },
+      { displayName: 'Техніка Philips', brandSlug: 'philips', models: ["Зволожувачі повітря"], imageUrl: "/Categoryes/philips.png" },
+  ],
+  'pobutova-tekhnika': [
+      { displayName: 'Техніка Samsung', brandSlug: 'samsung', models: ["Пральні машини"], imageUrl: "/Categoryes/samsung.png" },
+      { displayName: 'Техніка Dyson', brandSlug: 'dyson', models: ["Пилососи"], imageUrl: "/Categoryes/dyson.png" },
+  ],
+  audiotekhnika: [
+      { displayName: 'Аудіо Apple', brandSlug: 'apple', models: ["AirPods"], imageUrl: "/Categoryes/image8.png" },
+      { displayName: 'Аудіо Sony', brandSlug: 'sony', models: ["Навушники"], imageUrl: "/Categoryes/sony-tv.png" },
+  ],
+  heyminh: [
+      { displayName: 'Консолі Sony', brandSlug: 'sony', models: ["PlayStation 5"], imageUrl: "/Categoryes/sony-console.png" },
+      { displayName: 'Консолі Microsoft', brandSlug: 'microsoft', models: ["Xbox Series X"], imageUrl: "/Categoryes/xbox-console.png" },
+  ],
+  'krasa-i-zdorovya': [
+      { displayName: 'Техніка Dyson', brandSlug: 'dyson', models: ["Стайлери", "Фени"], imageUrl: "/Categoryes/dyson.png" },
+      { displayName: 'Техніка Philips', brandSlug: 'philips', models: ["Зубні щітки"], imageUrl: "/Categoryes/philips.png" },
+  ],
+  'dytyachi-tovary': [
+      { displayName: 'Візочки Anex', brandSlug: 'anex', models: ["m/type", "e/type"], imageUrl: "/Categoryes/anex.png" },
+      { displayName: 'Конструктори LEGO', brandSlug: 'lego', models: ["Technic", "Creator"], imageUrl: "/Categoryes/lego.png" },
+  ],
+  zootovary: [
+      { displayName: 'Корм Royal Canin', brandSlug: 'royal canin', models: ["Для котів", "Для собак"], imageUrl: "/Categoryes/royalcanin.png" },
+      { displayName: 'Аксесуари Petkit', brandSlug: 'petkit', models: ["Автоматичні годівниці"], imageUrl: "/Categoryes/petkit.png" },
+  ],
+  'odyah-ta-vzuttya': [
+      { displayName: 'Одяг та взуття Nike', brandSlug: 'nike', models: ["Кросівки", "Спортивний одяг"], imageUrl: "/Categoryes/nike.png" },
+      { displayName: 'Одяг The North Face', brandSlug: 'the north face', models: ["Худі", "Куртки"], imageUrl: "/Categoryes/tnf.png" },
+  ],
+  instrumenty: [
+      { displayName: 'Інструменти Bosch', brandSlug: 'bosch', models: ["Шуруповерти", "Дрилі"], imageUrl: "/Categoryes/bosch.png" },
+      { displayName: 'Набори TOPTUL', brandSlug: 'toptul', models: ["Для авто"], imageUrl: "/Categoryes/toptul.png" },
+  ],
+  enerhozabezpechennya: [
+      { displayName: 'Зарядні станції EcoFlow', brandSlug: 'ecoflow', models: ["DELTA", "RIVER"], imageUrl: "/Categoryes/ecoflow.png" },
+      { displayName: 'Павербанки Anker', brandSlug: 'anker', models: ["PowerCore", "MagGo"], imageUrl: "/Categoryes/anker.png" },
+  ],
+  transport: [
+      { displayName: 'Електросамокати Xiaomi', brandSlug: 'xiaomi', models: ["Scooter 4 Pro", "Scooter 3 Lite"], imageUrl: "/Categoryes/xiaomi.png" },
+      { displayName: 'Електровелосипеди Engwe', brandSlug: 'engwe', models: ["EP-2 Pro", "Engine Pro"], imageUrl: "/Categoryes/engwe.png" },
+  ],
+  'yizha-ta-napoyi': [
+      { displayName: 'Кава Lavazza', brandSlug: 'lavazza', models: ["Qualita Oro", "Espresso"], imageUrl: "/Categoryes/lavazza.png" },
+      { displayName: 'Олії Monini', brandSlug: 'monini', models: ["Classico", "Delicato"], imageUrl: "/Categoryes/monini.png" },
+  ],
+  'dim-ta-vidpochynok': [
+      { displayName: 'Спорядження Terra Incognita', brandSlug: 'terra incognita', models: ["Намети", "Спальники"], imageUrl: "/Categoryes/terra.png" },
+      { displayName: 'Спорттовари 4FIZJO', brandSlug: '4fizjo', models: ["Гантелі", "Килимки"], imageUrl: "/Categoryes/4fizjo.png" },
+  ]
 };
 
-const CategoryPage: FC<ICategoryPageProps> = ({ params }) => {
+const CategoryPage: FC<{ params: { category: string } }> = ({ params }) => {
   const { category } = params;
-  const categoryName = getCategoryName(category);
-  const categoryBrands = brandData[category] || {};
+  const categoryName = categorySlugMap[category] || 'Категорія';
+  const categoryBrands = brandData[category] || [];
+
+  if (categoryBrands.length === 0) {
+    return notFound();
+  }
 
   return (
     <div className="page-container">
       <Header logoAlt="Wolfix Logo" />
       <main className="main-content-category">
-        <div className="breadcrumbs">Головна / {categoryName} /</div>
+        <div className="breadcrumbs">Головна / {categoryName}</div>
         <h1 className="category-title">{categoryName}</h1>
         <div className="cards-grid">
-          {Object.entries(categoryBrands).map(([brandName, brandInfo]) => (
+          {categoryBrands.map((brandInfo) => (
             <BrandCard
-              key={brandName}
+              key={brandInfo.displayName}
               category={category}
-              brandName={brandName}
+              brandName={brandInfo.displayName}
               models={brandInfo.models}
               imageUrl={brandInfo.imageUrl}
             />
