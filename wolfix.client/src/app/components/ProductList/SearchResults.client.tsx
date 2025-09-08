@@ -1,7 +1,7 @@
 "use client";
 
 import { FC } from "react";
-import ProductCard from "../ProductCard/ProductCard.server";
+import ProductCard from "../ProductCard/ProductCard.client";
 import { Product } from "../../data/products";
 
 interface ISearchResultsProps {
@@ -18,9 +18,7 @@ const SearchResults: FC<ISearchResultsProps> = ({ products }) => {
         <div className="separator-line" />
       </div>
       <div className="products-grid">
-        {products.map((product: Product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        
       </div>
     </div>
   );

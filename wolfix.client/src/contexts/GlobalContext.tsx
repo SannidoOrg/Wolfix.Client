@@ -1,52 +1,52 @@
 "use client";
 
-import { createContext, useState, ReactNode, FC } from "react";
-import axios, { AxiosResponse } from "axios";
+import { createContext, useState, ReactNode, FC, useContext } from "react";
 
 interface GlobalContextType {
-    sendRequest: (
-        endpoint: string,
-        method?: string,
-        body?: any,
-        headers?: Record<string, string>
-    ) => Promise<AxiosResponse>;
     loading: boolean;
+    setLoading: (isLoading: boolean) => void;
+    showModal: boolean;
+    OnShowModal: (mContent: ReactNode, mTitle?: string) => void;
+    OnHideModal: () => void;
+    modalContent: ReactNode;
+    modalTitle: string;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
-const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [loading, setLoading] = useState<boolean>(false);
-
-    async function sendRequest(
-        endpoint: string,
-        method: string = "GET",
-        body: any = null,
-        headers: Record<string, string> = {}
-    ): Promise<AxiosResponse> {
-        setLoading(true);
-        try {
-            const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`;
-            const response = await axios({
-                url: fullUrl,
-                method,
-                data: body,
-                headers,
-            });
-            return response;
-        } catch (error: any) {
-            if (error.response) {
-                return error.response;
-            }
-            throw error;
-        } finally {
-            setLoading(false);
-        }
+export const useGlobalContext = () => {
+    const context = useContext(GlobalContext);
+    if (!context) {
+        throw new Error("useGlobalContext must be used within a GlobalContextProvider");
     }
+    return context;
+};
+
+export const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
+    const [loading, setLoading] = useState<boolean>(false);
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [modalContent, setModalContent] = useState<ReactNode>(null);
+    const [modalTitle, setModalTitle] = useState<string>("");
+
+    const OnShowModal = (mContent: ReactNode, mTitle: string = "") => {
+        setModalTitle(mTitle);
+        setModalContent(mContent);
+        setShowModal(true);
+    };
+
+    const OnHideModal = () => {
+        setModalContent(null);
+        setShowModal(false);
+    };
 
     const value: GlobalContextType = {
-        sendRequest,
         loading,
+        setLoading,
+        showModal,
+        OnShowModal,
+        OnHideModal,
+        modalContent,
+        modalTitle,
     };
 
     return (
@@ -55,5 +55,3 @@ const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         </GlobalContext.Provider>
     );
 };
-
-export { GlobalContextProvider, GlobalContext };

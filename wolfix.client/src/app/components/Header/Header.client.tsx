@@ -4,6 +4,7 @@ import { FC, useState, useRef } from "react";
 import "../../../styles/Header.css";
 import ProfileModal from "../ProfileModal/ProfileModal.client";
 import Search from "./Search.client";
+import { useAuth } from "../../../contexts/AuthContext";
 
 interface IHeaderClientProps {
   logoAlt: string;
@@ -14,17 +15,20 @@ interface IHeaderClientProps {
 const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchChange }) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const profileButtonRef = useRef<HTMLButtonElement | null>(null);
+  const { isAuthenticated, user, logout } = useAuth();
 
   const handleProfileClick = () => {
-    setIsModalOpen(true);
-    document.body.style.overflow = 'hidden';
+    if (!isAuthenticated) {
+        setIsModalOpen(true);
+        document.body.style.overflow = 'hidden';
+    }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     document.body.style.overflow = 'auto';
   };
-
+  
   return (
     <div className="header-container">
       <div className="top-bar">
@@ -34,9 +38,18 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
           <a href="/akcii" className="nav-link">Акції</a>
         </nav>
         <div className="top-banner"><img src="/banners/banner.png" alt="Promo Banner" /></div>
-        <button className="user-profile-icon" onClick={handleProfileClick} ref={profileButtonRef}>
-          <img src="/icons/Profile.png" alt="Profile Icon" />
-        </button>
+        
+        {isAuthenticated ? (
+            <div className="user-profile-info">
+                <span>{user?.email}</span>
+                <button onClick={logout} className="logout-button">Вийти</button>
+            </div>
+        ) : (
+            <button className="user-profile-icon" onClick={handleProfileClick} ref={profileButtonRef}>
+                <img src="/icons/Profile.png" alt="Profile Icon" />
+            </button>
+        )}
+
       </div>
       <header className="header">
         <a href="/">
@@ -60,7 +73,7 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
           </div>
         </div>
       </header>
-      <ProfileModal isOpen={isModalOpen} onClose={handleCloseModal} anchorRef={profileButtonRef} />
+      {!isAuthenticated && <ProfileModal isOpen={isModalOpen} onClose={handleCloseModal} anchorRef={profileButtonRef} />}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { FC, ReactNode } from "react";
+import { Providers } from './providers';
 import '../styles/Header.css'
 import '../styles/Sidebar.css'
 import '../styles/Banner.css'
@@ -21,7 +22,9 @@ const RootLayout: FC<ILayoutProps> = ({ children }) => {
   return (
     <html lang="uk">
       <body>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

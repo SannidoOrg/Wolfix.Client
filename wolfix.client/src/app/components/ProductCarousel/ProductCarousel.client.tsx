@@ -1,12 +1,12 @@
 "use client";
 
 import { FC } from "react";
-import ProductCard from "../ProductCard/ProductCard.server";
-import { Product } from "../../data/products";
+import ProductCard from "../ProductCard/ProductCard.client";
+import { ProductShortDto } from "../../../types/product";
 import "../../../styles/ProductCarousel.css";
 
 interface IProductCarouselProps {
-  products: Product[];
+  products: ProductShortDto[];
   currentIndex: number;
   onPrev: () => void;
   onNext: () => void;
