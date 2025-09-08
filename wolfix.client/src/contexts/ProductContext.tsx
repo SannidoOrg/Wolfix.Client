@@ -37,19 +37,19 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
         setLoading(true);
         try {
             const response = await api.get(`/api/products/category/${categoryId}/page/${page}`);
-            setProducts(response.data.products); 
+            setProducts(response.data.products);
         } catch (error) {
             console.error("Failed to fetch products by category:", error);
         } finally {
             setLoading(false);
         }
     };
-    
+
     const fetchPromoProducts = async (page: number = 1) => {
         setLoading(true);
         try {
             const response = await api.get(`/api/products/with-discount/page/${page}`);
-            setPromoProducts(response.data.products); 
+            setPromoProducts(response.data.products);
         } catch (error) {
             console.error("Failed to fetch promo products:", error);
         } finally {

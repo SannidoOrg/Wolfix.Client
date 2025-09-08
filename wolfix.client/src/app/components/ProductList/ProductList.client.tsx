@@ -1,7 +1,7 @@
 "use client";
 
 import { FC, useState, useEffect } from "react";
-import ProductCard from "../ProductCard/ProductCard.client"; 
+import ProductCard from "../ProductCard/ProductCard.client";
 import ProductCarousel from "../ProductCarousel/ProductCarousel.client";
 import LoadMoreButton from "../LoadMoreButton/LoadMoreButton.client";
 import { useProducts } from "../../../contexts/ProductContext";
@@ -10,7 +10,7 @@ import { useGlobalContext } from "../../../contexts/GlobalContext";
 const ProductListClient: FC = () => {
   const [carouselIndex, setCarouselIndex] = useState<number>(0);
   const [visibleProductsCount, setVisibleProductsCount] = useState<number>(12);
-  
+
   const { products, promoProducts, fetchRandomProducts, fetchPromoProducts } = useProducts();
   const { loading } = useGlobalContext();
   const [isLoadMoreLoading, setIsLoadMoreLoading] = useState<boolean>(false);
@@ -20,8 +20,11 @@ const ProductListClient: FC = () => {
     fetchPromoProducts(1);
   }, []);
 
-  const handlePrev = () => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : promoProducts.length - 4));
-  const handleNext = () => setCarouselIndex((prev) => (prev < promoProducts.length - 4 ? prev + 1 : 0));
+  const safePromoProducts = promoProducts || [];
+  const safeProducts = products || [];
+
+  const handlePrev = () => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : safePromoProducts.length - 4));
+  const handleNext = () => setCarouselIndex((prev) => (prev < safePromoProducts.length - 4 ? prev + 1 : 0));
 
   const handleLoadMore = () => {
     setIsLoadMoreLoading(true);
@@ -31,13 +34,13 @@ const ProductListClient: FC = () => {
     }, 1000);
   };
 
-  const totalSteps = promoProducts.length > 4 ? promoProducts.length - 4 : 0;
+  const totalSteps = safePromoProducts.length > 4 ? safePromoProducts.length - 4 : 0;
   const progressWidth = totalSteps > 0 ? `${(carouselIndex / totalSteps) * 100}%` : "0%";
 
-  const initialGridProducts = products.slice(0, 12);
-  const remainingProducts = products.slice(12, visibleProductsCount);
+  const initialGridProducts = safeProducts.slice(0, 12);
+  const remainingProducts = safeProducts.slice(12, visibleProductsCount);
 
-  if (loading && products.length === 0) {
+  if (loading && safeProducts.length === 0) {
     return <div>Завантаження товарів...</div>;
   }
 
@@ -48,7 +51,7 @@ const ProductListClient: FC = () => {
         <div className="separator-line" />
       </div>
       <ProductCarousel
-        products={promoProducts}
+        products={safePromoProducts}
         currentIndex={carouselIndex}
         onPrev={handlePrev}
         onNext={handleNext}
@@ -67,7 +70,7 @@ const ProductListClient: FC = () => {
         ))}
       </div>
 
-      {products.length > 12 && (
+      {safeProducts.length > 12 && (
         <>
           <div className="custom-separator" />
           <div className="custom-banner">
@@ -83,7 +86,7 @@ const ProductListClient: FC = () => {
         </>
       )}
 
-      {visibleProductsCount < products.length && (
+      {visibleProductsCount < safeProducts.length && (
         <div className="load-more-container">
           <LoadMoreButton onLoadMore={handleLoadMore} isLoading={isLoadMoreLoading} />
         </div>
