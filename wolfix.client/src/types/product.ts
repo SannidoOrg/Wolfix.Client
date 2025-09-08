@@ -5,7 +5,7 @@ export interface ProductShortDto {
   price: number;
   finalPrice: number;
   bonuses: number;
-  photoUrl: string;
+  mainPhoto: string;
 }
 
 export interface CreateProductDto {

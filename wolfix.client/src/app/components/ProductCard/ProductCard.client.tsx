@@ -35,7 +35,7 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
 
   return (
     <div className="product-card">
-      <img src={product.photoUrl || "/placeholder.png"} alt={product.title} className="product-image" />
+      <img src={product.mainPhoto || "/placeholder.png"} alt={product.title} className="product-image" />
       <div className="top-buttons">
         <button onClick={handleAddToFavorites} className="button-icon-wrapper">
           <img src="/icons/Vector79.png" alt="Add to Favorites" className="button-icon" />
