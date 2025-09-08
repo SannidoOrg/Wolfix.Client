@@ -1,0 +1,28 @@
+.sidebar {
+  width: 320px;
+  padding: 10px;
+  color: rgb(0, 0, 0);
+  min-height: calc(100vh - 200px);
+  background-color: #F9F9F9;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  color: #2C2C2C;
+  text-decoration: none;
+  margin-bottom: 10px;
+  font-family: 'Inter', sans-serif; 
+  font-weight: 400;
+}
+
+.sidebar-icons {
+  width: 35px;
+  height: 35px;
+  margin-right: 10px;
+  object-fit: contain;
+}
+
+.sidebar-link:hover {
+  color: #f4a261; 
+}
