@@ -1,10 +1,13 @@
-import { FC } from 'react';
+'use client';
+
+import {FC, useContext, useEffect} from 'react';
 import Header from '../../components/Header/Header.client';
 import Footer from '../../components/Footer/Footer.server';
 import BrandCard from '../../components/BrandCard/BrandCard.server';
 import { categorySlugMap } from '../../(utils)/categories.config';
 import '../../../styles/CategoryPage.css';
 import { notFound } from 'next/navigation';
+import {ProductContext} from "@/contexts/ProductContext";
 
 interface BrandInfo {
   displayName: string;
@@ -89,9 +92,16 @@ const CategoryPage: FC<{ params: { category: string } }> = ({ params }) => {
   const categoryName = categorySlugMap[category] || 'Категорія';
   const categoryBrands = brandData[category] || [];
 
-  if (categoryBrands.length === 0) {
-    return notFound();
-  }
+  // const {fetchProductsByCategory, products} = useContext(ProductContext)!;
+  //
+  // if (categoryBrands.length === 0) {
+  //   return notFound();
+  // }
+  //
+  // //todo
+  // useEffect(() => {
+  //     fetchProductsByCategory()
+  // }, []);
 
   return (
     <div className="page-container">

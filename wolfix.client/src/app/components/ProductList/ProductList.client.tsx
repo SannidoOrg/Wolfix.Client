@@ -4,8 +4,8 @@ import { FC, useState, useEffect } from "react";
 import ProductCard from "../ProductCard/ProductCard.client";
 import ProductCarousel from "../ProductCarousel/ProductCarousel.client";
 import LoadMoreButton from "../LoadMoreButton/LoadMoreButton.client";
-import { useProducts } from "../../../contexts/ProductContext";
-import { useGlobalContext } from "../../../contexts/GlobalContext";
+import { useProducts } from "@/contexts/ProductContext";
+import { useGlobalContext } from "@/contexts/GlobalContext";
 
 const ProductListClient: FC = () => {
   const [carouselIndex, setCarouselIndex] = useState<number>(0);

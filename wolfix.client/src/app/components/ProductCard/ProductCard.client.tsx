@@ -14,6 +14,7 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
   const { addToCart, addToFavorites } = useUser();
 
   const formattedPrice = new Intl.NumberFormat('uk-UA').format(product.finalPrice);
+
   const formattedOldPrice = product.price !== product.finalPrice ? new Intl.NumberFormat('uk-UA').format(product.price) : null;
 
   const handleAddToCart = () => {
@@ -49,7 +50,8 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
           <div className="product-pricing">
             <div className="product-rating">
               <img src="/icons/Vector.jpg" alt="Star" className="rating-star" />
-              <span className="rating-value">{product.averageRating.toFixed(1)}</span>
+              {/*<span className="rating-value">{product.averageRating.toFixed(1)}</span>*/}
+                <span className="rating-value">{product.averageRating}</span>
             </div>
             {formattedOldPrice && <div className="product-old-price">{formattedOldPrice} грн</div>}
             <div className="product-new-price">{formattedPrice} грн</div>
