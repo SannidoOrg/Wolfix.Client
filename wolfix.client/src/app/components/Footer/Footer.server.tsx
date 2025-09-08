@@ -1,4 +1,5 @@
 import { FC } from "react";
+import Link from "next/link";
 import "../../../styles/Footer.css";
 
 const Footer: FC = () => {
@@ -9,33 +10,33 @@ const Footer: FC = () => {
         <div className="footer-content">
           <div className="footer-column">
             <h3>Загальна інформація:</h3>
-            <a href="/about" className="footer-link">Про нас</a>
-            <a href="/terms" className="footer-link">Умови використання сайту</a>
-            <a href="/careers" className="footer-link">Вакансії</a>
-            <a href="/contacts" className="footer-link">Контакти</a>
-            <a href="/categories" className="footer-link">Всі категорії</a>
-            <a href="/promotions" className="footer-link">Акції</a>
+            <Link href="/wip" className="footer-link">Про нас</Link>
+            <Link href="/wip" className="footer-link">Умови використання сайту</Link>
+            <Link href="/wip" className="footer-link">Вакансії</Link>
+            <Link href="/wip" className="footer-link">Контакти</Link>
+            <Link href="/wip" className="footer-link">Всі категорії</Link>
+            <Link href="/wip" className="footer-link">Акції</Link>
           </div>
           <div className="footer-column">
             <h3>Допомога:</h3>
-            <a href="/shipping" className="footer-link">Доставка та оплата</a>
-            <a href="/returns" className="footer-link">Повернення товару</a>
-            <a href="/credit" className="footer-link">Кредит</a>
-            <a href="/warranty" className="footer-link">Гарантія</a>
-            <a href="/service-centers" className="footer-link">Сервісні центри</a>
+            <Link href="/wip" className="footer-link">Доставка та оплата</Link>
+            <Link href="/wip" className="footer-link">Повернення товару</Link>
+            <Link href="/wip" className="footer-link">Кредит</Link>
+            <Link href="/wip" className="footer-link">Гарантія</Link>
+            <Link href="/wip" className="footer-link">Сервісні центри</Link>
           </div>
           <div className="footer-column">
             <h3>Сервіси:</h3>
-            <a href="/bonus-account" className="footer-link">Бонусний рахунок</a>
-            <a href="/gift-cards" className="footer-link">Подарункові сертифікати Wolfix</a>
-            <a href="/exchange" className="footer-link">Wolfix Обмін</a>
-            <a href="/business-clients" className="footer-link">Для корпоративних клієнтів</a>
+            <Link href="/wip" className="footer-link">Бонусний рахунок</Link>
+            <Link href="/wip" className="footer-link">Подарункові сертифікати Wolfix</Link>
+            <Link href="/wip" className="footer-link">Wolfix Обмін</Link>
+            <Link href="/wip" className="footer-link">Для корпоративних клієнтів</Link>
           </div>
           <div className="footer-column">
             <h3>Партнерам:</h3>
-            <a href="/sell-on-wolfix" className="footer-link">Продавати на Wolfix</a>
-            <a href="/partnership" className="footer-link">Співпраця з нами</a>
-            <a href="/rentals" className="footer-link">Оренда приміщень</a>
+            <Link href="/wip" className="footer-link">Продавати на Wolfix</Link>
+            <Link href="/wip" className="footer-link">Співпраця з нами</Link>
+            <Link href="/wip" className="footer-link">Оренда приміщень</Link>
           </div>
           <div className="footer-social-link">
             <h3>Наші соціальні мережі:</h3>

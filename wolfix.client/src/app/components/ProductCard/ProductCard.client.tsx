@@ -37,10 +37,10 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
     <div className="product-card">
       <img src={product.mainPhoto || "/placeholder.png"} alt={product.title} className="product-image" />
       <div className="top-buttons">
-        <button onClick={handleAddToFavorites} className="button-icon-wrapper">
+        <button onClick={handleAddToFavorites} className="action-button">
           <img src="/icons/Vector79.png" alt="Add to Favorites" className="button-icon" />
         </button>
-        <button className="button-icon-wrapper">
+        <button className="action-button">
           <img src="/icons/Group.png" alt="Add to Compare" className="button-icon" />
         </button>
       </div>
