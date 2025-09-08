@@ -2,9 +2,16 @@
 
 import { createContext, useState, ReactNode, FC, useContext } from "react";
 
+interface NotificationState {
+    message: string;
+    type: 'success' | 'error';
+}
+
 interface GlobalContextType {
     loading: boolean;
     setLoading: (isLoading: boolean) => void;
+    notification: NotificationState | null;
+    showNotification: (message: string, type?: 'success' | 'error') => void;
     showModal: boolean;
     OnShowModal: (mContent: ReactNode, mTitle?: string) => void;
     OnHideModal: () => void;
@@ -24,9 +31,17 @@ export const useGlobalContext = () => {
 
 export const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [notification, setNotification] = useState<NotificationState | null>(null);
     const [showModal, setShowModal] = useState<boolean>(false);
     const [modalContent, setModalContent] = useState<ReactNode>(null);
     const [modalTitle, setModalTitle] = useState<string>("");
+
+    const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => {
+            setNotification(null);
+        }, 3000);
+    };
 
     const OnShowModal = (mContent: ReactNode, mTitle: string = "") => {
         setModalTitle(mTitle);
@@ -42,6 +57,8 @@ export const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children })
     const value: GlobalContextType = {
         loading,
         setLoading,
+        notification,
+        showNotification,
         showModal,
         OnShowModal,
         OnHideModal,

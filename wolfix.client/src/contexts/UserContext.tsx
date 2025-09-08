@@ -90,7 +90,7 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             setCart(null);
             setFavorites([]);
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, user]);
 
     const value = {
         cart,

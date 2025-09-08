@@ -1,5 +1,5 @@
 import Header from '../components/Header/Header.client';
-import Footer from '../components/Footer/Footer';
+import Footer from '../components/Footer/Footer.server';
 import '../../styles/rentals.css';
 
 interface IRentalsPageProps {

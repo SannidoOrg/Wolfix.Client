@@ -28,10 +28,8 @@ const ProductListClient: FC = () => {
 
   const handleLoadMore = () => {
     setIsLoadMoreLoading(true);
-    setTimeout(() => {
-      setVisibleProductsCount((prev) => prev + 4);
-      setIsLoadMoreLoading(false);
-    }, 1000);
+    setVisibleProductsCount((prev) => prev + 4);
+    setIsLoadMoreLoading(false);
   };
 
   const totalSteps = safePromoProducts.length > 4 ? safePromoProducts.length - 4 : 0;
