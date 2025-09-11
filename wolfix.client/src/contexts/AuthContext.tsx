@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, ReactNode, FC, useContext } from "r
 import { jwtDecode } from "jwt-decode";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
-import { User, RoleRequestDto, TokenRequestDto, RegisterDto, ChangeFullNameDto, ChangeAddressDto, ChangeBirthDateDto, ChangePhoneNumberDto } from "../types/auth";
+import { User, RoleRequestDto, TokenRequestDto, RegisterDto, ChangeFullNameDto, ChangeAddressDto, ChangeBirthDateDto, ChangePhoneNumberDto, UpdateProfileDto } from "../types/auth";
 
 interface AuthContextType {
     user: User | null;
@@ -17,6 +17,7 @@ interface AuthContextType {
     updateUserAddress: (data: ChangeAddressDto) => Promise<boolean>;
     updateUserBirthDate: (data: ChangeBirthDateDto) => Promise<boolean>;
     updateUserPhoneNumber: (data: ChangePhoneNumberDto) => Promise<boolean>;
+    updateUserProfile: (data: UpdateProfileDto) => Promise<boolean>;
 }
 
 interface DecodedToken {
@@ -116,6 +117,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
+    const updateUserProfile = (data: UpdateProfileDto) => updateUserAndToken('profile', data);
     const updateUserFullName = (data: ChangeFullNameDto) => updateUserAndToken('full-name', data);
     const updateUserAddress = (data: ChangeAddressDto) => updateUserAndToken('address', data);
     const updateUserBirthDate = (data: ChangeBirthDateDto) => updateUserAndToken('birth-date', data);
@@ -182,6 +184,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         updateUserAddress,
         updateUserBirthDate,
         updateUserPhoneNumber,
+        updateUserProfile,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

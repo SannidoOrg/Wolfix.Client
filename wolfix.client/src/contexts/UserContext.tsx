@@ -34,7 +34,7 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         if (!user?.userId) return;
         setLoading(true);
         try {
-            const response = await api.get(`/api/customer/cart-items/${user.userId}`);
+            const response = await api.get(`/api/customers/${user.userId}/cart-items`);
             setCart(response.data);
         } catch (error) {
             console.error("Failed to fetch cart:", error);
@@ -47,7 +47,7 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         if (!user?.userId) return;
         setLoading(true);
         try {
-            await api.post('/api/customer/cart-items', { customerId: user.userId, productId });
+            await api.post('/api/customers/cart-items', { customerId: user.userId, productId });
             await fetchCart();
         } catch (error) {
             console.error("Failed to add to cart:", error);
@@ -60,7 +60,7 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         if (!user?.userId) return;
         setLoading(true);
         try {
-            const response = await api.get(`/api/customer/favorites/${user.userId}`);
+            const response = await api.get(`/api/customers/${user.userId}/favorites`);
             setFavorites(response.data);
         } catch (error) {
             console.error("Failed to fetch favorites:", error);
@@ -73,7 +73,7 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         if (!user?.userId) return;
         setLoading(true);
         try {
-            await api.post('/api/customer/favorites', { customerId: user.userId, productId });
+            await api.post('/api/customers/favorites', { customerId: user.userId, productId });
             await fetchFavorites();
         } catch (error) {
             console.error("Failed to add to favorites:", error);
@@ -83,7 +83,7 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && user) {
             fetchCart();
             fetchFavorites();
         } else {

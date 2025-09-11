@@ -17,6 +17,25 @@ export interface User {
   address: Address | null;
 }
 
+export interface RegisterDto {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+}
+
+export interface ChangeAddressDto {
+    address: Address;
+}
+
+export interface ChangeBirthDateDto {
+    birthDate: string;
+}
+
+export interface ChangePhoneNumberDto {
+    phoneNumber: string;
+}
+
 export interface ChangeFullNameDto {
   firstName: string;
   lastName: string;
