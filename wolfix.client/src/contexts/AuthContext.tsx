@@ -2,10 +2,9 @@
 
 import { createContext, useState, useEffect, ReactNode, FC, useContext } from "react";
 import { jwtDecode } from "jwt-decode";
-import { AxiosResponse } from "axios";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
-import { User, RoleRequestDto, TokenRequestDto, RegisterDto } from "../types/auth";
+import { User, RoleRequestDto, TokenRequestDto, RegisterDto, UpdateProfileDto } from "../types/auth";
 
 interface AssignRoleDto {
     userId: string;
@@ -19,6 +18,7 @@ interface AuthContextType {
     fetchUserRoles: (credentials: RoleRequestDto) => Promise<string[] | null>;
     loginWithRole: (credentials: TokenRequestDto) => Promise<boolean>;
     registerAndSetRole: (details: RegisterDto) => Promise<boolean>;
+    updateUserProfile: (profileData: UpdateProfileDto) => Promise<boolean>;
     logout: () => void;
     assignRole: (roleData: AssignRoleDto) => Promise<boolean>;
 }
@@ -94,18 +94,30 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const registerAndSetRole = async (details: RegisterDto) => {
         setLoading(true);
         try {
-            const registerResponse = await api.post('/api/account/customer/register', details);
-            if (registerResponse.status !== 200 && registerResponse.status !== 201) {
-                throw new Error("Помилка реєстрації");
-            }
-            
-            await assignRole({ userId: "", email: details.email, role: "Customer" });
-
+            await api.post('/api/account/customer/register', details);
             const success = await loginWithRole({ email: details.email, role: "Customer" });
-            
             return success;
         } catch (error: any) {
             showNotification(error.response?.data?.message || "Не вдалося завершити реєстрацію.", "error");
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updateUserProfile = async (profileData: UpdateProfileDto) => {
+        if (!user) return false;
+        setLoading(true);
+        try {
+            const response = await api.post(`/api/customer/profile/${user.userId}`, profileData);
+            if (response.data.token) {
+                handleAuthSuccess(response.data.token);
+                showNotification("Профіль успішно оновлено!", "success");
+                return true;
+            }
+            return false;
+        } catch (error: any) {
+            showNotification(error.response?.data?.message || "Не вдалося оновити профіль.", "error");
             return false;
         } finally {
             setLoading(false);
@@ -133,6 +145,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         fetchUserRoles,
         loginWithRole,
         registerAndSetRole,
+        updateUserProfile,
         logout,
         assignRole,
     };

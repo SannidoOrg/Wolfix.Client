@@ -1,6 +1,7 @@
 "use client";
 
 import { FC } from "react";
+import Image from "next/image";
 import { ProductShortDto } from "../../../types/product";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
@@ -14,7 +15,6 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
   const { addToCart, addToFavorites } = useUser();
 
   const formattedPrice = new Intl.NumberFormat('uk-UA').format(product.finalPrice);
-
   const formattedOldPrice = product.price !== product.finalPrice ? new Intl.NumberFormat('uk-UA').format(product.price) : null;
 
   const handleAddToCart = () => {
@@ -35,7 +35,15 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
 
   return (
     <div className="product-card">
-      <img src={product.mainPhoto || "/placeholder.png"} alt={product.title} className="product-image" />
+      <div className="product-image-container">
+        <Image 
+          src={product.mainPhoto} 
+          alt={product.title} 
+          className="product-image"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        />
+      </div>
       <div className="top-buttons">
         <button onClick={handleAddToFavorites} className="action-button">
           <img src="/icons/Vector79.png" alt="Add to Favorites" className="button-icon" />
@@ -50,8 +58,7 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
           <div className="product-pricing">
             <div className="product-rating">
               <img src="/icons/Vector.jpg" alt="Star" className="rating-star" />
-              {/*<span className="rating-value">{product.averageRating.toFixed(1)}</span>*/}
-                <span className="rating-value">{product.averageRating}</span>
+              <span className="rating-value">{product.averageRating.toFixed(1)}</span>
             </div>
             {formattedOldPrice && <div className="product-old-price">{formattedOldPrice} грн</div>}
             <div className="product-new-price">{formattedPrice} грн</div>

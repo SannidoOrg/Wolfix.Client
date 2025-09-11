@@ -9,12 +9,18 @@ const ProfileSidebar = () => {
     const { user, logout } = useAuth();
     const router = useRouter();
     
-    const userName = "Романенко Олексій";
+    const userName = (user && user.firstName) 
+        ? `${user.firstName} ${user.lastName}` 
+        : user?.email;
 
     const handleLogout = () => {
         logout();
         router.push('/');
     };
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <aside className="profile-sidebar">

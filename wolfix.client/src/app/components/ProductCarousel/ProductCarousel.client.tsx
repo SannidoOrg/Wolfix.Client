@@ -2,7 +2,7 @@
 
 import { FC } from "react";
 import ProductCard from "../ProductCard/ProductCard.client";
-import { ProductShortDto } from "@/types/product";
+import { ProductShortDto } from "../../../types/product";
 import "../../../styles/ProductCarousel.css";
 
 interface IProductCarouselProps {
@@ -21,8 +21,8 @@ const ProductCarousel: FC<IProductCarouselProps> = ({ products, currentIndex, on
     <div className="product-carousel">
       <div className="carousel-content">
         <div className="carousel-track" style={{ transform: `translateX(-${currentIndex * 230}px)` }}>
-          {products.map((product, index) => (
-            <div key={product.id ?? index} className="carousel-item">
+          {products.map((product) => (
+            <div key={product.id} className="carousel-item">
               <ProductCard product={product} />
             </div>
           ))}

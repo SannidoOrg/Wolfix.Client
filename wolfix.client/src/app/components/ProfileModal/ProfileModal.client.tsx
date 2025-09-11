@@ -15,13 +15,13 @@ interface IProfileModalProps {
 const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState<'login' | 'register' | 'selectRole'>('login');
-  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [availableRoles, setAvailableRoles] = useState<string[]>([]);
   const [error, setError] = useState('');
-
   const { fetchUserRoles, loginWithRole, registerAndSetRole } = useAuth();
   const { loading, showNotification } = useGlobalContext();
 
@@ -32,13 +32,9 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
         onClose();
       }
     };
-
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -48,6 +44,8 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
     setEmail('');
     setPassword('');
     setConfirmPassword('');
+    setFirstName('');
+    setLastName('');
     setError('');
     setAvailableRoles([]);
   };
@@ -79,7 +77,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
       const roles = await fetchUserRoles({ email, password });
       if (roles && roles.length > 0) {
         if (roles.length === 1) {
-          handleRoleSelect(roles[0]);
+          await handleRoleSelect(roles[0]);
         } else {
           setAvailableRoles(roles);
           setView('selectRole');
@@ -92,12 +90,10 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
         setError("Паролі не співпадають");
         return;
       }
-      const success = await registerAndSetRole({ email, password });
+      const success = await registerAndSetRole({ email, password, firstName, lastName });
       if (success) {
         showNotification("Реєстрація успішна!", "success");
         onClose();
-      } else {
-        setError("Не вдалося завершити реєстрацію.");
       }
     }
   };
@@ -137,6 +133,10 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
                     </>
                 ) : (
                     <>
+                    <label htmlFor="register-firstname-input" className="form-label">Ім'я</label>
+                    <input type="text" id="register-firstname-input" className="form-input" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                    <label htmlFor="register-lastname-input" className="form-label">Прізвище</label>
+                    <input type="text" id="register-lastname-input" className="form-input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
                     <label htmlFor="register-email-input" className="form-label">Електронна пошта</label>
                     <input type="email" id="register-email-input" className="form-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     <label htmlFor="register-password-input" className="form-label">Пароль</label>

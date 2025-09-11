@@ -5,7 +5,7 @@ import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
 import { ProductShortDto, CreateProductDto } from "@/types/product";
 import { AddProductReviewDto } from "@/types/review";
-import {PaginationDto} from "@/types/pagination";
+import { PaginationDto } from "@/types/pagination";
 
 interface ProductContextType {
     products: ProductShortDto[];
@@ -29,17 +29,16 @@ export const useProducts = () => {
 };
 
 export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [products, setProducts] = useState<ProductShortDto[]>([{} as ProductShortDto]);
-    const [promoProducts, setPromoProducts] = useState<ProductShortDto[]>([{} as ProductShortDto]);
+    const [products, setProducts] = useState<ProductShortDto[]>([]);
+    const [promoProducts, setPromoProducts] = useState<ProductShortDto[]>([]);
     const [recommendedProducts, setRecommendedProducts] = useState<ProductShortDto[]>([]);
     const { setLoading } = useGlobalContext();
 
     const fetchProductsByCategory = async (categoryId: string, page: number = 1) => {
         setLoading(true);
         try {
-            const response = await api.get(`https://wolfix-api.azurewebsites.net/api/products/category/${categoryId}/page/${page}`);
+            const response = await api.get(`/api/products/category/${categoryId}/page/${page}`);
             const data: PaginationDto<ProductShortDto> = response.data;
-
             setProducts(data.items);
         } catch (error) {
             console.error("Failed to fetch products by category:", error);
@@ -51,9 +50,8 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const fetchPromoProducts = async (page: number = 1) => {
         setLoading(true);
         try {
-            const response = await api.get(`https://wolfix-api.azurewebsites.net/api/products/with-discount/page/${page}`);
+            const response = await api.get(`/api/products/with-discount/page/${page}`);
             const data: PaginationDto<ProductShortDto> = response.data;
-
             setPromoProducts(data.items);
         } catch (error) {
             console.error("Failed to fetch promo products:", error);
@@ -65,9 +63,8 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const fetchRecommendedProducts = async () => {
         setLoading(true);
         try {
-            const response = await api.get('https://wolfix-api.azurewebsites.net/api/products/recommended');
+            const response = await api.get('/api/products/recommended');
             const data: ProductShortDto[] = response.data;
-
             setRecommendedProducts(data);
         } catch (error) {
             console.error("Failed to fetch recommended products:", error);
@@ -79,9 +76,8 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const fetchRandomProducts = async () => {
         setLoading(true);
         try {
-            const response = await api.get('https://wolfix-api.azurewebsites.net/api/products/random');
+            const response = await api.get('/api/products/random');
             const data: ProductShortDto[] = response.data;
-
             setProducts(data);
         } catch (error) {
             console.error("Failed to fetch random products:", error);
@@ -93,7 +89,7 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const fetchProductReviews = async (productId: string) => {
         setLoading(true);
         try {
-            const response = await api.get(`https://wolfix-api.azurewebsites.net/api/products/${productId}/reviews`);
+            const response = await api.get(`/api/products/${productId}/reviews`);
             return response.data;
         } catch (error) {
             console.error("Failed to fetch reviews:", error);
@@ -105,7 +101,7 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const addProductReview = async (productId: string, reviewData: AddProductReviewDto) => {
         setLoading(true);
         try {
-            const response = await api.post(`https://wolfix-api.azurewebsites.net/api/products/${productId}/reviews`, reviewData);
+            const response = await api.post(`/api/products/${productId}/reviews`, reviewData);
             return response;
         } catch (error: any) {
             console.error("Failed to add review:", error);
@@ -118,7 +114,7 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const createProduct = async (productData: CreateProductDto) => {
         setLoading(true);
         try {
-            const response = await api.post('https://wolfix-api.azurewebsites.net/api/products', productData);
+            const response = await api.post('/api/products', productData);
             return response;
         } catch (error: any) {
             console.error("Failed to create product:", error);
