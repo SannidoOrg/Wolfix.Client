@@ -63,7 +63,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
   };
   
   const handleRoleSelect = async (role: string) => {
-      const success = await loginWithRole({ email, role });
+      const success = await loginWithRole({ email, password, role });
       if (success) {
           onClose();
       }

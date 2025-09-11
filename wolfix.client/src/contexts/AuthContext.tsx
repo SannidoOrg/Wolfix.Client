@@ -4,23 +4,33 @@ import { createContext, useState, useEffect, ReactNode, FC, useContext } from "r
 import { jwtDecode } from "jwt-decode";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
-import { User, RoleRequestDto, TokenRequestDto, RegisterDto, UpdateProfileDto } from "../types/auth";
-
-interface AssignRoleDto {
-    userId: string;
-    email: string;
-    role: string;
-}
+import { User, RoleRequestDto, TokenRequestDto, RegisterDto, ChangeFullNameDto, ChangeAddressDto, ChangeBirthDateDto, ChangePhoneNumberDto } from "../types/auth";
 
 interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
+    logout: () => void;
     fetchUserRoles: (credentials: RoleRequestDto) => Promise<string[] | null>;
     loginWithRole: (credentials: TokenRequestDto) => Promise<boolean>;
     registerAndSetRole: (details: RegisterDto) => Promise<boolean>;
-    updateUserProfile: (profileData: UpdateProfileDto) => Promise<boolean>;
-    logout: () => void;
-    assignRole: (roleData: AssignRoleDto) => Promise<boolean>;
+    updateUserFullName: (data: ChangeFullNameDto) => Promise<boolean>;
+    updateUserAddress: (data: ChangeAddressDto) => Promise<boolean>;
+    updateUserBirthDate: (data: ChangeBirthDateDto) => Promise<boolean>;
+    updateUserPhoneNumber: (data: ChangePhoneNumberDto) => Promise<boolean>;
+}
+
+interface DecodedToken {
+    sub?: string;
+    nameid?: string;
+    userId?: string;
+    email: string;
+    role: string;
+    firstName?: string;
+    lastName?: string;
+    middleName?: string;
+    phoneNumber?: string;
+    birthDate?: string;
+    address?: any; 
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,25 +45,83 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const [user, setUser] = useState<User | null>(null);
     const { setLoading, showNotification } = useGlobalContext();
 
+    const processToken = (token: string): User | null => {
+        try {
+            const decoded: DecodedToken = jwtDecode(token);
+            const userId = decoded.sub || decoded.nameid || decoded.userId;
+
+            if (!userId) {
+                console.error("User ID not found in token claims (checked sub, nameid, userId).");
+                return null;
+            }
+
+            const userForState: User = {
+                userId: userId,
+                email: decoded.email,
+                role: decoded.role,
+                firstName: decoded.firstName || null,
+                lastName: decoded.lastName || null,
+                middleName: decoded.middleName || null,
+                phoneNumber: decoded.phoneNumber || null,
+                birthDate: decoded.birthDate || null,
+                address: decoded.address || null,
+            };
+            return userForState;
+        } catch (error) {
+            console.error("Failed to decode token:", error);
+            return null;
+        }
+    };
+
     useEffect(() => {
         const token = sessionStorage.getItem("authToken");
         if (token) {
-            try {
-                const decodedUser: User = jwtDecode(token);
-                setUser(decodedUser);
-            } catch (error) {
+            const userFromToken = processToken(token);
+            if (userFromToken) {
+                setUser(userFromToken);
+            } else {
                 sessionStorage.removeItem("authToken");
             }
         }
     }, []);
 
     const handleAuthSuccess = (token: string) => {
-        sessionStorage.setItem("authToken", token);
-        const decodedUser: User = jwtDecode(token);
-        setUser(decodedUser);
+        const userForState = processToken(token);
+        if (userForState) {
+            sessionStorage.setItem("authToken", token);
+            setUser(userForState);
+            return true;
+        }
+        return false;
     };
-    
-    const fetchUserRoles = async (credentials: RoleRequestDto) => {
+
+    const updateUserAndToken = async (endpoint: string, data: any): Promise<boolean> => {
+        if (!user?.userId) {
+            showNotification("ID користувача не знайдено, спробуйте увійти знову.", "error");
+            return false;
+        }
+        setLoading(true);
+        try {
+            const response = await api.patch(`/api/customers/${user.userId}/${endpoint}`, data);
+            showNotification("Дані успішно оновлено!", "success");
+            if (response.data.token) {
+                return handleAuthSuccess(response.data.token);
+            }
+            return true;
+        } catch (error: any) {
+            showNotification(error.response?.data?.message || "Не вдалося оновити дані", "error");
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const updateUserFullName = (data: ChangeFullNameDto) => updateUserAndToken('full-name', data);
+    const updateUserAddress = (data: ChangeAddressDto) => updateUserAndToken('address', data);
+    const updateUserBirthDate = (data: ChangeBirthDateDto) => updateUserAndToken('birth-date', data);
+    const updateUserPhoneNumber = (data: ChangePhoneNumberDto) => updateUserAndToken('phone-number', data);
+
+    const fetchUserRoles = async (credentials: RoleRequestDto): Promise<string[] | null> => {
         setLoading(true);
         try {
             const response = await api.post('/api/account/customer/roles', credentials);
@@ -69,13 +137,12 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
-    const loginWithRole = async (credentials: TokenRequestDto) => {
+    const loginWithRole = async (credentials: TokenRequestDto): Promise<boolean> => {
         setLoading(true);
         try {
             const response = await api.post('/api/account/customer/token', credentials);
             if (response.data && typeof response.data === 'string') {
-                handleAuthSuccess(response.data);
-                return true;
+                return handleAuthSuccess(response.data);
             }
             return false;
         } catch (error: any) {
@@ -86,17 +153,11 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
-    const logout = () => {
-        sessionStorage.removeItem("authToken");
-        setUser(null);
-    };
-    
-    const registerAndSetRole = async (details: RegisterDto) => {
+    const registerAndSetRole = async (details: RegisterDto): Promise<boolean> => {
         setLoading(true);
         try {
             await api.post('/api/account/customer/register', details);
-            const success = await loginWithRole({ email: details.email, role: "Customer" });
-            return success;
+            return await loginWithRole({ email: details.email, password: details.password, role: "Customer" });
         } catch (error: any) {
             showNotification(error.response?.data?.message || "Не вдалося завершити реєстрацію.", "error");
             return false;
@@ -104,50 +165,23 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             setLoading(false);
         }
     };
-
-    const updateUserProfile = async (profileData: UpdateProfileDto) => {
-        if (!user) return false;
-        setLoading(true);
-        try {
-            const response = await api.post(`/api/customer/profile/${user.userId}`, profileData);
-            if (response.data.token) {
-                handleAuthSuccess(response.data.token);
-                showNotification("Профіль успішно оновлено!", "success");
-                return true;
-            }
-            return false;
-        } catch (error: any) {
-            showNotification(error.response?.data?.message || "Не вдалося оновити профіль.", "error");
-            return false;
-        } finally {
-            setLoading(false);
-        }
+    
+    const logout = () => {
+        sessionStorage.removeItem("authToken");
+        setUser(null);
     };
 
-    const assignRole = async (roleData: AssignRoleDto) => {
-       try {
-            const response = await api.post('/api/account/customer/roles', roleData);
-            if (response.data.token) {
-                handleAuthSuccess(response.data.token);
-                showNotification("Ваша роль успішно оновлена!", "success");
-                return true;
-            }
-            return false;
-        } catch (error: any) {
-            showNotification("Помилка при оновленні ролі.", "error");
-            return false;
-        }
-    };
-
-    const value = {
+    const value: AuthContextType = {
         user,
         isAuthenticated: !!user,
+        logout,
         fetchUserRoles,
         loginWithRole,
         registerAndSetRole,
-        updateUserProfile,
-        logout,
-        assignRole,
+        updateUserFullName,
+        updateUserAddress,
+        updateUserBirthDate,
+        updateUserPhoneNumber,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
