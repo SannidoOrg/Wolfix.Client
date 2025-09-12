@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, ReactNode, FC, useContext } from "r
 import { jwtDecode } from "jwt-decode";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
-import { User, RoleRequestDto, TokenRequestDto, RegisterDto, ChangeFullNameDto, ChangeAddressDto, ChangeBirthDateDto, ChangePhoneNumberDto, UpdateProfileDto } from "../types/auth";
+import { User, RoleRequestDto, TokenRequestDto, RegisterDto, ChangeFullNameDto, ChangeAddressDto, ChangeBirthDateDto, ChangePhoneNumberDto, UpdateProfileDto, RegisterSellerDto } from "../types/auth";
 
 interface AuthContextType {
     user: User | null;
@@ -13,6 +13,7 @@ interface AuthContextType {
     fetchUserRoles: (credentials: RoleRequestDto) => Promise<string[] | null>;
     loginWithRole: (credentials: TokenRequestDto) => Promise<boolean>;
     registerAndSetRole: (details: RegisterDto) => Promise<boolean>;
+    registerSeller: (details: RegisterSellerDto) => Promise<boolean>;
     updateUserFullName: (data: ChangeFullNameDto) => Promise<boolean>;
     updateUserAddress: (data: ChangeAddressDto) => Promise<boolean>;
     updateUserBirthDate: (data: ChangeBirthDateDto) => Promise<boolean>;
@@ -50,13 +51,8 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         try {
             const decoded: DecodedToken = jwtDecode(token);
             const userId = decoded.sub || decoded.nameid || decoded.userId;
-
-            if (!userId) {
-                console.error("User ID not found in token claims (checked sub, nameid, userId).");
-                return null;
-            }
-
-            const userForState: User = {
+            if (!userId) return null;
+            return {
                 userId: userId,
                 email: decoded.email,
                 role: decoded.role,
@@ -67,9 +63,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
                 birthDate: decoded.birthDate || null,
                 address: decoded.address || null,
             };
-            return userForState;
         } catch (error) {
-            console.error("Failed to decode token:", error);
             return null;
         }
     };
@@ -78,11 +72,8 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         const token = sessionStorage.getItem("authToken");
         if (token) {
             const userFromToken = processToken(token);
-            if (userFromToken) {
-                setUser(userFromToken);
-            } else {
-                sessionStorage.removeItem("authToken");
-            }
+            if (userFromToken) setUser(userFromToken);
+            else sessionStorage.removeItem("authToken");
         }
     }, []);
 
@@ -105,9 +96,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         try {
             const response = await api.patch(`/api/customers/${user.userId}/${endpoint}`, data);
             showNotification("Дані успішно оновлено!", "success");
-            if (response.data.token) {
-                return handleAuthSuccess(response.data.token);
-            }
+            if (response.data.token) return handleAuthSuccess(response.data.token);
             return true;
         } catch (error: any) {
             showNotification(error.response?.data?.message || "Не вдалося оновити дані", "error");
@@ -127,10 +116,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         setLoading(true);
         try {
             const response = await api.post('/api/account/customer/roles', credentials);
-            if (response.data && Array.isArray(response.data.roles)) {
-                return response.data.roles;
-            }
-            return null;
+            return response.data?.roles || null;
         } catch (error: any) {
             showNotification(error.response?.data?.message || "Неправильний email або пароль", "error");
             return null;
@@ -143,9 +129,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         setLoading(true);
         try {
             const response = await api.post('/api/account/customer/token', credentials);
-            if (response.data && typeof response.data === 'string') {
-                return handleAuthSuccess(response.data);
-            }
+            if (response.data && typeof response.data === 'string') return handleAuthSuccess(response.data);
             return false;
         } catch (error: any) {
              showNotification(error.response?.data?.message || "Не вдалося увійти з обраною роллю", "error");
@@ -167,6 +151,32 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             setLoading(false);
         }
     };
+
+    const registerSeller = async (details: RegisterSellerDto): Promise<boolean> => {
+        setLoading(true);
+        const formData = new FormData();
+        Object.keys(details).forEach(key => {
+            const value = details[key as keyof RegisterSellerDto];
+            if (value !== undefined) {
+                formData.append(key, value);
+            }
+        });
+        
+        try {
+            await api.post('/api/account/seller/register', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            showNotification("Реєстрація успішна! Тепер ви можете увійти.", "success");
+            return await loginWithRole({ email: details.email, password: details.password, role: "Seller" });
+        } catch (error: any) {
+            showNotification(error.response?.data?.message || "Не вдалося зареєструвати продавця.", "error");
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    };
     
     const logout = () => {
         sessionStorage.removeItem("authToken");
@@ -180,6 +190,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         fetchUserRoles,
         loginWithRole,
         registerAndSetRole,
+        registerSeller,
         updateUserFullName,
         updateUserAddress,
         updateUserBirthDate,

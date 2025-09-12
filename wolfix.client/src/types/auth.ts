@@ -24,6 +24,16 @@ export interface RegisterDto {
     lastName: string;
 }
 
+export interface RegisterSellerDto {
+    companyName: string;
+    siteUrl?: string;
+    fullName: string;
+    position: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+}
+
 export interface ChangeAddressDto {
     address: Address;
 }
