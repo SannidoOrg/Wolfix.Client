@@ -1,0 +1,112 @@
+.list-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.list-container h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
+}
+
+.list-items {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.list-item {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    transition: box-shadow 0.2s;
+}
+
+.list-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.list-item-image-link {
+    flex-shrink: 0;
+}
+
+.list-item-image {
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.list-item-details {
+    flex-grow: 1;
+}
+
+.list-item-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+}
+
+.list-item-price {
+    font-size: 1rem;
+    color: #4b5563;
+    margin: 0;
+}
+
+.list-item-remove-button {
+    background-color: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.list-item-remove-button:hover {
+    background-color: #fecaca;
+}
+
+.list-summary {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+    text-align: right;
+}
+
+.list-summary h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.checkout-button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.checkout-button:hover {
+    background-color: #1d4ed8;
+}
+
+.list-container a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.list-container a:hover {
+    text-decoration: underline;
+}

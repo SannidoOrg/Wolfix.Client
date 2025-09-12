@@ -34,12 +34,17 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const [recommendedProducts, setRecommendedProducts] = useState<ProductShortDto[]>([]);
     const { setLoading } = useGlobalContext();
 
+    const getUniqueProducts = (products: ProductShortDto[]): ProductShortDto[] => {
+        if (!Array.isArray(products)) return [];
+        return Array.from(new Map(products.map(item => [item.id, item])).values());
+    };
+
     const fetchProductsByCategory = async (categoryId: string, page: number = 1) => {
         setLoading(true);
         try {
             const response = await api.get(`/api/products/category/${categoryId}/page/${page}`);
             const data: PaginationDto<ProductShortDto> = response.data;
-            setProducts(data.items);
+            setProducts(getUniqueProducts(data.items));
         } catch (error) {
             console.error("Failed to fetch products by category:", error);
         } finally {
@@ -52,7 +57,7 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
         try {
             const response = await api.get(`/api/products/with-discount/page/${page}`);
             const data: PaginationDto<ProductShortDto> = response.data;
-            setPromoProducts(data.items);
+            setPromoProducts(getUniqueProducts(data.items));
         } catch (error) {
             console.error("Failed to fetch promo products:", error);
         } finally {
@@ -65,7 +70,7 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
         try {
             const response = await api.get('/api/products/recommended');
             const data: ProductShortDto[] = response.data;
-            setRecommendedProducts(data);
+            setRecommendedProducts(getUniqueProducts(data));
         } catch (error) {
             console.error("Failed to fetch recommended products:", error);
         } finally {
@@ -78,7 +83,7 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
         try {
             const response = await api.get('/api/products/random');
             const data: ProductShortDto[] = response.data;
-            setProducts(data);
+            setProducts(getUniqueProducts(data));
         } catch (error) {
             console.error("Failed to fetch random products:", error);
         } finally {

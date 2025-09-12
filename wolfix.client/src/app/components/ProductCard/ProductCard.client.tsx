@@ -19,16 +19,16 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
 
   const handleAddToCart = () => {
     if (!isAuthenticated) {
-        alert("Будь ласка, увійдіть до акаунту");
-        return;
+      alert("Будь ласка, увійдіть до акаунту");
+      return;
     }
     addToCart(product.id);
   };
 
   const handleAddToFavorites = () => {
     if (!isAuthenticated) {
-        alert("Будь ласка, увійдіть до акаунту");
-        return;
+      alert("Будь ласка, увійдіть до акаунту");
+      return;
     }
     addToFavorites(product.id);
   };
@@ -37,11 +37,12 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
     <div className="product-card">
       <div className="product-image-container">
         <Image 
-          src={product.mainPhoto} 
+          src={product.mainPhoto || 'https://placehold.co/600x400/eee/ccc?text=No+Image'} 
           alt={product.title} 
           className="product-image"
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          unoptimized={true}
         />
       </div>
       <div className="top-buttons">
@@ -56,10 +57,12 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
         <div className="product-name">{product.title}</div>
         <div className="product-details">
           <div className="product-pricing">
-            <div className="product-rating">
-              <img src="/icons/Vector.jpg" alt="Star" className="rating-star" />
-              <span className="rating-value">{product.averageRating.toFixed(1)}</span>
-            </div>
+            {typeof product.averageRating === 'number' && (
+              <div className="product-rating">
+                <img src="/icons/Vector.jpg" alt="Star" className="rating-star" />
+                <span className="rating-value">{product.averageRating.toFixed(1)}</span>
+              </div>
+            )}
             {formattedOldPrice && <div className="product-old-price">{formattedOldPrice} грн</div>}
             <div className="product-new-price">{formattedPrice} грн</div>
           </div>
