@@ -155,18 +155,19 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const registerSeller = async (details: RegisterSellerDto): Promise<boolean> => {
         setLoading(true);
         const formData = new FormData();
-        Object.keys(details).forEach(key => {
-            const value = details[key as keyof RegisterSellerDto];
-            if (value !== undefined) {
+        
+        (Object.keys(details) as Array<keyof RegisterSellerDto>).forEach(key => {
+            const value = details[key];
+            if (key === 'document' && value instanceof File) {
                 formData.append(key, value);
+            } else if (value !== undefined && value !== null && value !== '') {
+                formData.append(key, String(value));
             }
         });
         
         try {
             await api.post('/api/account/seller/register', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             showNotification("Реєстрація успішна! Тепер ви можете увійти.", "success");
             return await loginWithRole({ email: details.email, password: details.password, role: "Seller" });
