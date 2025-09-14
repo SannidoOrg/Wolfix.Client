@@ -158,10 +158,12 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         
         (Object.keys(details) as Array<keyof RegisterSellerDto>).forEach(key => {
             const value = details[key];
+            const pascalCaseKey = key.charAt(0).toUpperCase() + key.slice(1);
+
             if (key === 'document' && value instanceof File) {
-                formData.append(key, value);
+                formData.append(pascalCaseKey, value);
             } else if (value !== undefined && value !== null && value !== '') {
-                formData.append(key, String(value));
+                formData.append(pascalCaseKey, String(value));
             }
         });
         
@@ -172,7 +174,8 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             showNotification("Реєстрація успішна! Тепер ви можете увійти.", "success");
             return await loginWithRole({ email: details.email, password: details.password, role: "Seller" });
         } catch (error: any) {
-            showNotification(error.response?.data?.message || "Не вдалося зареєструвати продавця.", "error");
+            const errorMessage = error.response?.data?.detail || error.response?.data?.title || error.response?.data?.message || "Не вдалося зареєструвати продавця.";
+            showNotification(errorMessage, "error");
             return false;
         } finally {
             setLoading(false);

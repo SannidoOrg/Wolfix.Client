@@ -20,8 +20,6 @@ export interface User {
 export interface RegisterDto {
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
 }
 
 export interface RegisterSellerDto {

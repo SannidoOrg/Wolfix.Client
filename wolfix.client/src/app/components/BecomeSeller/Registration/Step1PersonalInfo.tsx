@@ -45,7 +45,7 @@ const Step1PersonalInfo = ({ formData, setFormData, onNext }: Props) => {
                         </div>
                         <div className="form-group">
                             <label htmlFor="phoneNumber" className="form-label">Номер телефону*</label>
-                            <input type="tel" id="phoneNumber" className="form-input" value={formData.phoneNumber} onChange={handleChange} required />
+                            <input type="tel" id="phoneNumber" className="form-input" value={formData.phoneNumber} onChange={handleChange} required placeholder="+380..." />
                         </div>
                         <p className="form-footnote">*Поля обов'язкові до заповнення</p>
                     </fieldset>

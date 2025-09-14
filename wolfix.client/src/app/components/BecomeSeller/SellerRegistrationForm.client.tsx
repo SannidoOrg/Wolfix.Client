@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { RegisterSellerDto } from "@/types/auth";
-import Step1PersonalInfo from "./Registration/Step1StoreInfo";
-import Step2AddressAndAccount from "./Registration/Step2ContactInfo";
+import Step1PersonalInfo from "./Registration/Step1PersonalInfo";
+import Step2AddressAndAccount from "./Registration/Step2AddressAndAccount";
 
 const SellerRegistrationForm = () => {
     const [step, setStep] = useState(1);
@@ -36,7 +36,7 @@ const SellerRegistrationForm = () => {
         };
         const success = await registerSeller(finalData);
         if (success) {
-            router.push("/seller/dashboard");
+            router.push("/");
         }
     };
 
