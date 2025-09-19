@@ -5,9 +5,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'th.bing.com',
+        hostname: 'iluhahr.blob.core.windows.net',
         port: '',
-        pathname: '/**',
+        pathname: '/wolfix-images/**',
       },
       {
         protocol: 'https',

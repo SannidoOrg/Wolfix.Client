@@ -14,13 +14,15 @@ interface IProfileModalProps {
 
 const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) => {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [view, setView] = useState<'login' | 'register' | 'selectRole'>('login');
+  const [view, setView] = useState<'login' | 'register'>('login');
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState<'Customer' | 'Seller'>('Customer');
   const [error, setError] = useState('');
-  const { fetchUserRoles, loginWithRole, registerAndSetRole } = useAuth();
+  
+  const { loginWithRole, registerAndSetRole } = useAuth();
   const { loading, showNotification } = useGlobalContext();
 
   useEffect(() => {
@@ -43,7 +45,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
     setPassword('');
     setConfirmPassword('');
     setError('');
-    setAvailableRoles([]);
+    setSelectedRole('Customer');
   };
 
   const handleSwitchToRegister = (e: React.MouseEvent) => {
@@ -58,29 +60,17 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
     setView('login');
   };
   
-  const handleRoleSelect = async (role: string) => {
-      const success = await loginWithRole({ email, password, role });
-      if (success) {
-          onClose();
-      }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (view === 'login') {
-      const roles = await fetchUserRoles({ email, password });
-      if (roles && roles.length > 0) {
-        if (roles.length === 1) {
-          await handleRoleSelect(roles[0]);
+        const success = await loginWithRole({ email, password, role: selectedRole });
+        if (success) {
+            onClose();
         } else {
-          setAvailableRoles(roles);
-          setView('selectRole');
+            setError("Помилка входу. Перевірте email, пароль або роль.");
         }
-      } else {
-        setError("Не вдалося отримати ролі. Перевірте дані.");
-      }
     } else if (view === 'register') {
       if (password !== confirmPassword) {
         setError("Паролі не співпадають");
@@ -90,6 +80,8 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
       if (success) {
         showNotification("Реєстрація успішна!", "success");
         onClose();
+      } else {
+        setError("Помилка реєстрації. Можливо, такий користувач вже існує.");
       }
     }
   };
@@ -101,70 +93,78 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
       <div className="modal-content" ref={modalRef}>
         <button className="modal-close-button" onClick={onClose}>&times;</button>
         
-        {view === 'selectRole' ? (
-            <div>
-                <h2 className="modal-title">Оберіть роль для входу</h2>
-                <div className="modal-separator"></div>
-                <div className="roles-selection">
-                    {availableRoles.map(role => (
-                        <button key={role} onClick={() => handleRoleSelect(role)} className="continue-button role-button">
-                            Увійти як {role}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        ) : (
+        <h2 className="modal-title">{view === 'login' ? 'Вхід' : 'Реєстрація'}</h2>
+        <div className="modal-separator"></div>
+        <form className="login-form" onSubmit={handleSubmit}>
+          {view === 'login' ? (
             <>
-                <h2 className="modal-title">{view === 'login' ? 'Вхід' : 'Реєстрація'}</h2>
-                <div className="modal-separator"></div>
+              <label htmlFor="login-email-input" className="form-label">Електронна пошта</label>
+              <input type="email" id="login-email-input" className="form-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <label htmlFor="login-password-input" className="form-label">Пароль</label>
+              <input type="password" id="login-password-input" className="form-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              
+              <div className="role-selector">
+                <label>
+                  <input 
+                    type="radio" 
+                    name="role" 
+                    value="Customer" 
+                    checked={selectedRole === 'Customer'} 
+                    onChange={() => setSelectedRole('Customer')} 
+                  />
+                  Я — Покупець
+                </label>
+                <label>
+                  <input 
+                    type="radio" 
+                    name="role" 
+                    value="Seller" 
+                    checked={selectedRole === 'Seller'} 
+                    onChange={() => setSelectedRole('Seller')} 
+                  />
+                  Я — Продавець
+                </label>
+              </div>
 
-                <form className="login-form" onSubmit={handleSubmit}>
-                {view === 'login' ? (
-                    <>
-                    <label htmlFor="login-email-input" className="form-label">Електронна пошта</label>
-                    <input type="email" id="login-email-input" className="form-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    <label htmlFor="login-password-input" className="form-label">Пароль</label>
-                    <input type="password" id="login-password-input" className="form-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    <a href="#" className="forgot-password">Забули пароль?</a>
-                    </>
-                ) : (
-                    <>
-                    <label htmlFor="register-email-input" className="form-label">Електронна пошта</label>
-                    <input type="email" id="register-email-input" className="form-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                    <label htmlFor="register-password-input" className="form-label">Пароль</label>
-                    <input type="password" id="register-password-input" className="form-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                    <label htmlFor="register-confirm-password-input" className="form-label">Підтвердити пароль</label>
-                    <input type="password" id="register-confirm-password-input" className="form-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-                    </>
-                )}
-                {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
-                <button type="submit" className="continue-button" disabled={loading}>
-                    {loading ? 'Завантаження...' : 'Продовжити'}
-                </button>
-                </form>
-
-                <p className="privacy-policy">
-                Продовжуючи, ви підтверджуєте, що згодні увійти до облікового запису Wolfix та надаєте згоду на&nbsp;
-                <a href="#">обробку персональних даних</a>
-                </p>
-
-                <div className="modal-separator-text-middle">або</div>
-
-                <div className="social-login-options">
-                <button className="social-button"><Image src="/icons/Facebook.jpg" alt="Facebook" width={24} height={24} />Реєстрація через Facebook</button>
-                <button className="social-button"><Image src="/icons/Group198.jpg" alt="Google" width={24} height={24} />Реєстрація через Google</button>
-                </div>
-
-                {view === 'login' ? (
-                <div className="registration-prompt">
-                    <p>Ще немає акаунту? <a href="#" onClick={handleSwitchToRegister}>Зареєструватися</a></p>
-                </div>
-                ) : (
-                <div className="registration-prompt">
-                    <p>Вже є акаунт? <a href="#" onClick={handleSwitchToLogin}>Увійти</a></p>
-                </div>
-                )}
+              <a href="#" className="forgot-password">Забули пароль?</a>
             </>
+          ) : (
+            <>
+              <label htmlFor="register-email-input" className="form-label">Електронна пошта</label>
+              <input type="email" id="register-email-input" className="form-input" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <label htmlFor="register-password-input" className="form-label">Пароль</label>
+              <input type="password" id="register-password-input" className="form-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <label htmlFor="register-confirm-password-input" className="form-label">Підтвердити пароль</label>
+              <input type="password" id="register-confirm-password-input" className="form-input" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+            </>
+          )}
+
+          {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
+          <button type="submit" className="continue-button" disabled={loading}>
+              {loading ? 'Завантаження...' : 'Продовжити'}
+          </button>
+        </form>
+
+        <p className="privacy-policy">
+          Продовжуючи, ви підтверджуєте, що згодні увійти до облікового запису Wolfix та надаєте згоду на&nbsp;
+          <a href="#">обробку персональних даних</a>
+        </p>
+
+        <div className="modal-separator-text-middle">або</div>
+
+        <div className="social-login-options">
+          <button className="social-button"><Image src="/icons/Facebook.jpg" alt="Facebook" width={24} height={24} />Реєстрація через Facebook</button>
+          <button className="social-button"><Image src="/icons/Group198.jpg" alt="Google" width={24} height={24} />Реєстрація через Google</button>
+        </div>
+
+        {view === 'login' ? (
+          <div className="registration-prompt">
+              <p>Ще немає акаунту? <a href="#" onClick={handleSwitchToRegister}>Зареєструватися</a></p>
+          </div>
+        ) : (
+          <div className="registration-prompt">
+              <p>Вже є акаунт? <a href="#" onClick={handleSwitchToLogin}>Увійти</a></p>
+          </div>
         )}
       </div>
     </div>

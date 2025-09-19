@@ -4,7 +4,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { useGlobalContext } from "../../../contexts/GlobalContext";
 
 const ProfilePage = () => {
-    const { user, assignRole, logout } = useAuth();
+    const { user, assignRole } = useAuth();
     const { loading } = useGlobalContext();
 
     if (!user) {
@@ -44,8 +44,6 @@ const ProfilePage = () => {
                     <p>Тепер вам доступні інструменти для управління товарами.</p>
                 </div>
             )}
-
-            <button onClick={logout} style={{ marginTop: '2rem' }}>Вийти</button>
         </div>
     );
 };

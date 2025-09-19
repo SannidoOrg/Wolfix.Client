@@ -33,7 +33,7 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
     setIsModalOpen(false);
     document.body.style.overflow = 'auto';
   };
-  
+
   return (
     <div className="header-container">
       <div className="top-bar">
@@ -43,11 +43,9 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
           <Link href="/wip" className="nav-link">Акції</Link>
         </nav>
         <div className="top-banner"><img src="/banners/banner.png" alt="Promo Banner" /></div>
-        
         <button className="user-profile-icon" onClick={handleProfileClick} ref={profileButtonRef}>
             <img src="/icons/Profile.png" alt="Profile Icon" />
         </button>
-
       </div>
       <header className="header">
         <a href="/">

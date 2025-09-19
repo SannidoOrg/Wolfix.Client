@@ -12,11 +12,6 @@ interface GlobalContextType {
     setLoading: (isLoading: boolean) => void;
     notification: NotificationState | null;
     showNotification: (message: string, type?: 'success' | 'error') => void;
-    showModal: boolean;
-    OnShowModal: (mContent: ReactNode, mTitle?: string) => void;
-    OnHideModal: () => void;
-    modalContent: ReactNode;
-    modalTitle: string;
 }
 
 const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
@@ -32,9 +27,6 @@ export const useGlobalContext = () => {
 export const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [loading, setLoading] = useState<boolean>(false);
     const [notification, setNotification] = useState<NotificationState | null>(null);
-    const [showModal, setShowModal] = useState<boolean>(false);
-    const [modalContent, setModalContent] = useState<ReactNode>(null);
-    const [modalTitle, setModalTitle] = useState<string>("");
 
     const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
         setNotification({ message, type });
@@ -43,27 +35,11 @@ export const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children })
         }, 3000);
     };
 
-    const OnShowModal = (mContent: ReactNode, mTitle: string = "") => {
-        setModalTitle(mTitle);
-        setModalContent(mContent);
-        setShowModal(true);
-    };
-
-    const OnHideModal = () => {
-        setModalContent(null);
-        setShowModal(false);
-    };
-
     const value: GlobalContextType = {
         loading,
         setLoading,
         notification,
         showNotification,
-        showModal,
-        OnShowModal,
-        OnHideModal,
-        modalContent,
-        modalTitle,
     };
 
     return (

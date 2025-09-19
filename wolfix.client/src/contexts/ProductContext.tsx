@@ -17,7 +17,7 @@ interface ProductContextType {
     fetchRandomProducts: () => Promise<void>;
     fetchProductReviews: (productId: string) => Promise<any>;
     addProductReview: (productId: string, reviewData: AddProductReviewDto) => Promise<any>;
-    createProduct: (productData: CreateProductDto) => Promise<any>;
+    createProduct: (productData: CreateProductDto | FormData) => Promise<any>;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -116,10 +116,14 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
         }
     };
 
-    const createProduct = async (productData: CreateProductDto) => {
+    const createProduct = async (productData: CreateProductDto | FormData) => {
         setLoading(true);
         try {
-            const response = await api.post('/api/products', productData);
+            const response = await api.post('/api/products', productData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
             return response;
         } catch (error: any) {
             console.error("Failed to create product:", error);
