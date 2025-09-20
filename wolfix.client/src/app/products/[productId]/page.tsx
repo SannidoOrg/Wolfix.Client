@@ -6,8 +6,6 @@ import Footer from "../../components/Footer/Footer.server";
 import ProductActions from "./ProductActions.client";
 import styles from './page.module.css';
 
-// ... (інтерфейси залишаються без змін)
-
 interface ProductCategory {
   categoryId: string;
   categoryName: string;
