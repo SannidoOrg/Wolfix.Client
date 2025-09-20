@@ -15,7 +15,7 @@ interface ProductContextType {
     fetchPromoProducts: (page: number) => Promise<void>;
     fetchRecommendedProducts: () => Promise<void>;
     fetchRandomProducts: () => Promise<void>;
-    fetchProductReviews: (productId: string) => Promise<any>;
+    fetchProductReviews: (productId: string, params?: { pageSize?: number; lastId?: string }) => Promise<any>;
     addProductReview: (productId: string, reviewData: AddProductReviewDto) => Promise<any>;
     createProduct: (productData: CreateProductDto | FormData) => Promise<any>;
 }
@@ -91,13 +91,14 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
         }
     };
 
-    const fetchProductReviews = async (productId: string) => {
+    const fetchProductReviews = async (productId: string, params: { pageSize?: number; lastId?: string } = {}) => {
         setLoading(true);
         try {
-            const response = await api.get(`/api/products/${productId}/reviews`);
+            const response = await api.get(`/api/products/${productId}/reviews`, { params });
             return response.data;
         } catch (error) {
             console.error("Failed to fetch reviews:", error);
+            return null;
         } finally {
             setLoading(false);
         }
