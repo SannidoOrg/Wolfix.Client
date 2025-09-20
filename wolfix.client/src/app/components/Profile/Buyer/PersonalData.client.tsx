@@ -1,20 +1,36 @@
 "use client";
 
-import React from 'react';
+import { useAuth } from "../../../../contexts/AuthContext";
 
 const PersonalData = () => {
+    const { user } = useAuth();
+
+    if (!user) {
+        return <div>Завантаження...</div>;
+    }
+
     return (
-        <div>
-            <nav style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem', marginBottom: '1rem' }}>
-                <button style={{ background: 'darkorange', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px' }}>
-                    Додати оголошення
-                </button>
-            </nav>
-            
-            <div className="profile-content-sections">
-                <h2>Мій акаунт Wolfix</h2>
-                <p>Тут буде контент покупця з особистими даними, адресою, бонусами і т.д.</p>
+        <div className="profile-content">
+            <div className="profile-header">
+                <h1>Особистий кабінет</h1>
+                <div className="profile-actions">
+                    <button className="action-button-primary">Редагувати</button>
+                </div>
             </div>
+
+            <section className="profile-section">
+                <h2>Ваші дані</h2>
+                <div className="data-grid">
+                    <div className="data-item">
+                        <span className="data-label">Електронна пошта</span>
+                        <span className="data-value">{user.email}</span>
+                    </div>
+                    <div className="data-item">
+                        <span className="data-label">Ваша поточна роль</span>
+                        <span className="data-value">{user.role}</span>
+                    </div>
+                </div>
+            </section>
         </div>
     );
 };

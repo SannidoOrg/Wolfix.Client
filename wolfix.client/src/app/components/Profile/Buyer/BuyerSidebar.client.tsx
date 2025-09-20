@@ -1,27 +1,50 @@
 "use client";
 
+import { useAuth } from "../../../../contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import Link from 'next/link';
-import { useAuth } from '../../../../contexts/AuthContext';
-import '../../../../styles/ProfilePage.css';
+import Image from "next/image";
 
 const BuyerSidebar = () => {
     const { user, logout } = useAuth();
+    const router = useRouter();
+    
+    const userName = (user && user.firstName) 
+        ? `${user.firstName} ${user.lastName}` 
+        : user?.email;
+
+    const handleLogout = () => {
+        logout();
+        router.push('/');
+    };
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <aside className="profile-sidebar">
             <div className="sidebar-user-info">
-                <div className="sidebar-avatar-icon"></div>
-                <p className="sidebar-user-email">{user?.email}</p>
+                <Image src="/icons/prof.png" alt="User Avatar" width={48} height={48} className="user-avatar" />
+                <span className="sidebar-user-name">{userName}</span>
             </div>
             <nav className="sidebar-nav">
-                <Link href="/wip" className="sidebar-link">Бонуси</Link>
-                <Link href="/wip" className="sidebar-link">Замовлення</Link>
-                <Link href="/profile/cart" className="sidebar-link">Кошик</Link>
-                <Link href="/wip" className="sidebar-link">Відгуки</Link>
-                <Link href="/profile/favorites" className="sidebar-link">Обране</Link>
+                <ul>
+                    <li><Link href="/wip">Бонуси</Link></li>
+                    <li><Link href="/wip">Замовлення</Link></li>
+                    <li><Link href="/wip">Відгуки</Link></li>
+                    <li><Link href="/profile/favorites">Обране</Link></li>
+                    <li><Link href="/wip">Список порівнянь</Link></li>
+                    <li><Link href="/profile/cart">Кошик</Link></li>
+                    <li><Link href="/wip">Мої картки</Link></li>
+                    <li><Link href="/wip">Сповіщення</Link></li>
+                    <li><Link href="/become-seller">Стати продавцем</Link></li>
+                </ul>
             </nav>
-            <div className="sidebar-footer-nav">
-                <button onClick={logout} className="sidebar-link sidebar-logout-button">Вихід</button>
+            <div className="sidebar-footer">
+                 <a href="#infocenter">Інфоцентр</a>
+                 <a href="#support">Технічна підтримка</a>
+                 <button onClick={handleLogout} className="logout-button">Вихід</button>
             </div>
         </aside>
     );

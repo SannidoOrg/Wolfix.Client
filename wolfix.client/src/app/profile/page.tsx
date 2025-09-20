@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "../../contexts/AuthContext";
-import PersonalData from "../components/Profile/Buyer/PersonalData.client";
+import BuyerProfile from "../components/Profile/Buyer/BuyerProfile.client";
 import SellerProfile from "../components/Profile/Seller/SellerProfile.client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -23,7 +23,7 @@ const ProfilePageRouter = () => {
   if (user.role === 'Seller') {
     return <SellerProfile />;
   } else {
-    return <PersonalData />;
+    return <BuyerProfile />;
   }
 };
 
