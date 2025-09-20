@@ -33,9 +33,9 @@ const ProfileSidebar = () => {
                     <li><Link href="/wip">Бонуси</Link></li>
                     <li><Link href="/wip">Замовлення</Link></li>
                     <li><Link href="/wip">Відгуки</Link></li>
-                    <li><Link href="/wip">Обране</Link></li>
+                    <li><Link href="/profile/favorites">Обране</Link></li>
                     <li><Link href="/wip">Список порівнянь</Link></li>
-                    <li><Link href="/wip">Кошик</Link></li>
+                    <li><Link href="/profile/cart">Кошик</Link></li>
                     <li><Link href="/wip">Мої картки</Link></li>
                     <li><Link href="/wip">Сповіщення</Link></li>
                     <li><Link href="/become-seller">Стати продавцем</Link></li>

@@ -69,11 +69,16 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const processToken = (token: string): User | null => {
         try {
             const decoded: DecodedToken = jwtDecode(token);
-            const userId = decoded.profile_id || decoded.sub;
+            const accountId = decoded.sub;
+            const profileId = decoded.profile_id;
             const userRole = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || decoded.role;
-            if (!userId || !userRole) return null;
+
+            if (!accountId || !profileId || !userRole) return null;
+            
             return {
-                userId: userId,
+                userId: profileId,
+                accountId: accountId,
+                profileId: profileId,
                 email: decoded.email,
                 role: userRole,
                 firstName: decoded.firstName || null,
@@ -194,10 +199,10 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     const updateUserAndToken = async (endpoint: string, data: any): Promise<boolean> => {
-        if (!user?.userId) return false;
+        if (!user?.profileId) return false;
         setLoading(true);
         try {
-            const response = await api.patch(`/api/customers/${user.userId}/${endpoint}`, data);
+            const response = await api.patch(`/api/customers/${user.profileId}/${endpoint}`, data);
             showNotification("Дані клієнта оновлено!", "success");
             if (response.data.token) return handleAuthSuccess(response.data.token);
             return true;
@@ -210,10 +215,10 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     const updateSellerData = async (endpoint: string, data: any): Promise<boolean> => {
-        if (!user?.userId) return false;
+        if (!user?.profileId) return false;
         setLoading(true);
         try {
-            const response = await api.patch(`/api/sellers/${user.userId}/${endpoint}`, data);
+            const response = await api.patch(`/api/sellers/${user.profileId}/${endpoint}`, data);
             showNotification("Дані продавця оновлено!", "success");
             if (response.data && response.data.token) {
                 return handleAuthSuccess(response.data.token);

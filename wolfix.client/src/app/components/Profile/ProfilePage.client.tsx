@@ -14,7 +14,7 @@ const ProfilePage = () => {
     const handleBecomeSeller = async () => {
         if (user) {
             const success = await assignRole({
-                userId: user.userId,
+                userId: user.profileId,
                 email: user.email,
                 role: "Seller"
             });

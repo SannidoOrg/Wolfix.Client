@@ -140,3 +140,9 @@
   height: 22px;
   object-fit: contain;
 }
+
+.product-card-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}

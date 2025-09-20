@@ -16,8 +16,9 @@ const BuyerSidebar = () => {
             <nav className="sidebar-nav">
                 <Link href="/wip" className="sidebar-link">Бонуси</Link>
                 <Link href="/wip" className="sidebar-link">Замовлення</Link>
+                <Link href="/profile/cart" className="sidebar-link">Кошик</Link>
                 <Link href="/wip" className="sidebar-link">Відгуки</Link>
-                <Link href="/wip" className="sidebar-link">Обране</Link>
+                <Link href="/profile/favorites" className="sidebar-link">Обране</Link>
             </nav>
             <div className="sidebar-footer-nav">
                 <button onClick={logout} className="sidebar-link sidebar-logout-button">Вихід</button>

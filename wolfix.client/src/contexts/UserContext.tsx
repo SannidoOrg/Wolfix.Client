@@ -12,10 +12,10 @@ interface UserContextType {
     favorites: FavoriteItemDto[];
     fetchCart: () => Promise<void>;
     addToCart: (productId: string) => Promise<void>;
-    removeFromCart: (productId: string) => Promise<void>;
+    removeFromCart: (cartItemId: string) => Promise<void>;
     fetchFavorites: () => Promise<void>;
     addToFavorites: (productId: string) => Promise<void>;
-    removeFromFavorites: (productId: string) => Promise<void>;
+    removeFromFavorites: (favoriteItemId: string) => Promise<void>;
     isFavorite: (productId: string) => boolean;
 }
 
@@ -34,10 +34,10 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const { user, isAuthenticated } = useAuth();
 
     const fetchCart = useCallback(async () => {
-        if (!user?.userId) return;
+        if (!user?.profileId) return;
         setLoading(true);
         try {
-            const response = await api.get<CustomerCartItemsDto>(`/api/customers/cart-items/${user.userId}`);
+            const response = await api.get<CustomerCartItemsDto>(`/api/customers/cart-items/${user.profileId}`);
             setCart(response.data);
         } catch (error) {
             setCart(null);
@@ -47,10 +47,10 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     }, [user, setLoading]);
 
     const addToCart = async (productId: string) => {
-        if (!user?.userId) return;
+        if (!user?.profileId) return;
         setLoading(true);
         try {
-            await api.post(`/api/customers/cart-items`, { customerId: user.userId, productId });
+            await api.post(`/api/customers/cart-items`, { customerId: user.profileId, productId });
             showNotification("Товар додано до кошика", "success");
             await fetchCart();
         } catch (error) {
@@ -60,11 +60,11 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
-    const removeFromCart = async (productId: string) => {
-        if (!user?.userId) return;
+    const removeFromCart = async (cartItemId: string) => {
+        if (!user?.profileId) return;
         setLoading(true);
         try {
-            await api.delete(`/api/customers/${user.userId}/cart-items/${productId}`);
+            await api.delete(`/api/customers/cart-items/${user.profileId}/${cartItemId}`);
             showNotification("Товар видалено з кошика", "success");
             await fetchCart();
         } catch (error) {
@@ -75,10 +75,10 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     const fetchFavorites = useCallback(async () => {
-        if (!user?.userId) return;
+        if (!user?.profileId) return;
         setLoading(true);
         try {
-            const response = await api.get<FavoriteItemDto[]>(`/api/customers/favorites/${user.userId}`);
+            const response = await api.get<FavoriteItemDto[]>(`/api/customers/favorites/${user.profileId}`);
             setFavorites(response.data);
         } catch (error) {
             setFavorites([]);
@@ -88,10 +88,10 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     }, [user, setLoading]);
 
     const addToFavorites = async (productId: string) => {
-        if (!user?.userId) return;
+        if (!user?.profileId) return;
         setLoading(true);
         try {
-            await api.post(`/api/customers/favorites`, { customerId: user.userId, productId });
+            await api.post(`/api/customers/favorites`, { customerId: user.profileId, productId });
             showNotification("Товар додано до обраного", "success");
             await fetchFavorites();
         } catch (error) {
@@ -101,11 +101,11 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
     
-    const removeFromFavorites = async (productId: string) => {
-        if (!user?.userId) return;
+    const removeFromFavorites = async (favoriteItemId: string) => {
+        if (!user?.profileId) return;
         setLoading(true);
         try {
-            await api.delete(`/api/customers/${user.userId}/favorites/${productId}`);
+            await api.delete(`/api/customers/favorites/${user.profileId}/${favoriteItemId}`);
             showNotification("Товар видалено з обраного", "success");
             await fetchFavorites();
         } catch (error) {

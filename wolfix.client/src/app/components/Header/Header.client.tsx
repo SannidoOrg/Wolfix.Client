@@ -62,9 +62,8 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
           <div className="user-icons">
             <div className="icon-group">
               <Link href="/wip" className="icon"><img src="/icons/notification.png" alt="Notification Icon" /></Link>
-              <Link href="/wip" className="icon"><img src="/icons/selected.png" alt="Selected Icon" /></Link>
-              <Link href="/wip" className="icon"><img src="/icons/comparison.png" alt="Comparison Icon" /></Link>
-              <Link href="/wip" className="icon"><img src="/icons/cart.png" alt="Cart Icon" /></Link>
+              <Link href="/profile/favorites" className="icon"><img src="/icons/selected.png" alt="Selected Icon" /></Link>
+              <Link href="/profile/cart" className="icon"><img src="/icons/cart.png" alt="Cart Icon" /></Link>
             </div>
           </div>
         </div>

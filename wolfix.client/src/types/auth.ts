@@ -7,6 +7,8 @@ export interface Address {
 
 export interface User {
   userId: string;
+  profileId: string;
+  accountId: string;
   email: string;
   role: string;
   firstName: string | null;
