@@ -1,18 +1,39 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { SellerApplicationDto } from "@/types/auth";
+import { SellerApplicationDto, Category } from "@/types/auth";
 
 interface Props {
     formData: Omit<SellerApplicationDto, 'document'>;
     setFormData: Dispatch<SetStateAction<Omit<SellerApplicationDto, 'document'>>>;
+    parentCategories: Category[];
+    childCategories: Category[];
+    selectedParent: string;
+    setSelectedParent: Dispatch<SetStateAction<string>>;
     onNext: () => void;
 }
 
-const Step1PersonalInfo = ({ formData, setFormData, onNext }: Props) => {
+const Step1PersonalInfo = ({ formData, setFormData, parentCategories, childCategories, selectedParent, setSelectedParent, onNext }: Props) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         setFormData((prev) => ({ ...prev, [id]: value }));
+    };
+
+    const handleParentCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedParent(e.target.value);
+        setFormData((prev) => ({ ...prev, categoryId: "", categoryName: "" }));
+    };
+
+    const handleChildCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedIndex = e.target.selectedIndex;
+        if (selectedIndex > 0) {
+            const selectedOption = e.target.options[selectedIndex];
+            const categoryId = selectedOption.value;
+            const categoryName = selectedOption.text;
+            setFormData((prev) => ({ ...prev, categoryId, categoryName }));
+        } else {
+            setFormData((prev) => ({ ...prev, categoryId: "", categoryName: "" }));
+        }
     };
     
     const handleSubmit = (e: React.FormEvent) => {
@@ -47,6 +68,26 @@ const Step1PersonalInfo = ({ formData, setFormData, onNext }: Props) => {
                             <label htmlFor="phoneNumber" className="form-label">Номер телефону*</label>
                             <input type="tel" id="phoneNumber" className="form-input" value={formData.phoneNumber} onChange={handleChange} required placeholder="+380..." />
                         </div>
+                        <div className="form-group">
+                            <label htmlFor="parentCategory" className="form-label">Основна категорія*</label>
+                            <select id="parentCategory" className="form-input" value={selectedParent} onChange={handleParentCategoryChange} required>
+                                <option value="">Оберіть основну категорію...</option>
+                                {parentCategories.map(category => (
+                                    <option key={category.id} value={category.id}>{category.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        {selectedParent && childCategories.length > 0 && (
+                            <div className="form-group">
+                                <label htmlFor="categoryId" className="form-label">Підкатегорія*</label>
+                                <select id="categoryId" className="form-input" value={formData.categoryId} onChange={handleChildCategoryChange} required>
+                                    <option value="">Оберіть підкатегорію...</option>
+                                    {childCategories.map(category => (
+                                        <option key={category.id} value={category.id}>{category.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
                         <p className="form-footnote">*Поля обов'язкові до заповнення</p>
                     </fieldset>
                     <div className="form-actions">

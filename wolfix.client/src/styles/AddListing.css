@@ -124,3 +124,78 @@
     cursor: pointer;
     text-decoration: underline;
 }
+
+.file-uploader {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.file-uploader-label {
+    display: block;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.file-uploader-label:hover {
+    background-color: #f0f0f0;
+}
+
+.file-uploader input[type="file"] {
+    display: none;
+}
+
+.dynamic-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.attribute-key-select {
+    flex-basis: 40%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.attribute-value-input {
+    flex-basis: 60%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.remove-button {
+    background-color: #fce8e8;
+    color: #c53030;
+    border: none;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.add-button {
+    background: none;
+    border: 1px dashed #ccc;
+    color: #555;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+}

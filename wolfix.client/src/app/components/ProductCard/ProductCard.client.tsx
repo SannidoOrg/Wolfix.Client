@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ProductShortDto } from "../../../types/product";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
-import '../../../styles/ProductCard.css'; // Додаємо файл стилів
+import '../../../styles/ProductCard.css';
 
 interface IProductCardProps {
   product: ProductShortDto;
@@ -29,21 +29,28 @@ const ProductCard: FC<IProductCardProps> = ({ product }) => {
     action(product.id);
   };
   
-  const imageUrl = product.mainPhoto && product.mainPhoto.startsWith('http')
-    ? product.mainPhoto
-    : 'https://placehold.co/600x400/eee/ccc?text=No+Image';
+  const getImageUrl = (): string => {
+    if (product.mainPhoto && product.mainPhoto.startsWith('http')) {
+      return product.mainPhoto;
+    }
+    return '';
+  };
+
+  const imageUrl = getImageUrl();
 
   return (
     <Link href={`/products/${product.id}`} className="product-card-link">
       <div className="product-card">
         <div className="product-image-container">
-          <Image 
-            src={imageUrl} 
-            alt={product.title} 
-            className="product-image"
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+          {imageUrl && (
+            <Image 
+              src={imageUrl} 
+              alt={product.title} 
+              className="product-image"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          )}
         </div>
         <div className="top-buttons">
           <button onClick={(e) => handleActionClick(e, addToFavorites)} className="action-button">

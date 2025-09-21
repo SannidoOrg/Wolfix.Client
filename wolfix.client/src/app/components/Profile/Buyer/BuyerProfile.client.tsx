@@ -132,7 +132,7 @@ const BuyerProfile = () => {
                     {!isEditing && <button className="edit-button" onClick={() => setIsEditing(true)}>Редагувати</button>}
                 </div>
             </div>
-
+            
             <div className="profile-section">
                 <h2 className="section-title">Особисті дані</h2>
                 <div className="data-grid">
@@ -177,7 +177,7 @@ const BuyerProfile = () => {
             </div>
 
             <div className="profile-section">
-                <h2 className="section-title">Моя адреса доставки</h2>
+                <h2 className="section-title">Мої адреси доставки</h2>
                 <div className="data-grid">
                      {isEditing ? (
                         <>
@@ -189,6 +189,7 @@ const BuyerProfile = () => {
                      ) : (
                         <div className="address-item">
                             <span className="address-value">{fullAddress}</span>
+                            <span className="address-label">Адреса за замовчуванням</span>
                         </div>
                      )}
                 </div>

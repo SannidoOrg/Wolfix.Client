@@ -19,24 +19,35 @@ export interface User {
   address: Address | null;
 }
 
+export interface Category {
+    id: string;
+    name: string;
+}
+
+export interface SellerApplication {
+    id: string;
+    categoryName: string;
+    status: string;
+    documentUrl: string | null;
+    sellerProfileData: {
+        fullName: {
+            firstName: string;
+            lastName: string;
+            middleName: string;
+        };
+        phoneNumber: {
+            value: string;
+        };
+        address: Address;
+        birthDate: {
+            value: string;
+        };
+    };
+}
+
 export interface RegisterDto {
     email: string;
     password: string;
-}
-
-export interface RegisterSellerDto {
-    email: string;
-    password: string;
-    firstName: string;
-    lastName: string;
-    middleName: string;
-    phoneNumber: string;
-    city: string;
-    street: string;
-    houseNumber: string;
-    apartmentNumber?: string;
-    birthDate: string;
-    document?: File;
 }
 
 export interface SellerApplicationDto {
@@ -49,6 +60,8 @@ export interface SellerApplicationDto {
     houseNumber: string;
     apartmentNumber?: string;
     birthDate: string;
+    categoryId: string;
+    categoryName: string;
     document?: File;
 }
 

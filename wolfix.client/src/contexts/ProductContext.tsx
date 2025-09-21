@@ -3,7 +3,7 @@
 import { createContext, useState, ReactNode, FC, useContext } from "react";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
-import { ProductShortDto, CreateProductDto } from "@/types/product";
+import { ProductShortDto } from "@/types/product";
 import { AddProductReviewDto } from "@/types/review";
 import { PaginationDto } from "@/types/pagination";
 
@@ -17,7 +17,7 @@ interface ProductContextType {
     fetchRandomProducts: () => Promise<void>;
     fetchProductReviews: (productId: string, params?: { pageSize?: number; lastId?: string }) => Promise<any>;
     addProductReview: (productId: string, reviewData: AddProductReviewDto) => Promise<any>;
-    createProduct: (productData: CreateProductDto | FormData) => Promise<any>;
+    createProduct: (productData: FormData) => Promise<any>;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -117,7 +117,7 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
         }
     };
 
-    const createProduct = async (productData: CreateProductDto | FormData) => {
+    const createProduct = async (productData: FormData) => {
         setLoading(true);
         try {
             const response = await api.post('/api/products', productData, {

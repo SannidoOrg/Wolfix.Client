@@ -11,9 +11,16 @@ const CreateProductForm = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const productData = { name, description: '...', price: 100, categoryId: '...', stock: 10 };
-        const response = await createProduct(productData);
-        if (response.status === 201) {
+        
+        const productFormData = new FormData();
+        productFormData.append('name', name);
+        productFormData.append('description', '...');
+        productFormData.append('price', '100');
+        productFormData.append('categoryId', '...');
+        productFormData.append('stock', '10');
+
+        const response = await createProduct(productFormData);
+        if (response && response.status >= 200 && response.status < 300) {
             alert("Товар успішно створено!");
         } else {
             alert("Помилка створення товару.");

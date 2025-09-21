@@ -1,30 +1,31 @@
 "use client";
 
 import { useAuth } from "../../contexts/AuthContext";
+import { AdminContextProvider } from "../../contexts/AdminContext";
 import BuyerProfile from "../components/Profile/Buyer/BuyerProfile.client";
 import SellerProfile from "../components/Profile/Seller/SellerProfile.client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import AdminProfile from "../components/Profile/Admin/AdminProfile.client";
 
 const ProfilePageRouter = () => {
-  const { user, isAuthenticated, loading } = useAuth();
-  const router = useRouter();
+    const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/');
+    if (loading || !user) {
+        return <p>Завантаження даних профілю...</p>;
     }
-  }, [isAuthenticated, loading, router]);
 
-  if (loading || !user) {
-    return <p>Завантаження даних профілю...</p>;
-  }
+    if (user.role === 'Admin') {
+        return (
+            <AdminContextProvider>
+                <AdminProfile />
+            </AdminContextProvider>
+        );
+    }
+    
+    if (user.role === 'Seller') {
+        return <SellerProfile />;
+    } 
 
-  if (user.role === 'Seller') {
-    return <SellerProfile />;
-  } else {
     return <BuyerProfile />;
-  }
 };
 
 export default ProfilePageRouter;

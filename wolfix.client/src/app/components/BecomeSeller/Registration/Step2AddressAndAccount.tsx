@@ -57,8 +57,8 @@ const Step2AddressAndAccount = ({ formData, setFormData, setDocumentFile, onBack
                      <fieldset className="form-fieldset">
                         <legend className="fieldset-legend">Документи</legend>
                          <div className="form-group">
-                            <label htmlFor="document" className="form-label">Завантажте документ*</label>
-                            <input type="file" id="document" className="form-input" onChange={handleFileChange} required />
+                            <label htmlFor="document" className="form-label">Завантажте документ (тільки PDF)*</label>
+                            <input type="file" id="document" className="form-input" onChange={handleFileChange} required accept="application/pdf" />
                         </div>
                     </fieldset>
 

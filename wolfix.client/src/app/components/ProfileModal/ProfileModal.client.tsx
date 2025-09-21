@@ -19,7 +19,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<'Customer' | 'Seller'>('Customer');
+  const [selectedRole, setSelectedRole] = useState<'Customer' | 'Seller' | 'Admin'>('Customer');
   const [error, setError] = useState('');
   
   const { loginWithRole, registerAndSetRole } = useAuth();
@@ -123,6 +123,16 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
                     onChange={() => setSelectedRole('Seller')} 
                   />
                   Я — Продавець
+                </label>
+                <label>
+                  <input 
+                    type="radio" 
+                    name="role" 
+                    value="Admin" 
+                    checked={selectedRole === 'Admin'} 
+                    onChange={() => setSelectedRole('Admin')} 
+                  />
+                  Я — Адміністратор
                 </label>
               </div>
 

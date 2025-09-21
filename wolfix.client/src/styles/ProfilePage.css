@@ -248,3 +248,43 @@
     border-radius: 4px;
     width: 100%;
 }
+
+.profile-user-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.profile-user-email {
+    font-size: 14px;
+    color: #777;
+    margin-top: 4px;
+}
+
+.profile-tabs-nav {
+    display: flex;
+    gap: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 24px;
+}
+
+.profile-tab-button {
+    background: none;
+    border: none;
+    padding: 12px 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #555;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease-in-out;
+}
+
+.profile-tab-button.active {
+    color: #ff6600;
+    border-bottom-color: #ff6600;
+}
+
+.profile-tab-content {
+    padding-top: 16px;
+}

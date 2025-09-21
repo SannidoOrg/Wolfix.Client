@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, ReactNode, FC, useContext } from "react";
+import { createContext, useState, ReactNode, FC, useContext, useCallback } from "react";
 
 interface NotificationState {
     message: string;
@@ -28,12 +28,12 @@ export const GlobalContextProvider: FC<{ children: ReactNode }> = ({ children })
     const [loading, setLoading] = useState<boolean>(false);
     const [notification, setNotification] = useState<NotificationState | null>(null);
 
-    const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+    const showNotification = useCallback((message: string, type: 'success' | 'error' = 'success') => {
         setNotification({ message, type });
         setTimeout(() => {
             setNotification(null);
         }, 3000);
-    };
+    }, []);
 
     const value: GlobalContextType = {
         loading,

@@ -61,12 +61,13 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const [user, setUser] = useState<User | null>(null);
     const { loading, setLoading, showNotification } = useGlobalContext();
 
-    const fetchFullProfile = async (profileId: string) => {
+    const fetchProfileData = async (role: string, profileId: string) => {
+        const endpoint = role === 'Seller' ? `/api/sellers/${profileId}` : `/api/customers/${profileId}`;
         try {
-            const response = await api.get(`/api/customers/${profileId}`);
+            const response = await api.get(endpoint);
             return response.data;
         } catch (error) {
-            console.error("Не вдалося завантажити повний профіль", error);
+            console.error(`Не вдалося завантажити профіль для ролі ${role}`, error);
             return null;
         }
     };
@@ -92,18 +93,22 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
     const handleAuthSuccess = async (token: string) => {
         const userFromToken = processToken(token);
-        if (userFromToken && userFromToken.profileId) {
+
+        if (userFromToken && userFromToken.profileId && userFromToken.role) {
             sessionStorage.setItem("authToken", token);
-            
-            const fullProfileData = await fetchFullProfile(userFromToken.profileId);
+            let fullProfileData = null;
+
+            if (userFromToken.role === 'Customer' || userFromToken.role === 'Seller') {
+                fullProfileData = await fetchProfileData(userFromToken.role, userFromToken.profileId);
+            }
             
             const completeUser: User = {
                 ...userFromToken,
                 firstName: fullProfileData?.fullName?.firstName || null,
                 lastName: fullProfileData?.fullName?.lastName || null,
                 middleName: fullProfileData?.fullName?.middleName || null,
-                phoneNumber: fullProfileData?.phoneNumber || null,
-                birthDate: fullProfileData?.birthDate || null,
+                phoneNumber: fullProfileData?.phoneNumber?.value || fullProfileData?.phoneNumber || null,
+                birthDate: fullProfileData?.birthDate?.value || fullProfileData?.birthDate || null,
                 address: fullProfileData?.address || null,
             } as User;
             
@@ -265,7 +270,6 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
-    const updateUserProfile = (data: UpdateProfileDto) => updateUserAndToken('profile', data);
     const updateUserFullName = (data: ChangeFullNameDto) => updateUserAndToken('full-name', data);
     const updateUserAddress = (data: ChangeAddressDto) => updateUserAndToken('address', data);
     const updateUserBirthDate = (data: ChangeBirthDateDto) => updateUserAndToken('birth-date', data);
@@ -291,7 +295,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         updateUserAddress,
         updateUserBirthDate,
         updateUserPhoneNumber,
-        updateUserProfile,
+        updateUserProfile: () => Promise.resolve(false),
         updateSellerFullName,
         updateSellerPhoneNumber,
         updateSellerAddress,

@@ -1,11 +1,11 @@
 export interface ProductShortDto {
   id: string;
   title: string;
-  averageRating: number;
+  averageRating: number | null;
   price: number;
   finalPrice: number;
   bonuses: number;
-  mainPhoto: string;
+  mainPhoto: string | null;
 }
 
 export interface CreateProductDto {

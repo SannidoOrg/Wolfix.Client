@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '../../../../contexts/AuthContext';
-import api from '../../../../lib/api';
 import '../../../../styles/SellerProfile.css';
 
 interface SellerData {
@@ -15,7 +15,7 @@ interface SellerData {
     houseNumber: string;
     apartmentNumber: string;
     birthDate: string;
-    language: string; // Добавлено поле для языка
+    language: string;
 }
 
 interface AccordionProps {
@@ -67,7 +67,7 @@ const SellerProfile = () => {
                 middleName: user.middleName || '',
                 phoneNumber: user.phoneNumber || '',
                 birthDate: user.birthDate || '',
-                language: 'Українська', // Пример
+                language: 'Українська',
                 city: user.address?.city || '',
                 street: user.address?.street || '',
                 houseNumber: user.address?.houseNumber || '',
@@ -145,9 +145,9 @@ const SellerProfile = () => {
                     <button className="tab-button">Мої картки</button>
                     <button className="tab-button">Тех підтримка</button>
                 </div>
-                <button className="add-listing-button">
+                <Link href="/add-listing" className="add-listing-button">
                     Додати оголошення
-                </button>
+                </Link>
             </nav>
 
             <div>
