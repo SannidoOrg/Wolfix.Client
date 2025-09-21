@@ -39,8 +39,24 @@ export interface RegisterSellerDto {
     document?: File;
 }
 
+export interface SellerApplicationDto {
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    phoneNumber: string;
+    city: string;
+    street: string;
+    houseNumber: string;
+    apartmentNumber?: string;
+    birthDate: string;
+    document?: File;
+}
+
 export interface ChangeAddressDto {
-    address: Address;
+    city: string;
+    street: string;
+    houseNumber: string;
+    apartmentNumber?: string;
 }
 
 export interface ChangeBirthDateDto {
@@ -54,6 +70,7 @@ export interface ChangePhoneNumberDto {
 export interface ChangeFullNameDto {
   firstName: string;
   lastName: string;
+  middleName: string;
 }
 
 export interface UpdateProfileDto {

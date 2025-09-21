@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, ReactNode, FC, useContext } from "r
 import { jwtDecode } from "jwt-decode";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
-import { User, RoleRequestDto, TokenRequestDto, RegisterDto, ChangeFullNameDto, ChangeAddressDto, ChangeBirthDateDto, ChangePhoneNumberDto, UpdateProfileDto, RegisterSellerDto } from "../types/auth";
+import { User, RoleRequestDto, TokenRequestDto, RegisterDto, ChangeFullNameDto, ChangeAddressDto, ChangeBirthDateDto, ChangePhoneNumberDto, UpdateProfileDto, SellerApplicationDto } from "../types/auth";
 
 interface AssignRoleDto {
     userId: string;
@@ -24,11 +24,12 @@ interface AuthContextType {
     isAuthenticated: boolean;
     loading: boolean;
     logout: () => void;
+    refetchUser: () => Promise<void>;
     assignRole: (roleData: AssignRoleDto) => Promise<boolean>;
     fetchUserRoles: (credentials: RoleRequestDto) => Promise<string[] | null>;
     loginWithRole: (credentials: TokenRequestDto) => Promise<boolean>;
     registerAndSetRole: (details: RegisterDto) => Promise<boolean>;
-    registerSeller: (details: RegisterSellerDto) => Promise<boolean>;
+    createSellerApplication: (applicationData: SellerApplicationDto) => Promise<boolean>;
     updateUserFullName: (data: ChangeFullNameDto) => Promise<boolean>;
     updateUserAddress: (data: ChangeAddressDto) => Promise<boolean>;
     updateUserBirthDate: (data: ChangeBirthDateDto) => Promise<boolean>;
@@ -46,12 +47,6 @@ interface DecodedToken {
     email: string;
     role?: string;
     "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string;
-    firstName?: string;
-    lastName?: string;
-    middleName?: string;
-    phoneNumber?: string;
-    birthDate?: string;
-    address?: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,7 +61,17 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const [user, setUser] = useState<User | null>(null);
     const { loading, setLoading, showNotification } = useGlobalContext();
 
-    const processToken = (token: string): User | null => {
+    const fetchFullProfile = async (profileId: string) => {
+        try {
+            const response = await api.get(`/api/customers/${profileId}`);
+            return response.data;
+        } catch (error) {
+            console.error("Не вдалося завантажити повний профіль", error);
+            return null;
+        }
+    };
+
+    const processToken = (token: string): Partial<User> | null => {
         try {
             const decoded: DecodedToken = jwtDecode(token);
             const accountId = decoded.sub;
@@ -76,36 +81,47 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             if (!accountId || !profileId || !userRole) return null;
             
             return {
-                userId: profileId,
                 accountId: accountId,
                 profileId: profileId,
+                userId: profileId,
                 email: decoded.email,
                 role: userRole,
-                firstName: decoded.firstName || null,
-                lastName: decoded.lastName || null,
-                middleName: decoded.middleName || null,
-                phoneNumber: decoded.phoneNumber || null,
-                birthDate: decoded.birthDate || null,
-                address: decoded.address || null,
             };
         } catch (error) { return null; }
     };
 
-    const handleAuthSuccess = (token: string) => {
-        const userForState = processToken(token);
-        if (userForState) {
+    const handleAuthSuccess = async (token: string) => {
+        const userFromToken = processToken(token);
+        if (userFromToken && userFromToken.profileId) {
             sessionStorage.setItem("authToken", token);
-            setUser(userForState);
+            
+            const fullProfileData = await fetchFullProfile(userFromToken.profileId);
+            
+            const completeUser: User = {
+                ...userFromToken,
+                firstName: fullProfileData?.fullName?.firstName || null,
+                lastName: fullProfileData?.fullName?.lastName || null,
+                middleName: fullProfileData?.fullName?.middleName || null,
+                phoneNumber: fullProfileData?.phoneNumber || null,
+                birthDate: fullProfileData?.birthDate || null,
+                address: fullProfileData?.address || null,
+            } as User;
+            
+            setUser(completeUser);
             return true;
         }
         return false;
     };
-
-    useEffect(() => {
+    
+    const refetchUser = async () => {
         const token = sessionStorage.getItem("authToken");
         if (token) {
-            handleAuthSuccess(token);
+            await handleAuthSuccess(token);
         }
+    };
+
+    useEffect(() => {
+        refetchUser();
     }, []);
 
     const logout = () => {
@@ -133,7 +149,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
             if (token) {
                 showNotification("Вхід успішний!", "success");
-                return handleAuthSuccess(token);
+                return await handleAuthSuccess(token);
             }
             
             showNotification("Не вдалося отримати токен з відповіді.", "error");
@@ -152,7 +168,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         try {
             const response = await api.post('/api/account/customer/register', details);
             if (response.data && response.data.token) {
-                return handleAuthSuccess(response.data.token);
+                return await handleAuthSuccess(response.data.token);
             }
             return false;
         } catch (error: any) {
@@ -164,17 +180,27 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
     
-    const registerSeller = async (details: RegisterSellerDto): Promise<boolean> => {
+    const createSellerApplication = async (applicationData: SellerApplicationDto): Promise<boolean> => {
+        if (!user?.accountId) {
+            showNotification("Користувач не автентифікований.", "error");
+            return false;
+        }
         setLoading(true);
         try {
-            const response = await api.post('/api/account/seller/register', details);
-            if (response.data && response.data.token) {
-                showNotification("Реєстрація продавця успішна!", "success");
-                return handleAuthSuccess(response.data.token);
-            }
-            return false;
+            const formData = new FormData();
+            Object.entries(applicationData).forEach(([key, value]) => {
+                if (value) {
+                    formData.append(key, value);
+                }
+            });
+
+            await api.post(`/api/seller-applications/${user.accountId}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            showNotification("Заявку на отримання статусу продавця успішно подано!", "success");
+            return true;
         } catch (error: any) {
-            showNotification(error.response?.data?.message || "Помилка реєстрації продавця.", "error");
+            showNotification(error.response?.data?.message || "Не вдалося подати заявку.", "error");
             return false;
         } finally {
             setLoading(false);
@@ -187,7 +213,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             const response = await api.post('/api/account/assign-role', roleData);
             showNotification("Роль успішно оновлено!", "success");
             if (response.data && response.data.token) {
-               return handleAuthSuccess(response.data.token);
+               return await handleAuthSuccess(response.data.token);
             }
             return true;
         } catch (error: any) {
@@ -204,7 +230,12 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         try {
             const response = await api.patch(`/api/customers/${user.profileId}/${endpoint}`, data);
             showNotification("Дані клієнта оновлено!", "success");
-            if (response.data.token) return handleAuthSuccess(response.data.token);
+            
+            if (response.data.token) {
+                await handleAuthSuccess(response.data.token);
+            } else {
+                 await refetchUser();
+            }
             return true;
         } catch (error: any) {
             showNotification(error.response?.data?.message || "Не вдалося оновити дані клієнта", "error");
@@ -221,7 +252,9 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             const response = await api.patch(`/api/sellers/${user.profileId}/${endpoint}`, data);
             showNotification("Дані продавця оновлено!", "success");
             if (response.data && response.data.token) {
-                return handleAuthSuccess(response.data.token);
+                await handleAuthSuccess(response.data.token);
+            } else {
+                await refetchUser();
             }
             return true;
         } catch (error: any) {
@@ -248,11 +281,12 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         isAuthenticated: !!user,
         loading,
         logout,
+        refetchUser,
         assignRole,
         fetchUserRoles,
         loginWithRole,
         registerAndSetRole,
-        registerSeller,
+        createSellerApplication,
         updateUserFullName,
         updateUserAddress,
         updateUserBirthDate,

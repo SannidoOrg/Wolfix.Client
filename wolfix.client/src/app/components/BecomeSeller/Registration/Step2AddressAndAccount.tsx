@@ -1,11 +1,11 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { RegisterSellerDto } from "@/types/auth";
+import { SellerApplicationDto } from "@/types/auth";
 
 interface Props {
-    formData: Omit<RegisterSellerDto, 'document'>;
-    setFormData: Dispatch<SetStateAction<Omit<RegisterSellerDto, 'document'>>>;
+    formData: Omit<SellerApplicationDto, 'document'>;
+    setFormData: Dispatch<SetStateAction<Omit<SellerApplicationDto, 'document'>>>;
     setDocumentFile: Dispatch<SetStateAction<File | null>>;
     onBack: () => void;
     onSubmit: () => void;
@@ -32,7 +32,7 @@ const Step2AddressAndAccount = ({ formData, setFormData, setDocumentFile, onBack
         <>
             <span className="form-step">Крок 2 з 2</span>
             <div className="seller-form-container">
-                <h2 className="form-title">Адреса та дані для входу</h2>
+                <h2 className="form-title">Адреса та документи</h2>
                 <form onSubmit={handleSubmit}>
                     <fieldset className="form-fieldset">
                         <legend className="fieldset-legend">Адреса</legend>
@@ -54,18 +54,6 @@ const Step2AddressAndAccount = ({ formData, setFormData, setDocumentFile, onBack
                         </div>
                     </fieldset>
 
-                    <fieldset className="form-fieldset">
-                        <legend className="fieldset-legend">Дані для входу</legend>
-                         <div className="form-group">
-                            <label htmlFor="email" className="form-label">E-mail*</label>
-                            <input type="email" id="email" className="form-input" value={formData.email} onChange={handleChange} required />
-                        </div>
-                         <div className="form-group">
-                            <label htmlFor="password" className="form-label">Пароль*</label>
-                            <input type="password" id="password" className="form-input" value={formData.password} onChange={handleChange} required />
-                        </div>
-                    </fieldset>
-
                      <fieldset className="form-fieldset">
                         <legend className="fieldset-legend">Документи</legend>
                          <div className="form-group">
@@ -73,9 +61,10 @@ const Step2AddressAndAccount = ({ formData, setFormData, setDocumentFile, onBack
                             <input type="file" id="document" className="form-input" onChange={handleFileChange} required />
                         </div>
                     </fieldset>
+
                     <p className="form-footnote">*Поля обов'язкові до заповнення</p>
                     <div className="form-actions">
-                        <button type="submit" className="submit-button">Зареєструватись</button>
+                        <button type="submit" className="submit-button">Подати заявку</button>
                     </div>
                      <div className="form-actions" style={{marginTop: '1rem'}}>
                         <button type="button" onClick={onBack} className="return-link" style={{color: '#555', background: 'none', border: 'none', cursor: 'pointer'}}>Повернутись</button>

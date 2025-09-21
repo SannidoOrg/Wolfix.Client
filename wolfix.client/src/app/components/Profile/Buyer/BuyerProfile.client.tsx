@@ -1,90 +1,67 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Image from "next/image";
 import { useAuth } from '../../../../contexts/AuthContext';
-
-interface BuyerData {
-    firstName: string;
-    lastName: string;
-    middleName: string;
-    phoneNumber: string;
-    city: string;
-    street: string;
-    houseNumber: string;
-    apartmentNumber: string;
-    birthDate: string;
-    language: string;
-}
-
-interface AccordionProps {
-    title: string;
-    subtitle?: string;
-    children: React.ReactNode;
-}
-
-const Accordion = ({ title, subtitle, children }: AccordionProps) => (
-    <details className="seller-profile-accordion">
-        <summary>
-            <div><strong>{title}</strong>{subtitle && <span>{subtitle}</span>}</div>
-            <span className="accordion-arrow">▼</span>
-        </summary>
-        <div className="seller-profile-accordion-content">{children}</div>
-    </details>
-);
-
-interface EditableSectionProps {
-    children: React.ReactNode;
-    onSave: () => void;
-    onCancel: () => void;
-}
-
-const EditableSection = ({ children, onSave, onCancel }: EditableSectionProps) => {
-    return (
-        <div className="editable-section">
-            {children}
-            <div className="form-actions">
-                <button onClick={onCancel} className="cancel-button">Скасувати</button>
-                <button onClick={onSave} className="save-button">Зберегти</button>
-            </div>
-        </div>
-    );
-};
+import '../../../../styles/ProfilePage.css';
 
 const BuyerProfile = () => {
-    const { user, updateUserFullName, updateUserPhoneNumber, updateUserAddress, updateUserBirthDate } = useAuth();
-    const [profileData, setProfileData] = useState<BuyerData | null>(null);
-    const [formData, setFormData] = useState<Partial<BuyerData>>({});
-    const [editingSection, setEditingSection] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { user, refetchUser, updateUserFullName, updateUserPhoneNumber, updateUserAddress, updateUserBirthDate } = useAuth();
+    
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        firstName: '',
+        lastName: '',
+        middleName: '',
+        phoneNumber: '',
+        birthDate: '2000-01-01',
+        city: '',
+        street: '',
+        houseNumber: '',
+        apartmentNumber: ''
+    });
 
     useEffect(() => {
         if (user) {
-            const initialData = {
+            setFormData({
                 firstName: user.firstName || '',
                 lastName: user.lastName || '',
                 middleName: user.middleName || '',
                 phoneNumber: user.phoneNumber || '',
-                birthDate: user.birthDate || '',
-                language: 'Українська',
+                birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split('T')[0] : '2000-01-01',
                 city: user.address?.city || '',
                 street: user.address?.street || '',
                 houseNumber: user.address?.houseNumber || '',
-                apartmentNumber: user.address?.apartmentNumber || '',
-            };
-            setProfileData(initialData);
-            setFormData(initialData);
-            setIsLoading(false);
+                apartmentNumber: user.address?.apartmentNumber || ''
+            });
         }
     }, [user]);
 
-    const handleEdit = (section: string) => {
-        setEditingSection(section);
-        setFormData(profileData || {});
-    };
-
     const handleCancel = () => {
-        setEditingSection(null);
-        setFormData(profileData || {});
+        setIsEditing(false);
+    };
+    
+    const handleSave = async () => {
+        const results = await Promise.all([
+            updateUserFullName({
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                middleName: formData.middleName
+            }),
+            updateUserPhoneNumber({ phoneNumber: formData.phoneNumber }),
+            updateUserAddress({
+                city: formData.city,
+                street: formData.street,
+                houseNumber: formData.houseNumber,
+                apartmentNumber: formData.apartmentNumber
+            }),
+            updateUserBirthDate({ birthDate: formData.birthDate })
+        ]);
+
+        if (results.every(res => res)) {
+            await refetchUser();
+            setIsEditing(false);
+        }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,104 +69,137 @@ const BuyerProfile = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = async (section: string) => {
-        let success = false;
-        if (section === 'fullName') {
-            success = await updateUserFullName({ 
-                firstName: formData.firstName ?? '', 
-                lastName: formData.lastName ?? ''
-            });
-        } else if (section === 'phoneNumber') {
-            success = await updateUserPhoneNumber({ phoneNumber: formData.phoneNumber ?? '' });
-        } else if (section === 'address') {
-            success = await updateUserAddress({
-                address: {
-                    city: formData.city ?? '',
-                    street: formData.street ?? '',
-                    houseNumber: formData.houseNumber ?? '',
-                    apartmentNumber: formData.apartmentNumber ?? ''
-                }
-            });
-        } else if (section === 'birthDate') {
-            success = await updateUserBirthDate({ birthDate: formData.birthDate ?? '' });
-        }
-        
-        if (success) {
-            const updatedProfileData = { ...profileData!, ...formData } as BuyerData;
-            setProfileData(updatedProfileData);
-            setFormData(updatedProfileData);
-            setEditingSection(null);
-        }
+    const handleDateChange = (part: 'year' | 'month' | 'day', value: string) => {
+        const dateParts = formData.birthDate.split('-');
+        let [year, month, day] = dateParts;
+
+        if (part === 'year') year = value;
+        if (part === 'month') month = value.padStart(2, '0');
+        if (part === 'day') day = value.padStart(2, '0');
+
+        setFormData(prev => ({ ...prev, birthDate: `${year}-${month}-${day}` }));
     };
     
-    if (isLoading) return <div className="loader">Завантаження даних...</div>;
-    if (!profileData) return <div className="error">Не вдалося завантажити дані покупця.</div>;
+    const renderField = (label: string, value: string | null | undefined) => (
+        <div className="data-item">
+            <span className="data-label">{label}</span>
+            <span className="data-value">{value || ''}</span>
+        </div>
+    );
 
-    const renderField = (label: string, name: keyof BuyerData, value: string | undefined, type: string = 'text') => (
-        <div className="form-field">
-            <label htmlFor={name}>{label}</label>
-            <input id={name} name={name} type={type} value={value || ''} onChange={handleChange} />
+    const renderEditableField = (label: string, name: keyof typeof formData, value: string, type: string = 'text') => (
+        <div className="data-item">
+            <label className="data-label" htmlFor={name}>{label}</label>
+            <input
+                className="data-input"
+                id={name}
+                name={name}
+                type={type}
+                value={value}
+                onChange={handleChange}
+            />
         </div>
     );
     
+    if (!user) {
+        return <div className="loader">Завантаження...</div>;
+    }
+
+    const [year, month, day] = formData.birthDate.split('-');
+    
+    const years = Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i);
+    const days = Array.from({ length: 31 }, (_, i) => i + 1);
+    const months = Array.from({ length: 12 }, (_, i) => i + 1);
+    
+    const fullName = `${user.lastName || ''} ${user.firstName || ''} ${user.middleName || ''}`;
+    const fullAddress = user.address ? `м. ${user.address.city}, вул. ${user.address.street}, буд. ${user.address.houseNumber}, кв. ${user.address.apartmentNumber}` : '';
+    
+    const formattedBirthDate = user.birthDate ? (() => {
+        const date = new Date(user.birthDate);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}.${month}.${year}`;
+    })() : '';
+
     return (
-        <div className="profile-content-sections">
-            <Accordion title="Мій акаунт Wolfix" subtitle={`${profileData.lastName} ${profileData.firstName}`}>
-                {editingSection === 'fullName' ? (
-                    <EditableSection onSave={() => handleSave('fullName')} onCancel={handleCancel}>
-                        {renderField("Прізвище", "lastName", formData.lastName)}
-                        {renderField("Ім'я", "firstName", formData.firstName)}
-                        {renderField("По-батькові", "middleName", formData.middleName)}
-                    </EditableSection>
-                ) : (
-                    <div className="display-section">
-                        <p>{`${profileData.lastName} ${profileData.firstName} ${profileData.middleName}`}</p>
-                        <button onClick={() => handleEdit('fullName')}>Редагувати</button>
-                    </div>
-                )}
-            </Accordion>
+        <div className="user-profile-container">
+            <div className="profile-main-header">
+                <Image src="/icons/prof.png" alt="User Avatar" width={64} height={64}/>
+                <h1 className="profile-user-name">{fullName}</h1>
+                <div className="profile-actions">
+                    <button className="delete-button">Видалити</button>
+                    {!isEditing && <button className="edit-button" onClick={() => setIsEditing(true)}>Редагувати</button>}
+                </div>
+            </div>
 
-            <Accordion title="Особисті дані" subtitle={profileData.language}>
-                 {editingSection === 'birthDate' ? (
-                    <EditableSection onSave={() => handleSave('birthDate')} onCancel={handleCancel}>
-                        {renderField("Дата народження", "birthDate", formData.birthDate?.split('T')[0], 'date')}
-                    </EditableSection>
-                ) : (
-                    <div className="display-section">
-                        <p>Дата народження: {new Date(profileData.birthDate).toLocaleDateString()}</p>
-                        <button onClick={() => handleEdit('birthDate')}>Редагувати</button>
+            <div className="profile-section">
+                <h2 className="section-title">Особисті дані</h2>
+                <div className="data-grid">
+                    {isEditing ? renderEditableField("Телефон", "phoneNumber", formData.phoneNumber, "tel") : renderField("Телефон", user.phoneNumber)}
+                    {renderField("Електронна пошта", user.email)}
+                    <div className="data-item">
+                        <span className="data-label">Дата народження</span>
+                        {isEditing ? (
+                            <div className="date-select-group">
+                                <div className="date-select-item">
+                                    <label className="date-select-label">Рік</label>
+                                    <select className="date-select" value={year} onChange={(e) => handleDateChange('year', e.target.value)}>
+                                        {years.map(y => <option key={y} value={y}>{y}</option>)}
+                                    </select>
+                                </div>
+                                <div className="date-select-item">
+                                    <label className="date-select-label">Місяць</label>
+                                    <select className="date-select" value={parseInt(month, 10)} onChange={(e) => handleDateChange('month', e.target.value)}>
+                                        {months.map(m => <option key={m} value={m}>{m}</option>)}
+                                    </select>
+                                </div>
+                                <div className="date-select-item">
+                                    <label className="date-select-label">День</label>
+                                    <select className="date-select" value={parseInt(day, 10)} onChange={(e) => handleDateChange('day', e.target.value)}>
+                                        {days.map(d => <option key={d} value={d}>{d}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                        ) : (
+                            <span className="data-value">{formattedBirthDate}</span>
+                        )}
+                    </div>
+                    {renderField("Стать", "Чоловіча")}
+                </div>
+                {isEditing && (
+                    <div className="data-grid-single">
+                        {renderEditableField("Прізвище", "lastName", formData.lastName)}
+                        {renderEditableField("Ім'я", "firstName", formData.firstName)}
+                        {renderEditableField("По-батькові", "middleName", formData.middleName)}
                     </div>
                 )}
-            </Accordion>
+            </div>
 
-            <Accordion title="Контакти" subtitle={profileData.phoneNumber}>
-                 {editingSection === 'phoneNumber' ? (
-                    <EditableSection onSave={() => handleSave('phoneNumber')} onCancel={handleCancel}>
-                        {renderField("Номер телефону", "phoneNumber", formData.phoneNumber, 'tel')}
-                    </EditableSection>
-                ) : (
-                    <div className="display-section">
-                        <p>{profileData.phoneNumber}</p>
-                        <button onClick={() => handleEdit('phoneNumber')}>Редагувати</button>
-                    </div>
-                )}
-            </Accordion>
-            
-            <Accordion title="Моя адреса" subtitle={profileData.city}>
-                 {editingSection === 'address' ? (
-                    <EditableSection onSave={() => handleSave('address')} onCancel={handleCancel}>
-                        {renderField("Місто", "city", formData.city)}
-                        {renderField("Вулиця", "street", formData.street)}
-                        {renderField("Дім", "houseNumber", formData.houseNumber)}
-                        {renderField("Квартира", "apartmentNumber", formData.apartmentNumber)}
-                    </EditableSection>
-                ) : (
-                    <div className="display-section">
-                        <p>{`м. ${profileData.city}, вул. ${profileData.street}, ${profileData.houseNumber}/${profileData.apartmentNumber}`}</p>
-                        <button onClick={() => handleEdit('address')}>Редагувати</button>
-                    </div>
-                )}
-            </Accordion>
+            <div className="profile-section">
+                <h2 className="section-title">Моя адреса доставки</h2>
+                <div className="data-grid">
+                     {isEditing ? (
+                        <>
+                            {renderEditableField("Місто", "city", formData.city)}
+                            {renderEditableField("Вулиця", "street", formData.street)}
+                            {renderEditableField("Будинок", "houseNumber", formData.houseNumber)}
+                            {renderEditableField("Квартира", "apartmentNumber", formData.apartmentNumber)}
+                        </>
+                     ) : (
+                        <div className="address-item">
+                            <span className="address-value">{fullAddress}</span>
+                        </div>
+                     )}
+                </div>
+            </div>
+
+            {isEditing && (
+                <div className="form-actions-footer">
+                    <button className="cancel-button-footer" onClick={handleCancel}>Скасувати</button>
+                    <button className="save-button-footer" onClick={handleSave}>Зберегти зміни</button>
+                </div>
+            )}
         </div>
     );
 };

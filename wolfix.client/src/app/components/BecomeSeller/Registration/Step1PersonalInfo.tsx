@@ -1,11 +1,11 @@
 "use client";
 
 import { Dispatch, SetStateAction } from "react";
-import { RegisterSellerDto } from "@/types/auth";
+import { SellerApplicationDto } from "@/types/auth";
 
 interface Props {
-    formData: Omit<RegisterSellerDto, 'document'>;
-    setFormData: Dispatch<SetStateAction<Omit<RegisterSellerDto, 'document'>>>;
+    formData: Omit<SellerApplicationDto, 'document'>;
+    setFormData: Dispatch<SetStateAction<Omit<SellerApplicationDto, 'document'>>>;
     onNext: () => void;
 }
 
