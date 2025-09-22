@@ -111,7 +111,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
                     checked={selectedRole === 'Customer'} 
                     onChange={() => setSelectedRole('Customer')} 
                   />
-                  Я — Покупець
+                  <span>Покупець</span>
                 </label>
                 <label>
                   <input 
@@ -121,7 +121,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
                     checked={selectedRole === 'Seller'} 
                     onChange={() => setSelectedRole('Seller')} 
                   />
-                  Я — Продавець
+                  <span>Продавець</span>
                 </label>
                 <label>
                   <input 
@@ -131,7 +131,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
                     checked={selectedRole === 'Admin'} 
                     onChange={() => setSelectedRole('Admin')} 
                   />
-                  Я — Адміністратор
+                  <span>Адміністратор</span>
                 </label>
               </div>
 

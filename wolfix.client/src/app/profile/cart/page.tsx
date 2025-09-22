@@ -53,7 +53,7 @@ const CartPage = () => {
             const { clientSecret } = response.data;
             setClientSecret(clientSecret);
         } catch (error) {
-            console.error("Не удалось создать заказ:", error);
+            console.error("Не вдалося створити замовлення:", error);
         }
     };
 
