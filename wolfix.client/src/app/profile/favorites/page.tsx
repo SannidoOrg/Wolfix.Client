@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
 import { useGlobalContext } from "../../../contexts/GlobalContext";
@@ -28,37 +27,32 @@ const FavoritesPage = () => {
                     {favorites.map(item => {
                         let imageUrl = null;
                         if (item.photoUrl && item.photoUrl.trim() !== '') {
-                            if (item.photoUrl.startsWith('http')) {
-                                imageUrl = item.photoUrl;
-                            } else {
-                                const baseUrl = api.defaults.baseURL || '';
-                                imageUrl = `${baseUrl}${item.photoUrl}`;
-                            }
+                            imageUrl = item.photoUrl.startsWith('http')
+                                ? item.photoUrl
+                                : `${api.defaults.baseURL || ''}${item.photoUrl}`;
                         }
                         return (
                             <li key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-                                {imageUrl ? (
-                                    <Link href={`/products/${item.id}`}>
+                                <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+                                    {imageUrl ? (
                                         <Image
                                             src={imageUrl}
                                             alt={item.title}
                                             width={100}
                                             height={100}
-                                            style={{ marginRight: '1rem', objectFit: 'cover', cursor: 'pointer' }}
+                                            style={{ marginRight: '1rem', objectFit: 'cover' }}
                                         />
-                                    </Link>
-                                ) : (
-                                    <div style={{ width: 100, height: 100, marginRight: '1rem', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: '12px', textAlign: 'center' }}>
-                                        Немає фото
+                                    ) : (
+                                        <div style={{ width: 100, height: 100, marginRight: '1rem', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa', fontSize: '12px', textAlign: 'center' }}>
+                                            Немає фото
+                                        </div>
+                                    )}
+                                    <div style={{ flexGrow: 1 }}>
+                                        <h3 style={{ margin: '0 0 0.5rem 0' }}>{item.title}</h3>
+                                        <p style={{ margin: 0 }}><strong>Ціна:</strong> {new Intl.NumberFormat('uk-UA').format(item.finalPrice)} грн</p>
                                     </div>
-                                )}
-                                <div style={{ flexGrow: 1 }}>
-                                    <Link href={`/products/${item.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                        <h3 style={{ margin: '0 0 0.5rem 0', cursor: 'pointer' }}>{item.title}</h3>
-                                    </Link>
-                                    <p style={{ margin: 0 }}><strong>Ціна:</strong> {new Intl.NumberFormat('uk-UA').format(item.finalPrice)} грн</p>
                                 </div>
-                                <button onClick={() => removeFromFavorites(item.id)} style={{ background: 'tomato', color: 'white', border: 'none', padding: '8px 12px', cursor: 'pointer' }}>
+                                <button onClick={() => removeFromFavorites(item.id)} style={{ background: 'tomato', color: 'white', border: 'none', padding: '8px 12px', cursor: 'pointer', marginLeft: '1rem' }}>
                                     Видалити
                                 </button>
                             </li>

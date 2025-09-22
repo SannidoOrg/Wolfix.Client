@@ -16,7 +16,7 @@ interface ProductCategory {
   order: number;
 }
 interface ProductMedia {
-  url: string;
+  url:string;
   isMain: boolean;
 }
 interface ProductVariant {
@@ -27,6 +27,13 @@ interface ProductAttribute {
   key: string;
   value: string;
 }
+
+interface Seller {
+    sellerId: string;
+    sellerFullName: string;
+    sellerPhotoUrl: string;
+}
+
 interface ProductDetails {
   id: string;
   title: string;
@@ -35,7 +42,7 @@ interface ProductDetails {
   finalPrice: number;
   bonuses: number;
   averageRating: number | null;
-  seller: string;
+  seller: Seller | string | null;
   reviewsSummary: Omit<ReviewsResponseDto, 'reviews'>;
   medias: ProductMedia[];
   variants: ProductVariant[];
@@ -88,6 +95,10 @@ export default async function ProductPage({ params }: { params: { productId: str
 
   const sortedCategories = product.categories.sort((a, b) => a.order - b.order);
 
+  const sellerName = (product.seller && typeof product.seller === 'object')
+    ? product.seller.sellerFullName
+    : product.seller || 'Wolfix';
+
   return (
     <div className={styles.pageWrapper}>
       <Header />
@@ -134,7 +145,7 @@ export default async function ProductPage({ params }: { params: { productId: str
 
             <div className={styles.purchaseBox}>
                 <div className={styles.sellerHeader}>
-                    Продавець: {product.seller || 'Wolfix'}
+                    Продавець: {sellerName}
                 </div>
                 <div className={styles.priceContent}>
                     <div className={styles.priceLine}>

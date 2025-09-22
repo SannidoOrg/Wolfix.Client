@@ -183,11 +183,11 @@ export default function BrandPageClient({ initialProducts, brand, categoryName }
                   </div>
                 </div>
               </div>
-              <div className={`product-grid`}>
+              {/* <div className={`product-grid`}>
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
