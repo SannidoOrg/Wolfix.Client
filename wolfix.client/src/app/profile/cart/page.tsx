@@ -10,7 +10,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import CheckoutForm from "./CheckoutForm";
 
-const stripePromise = loadStripe("your_stripe_publishable_key");
+const stripePromise = loadStripe("");
 
 const CartPage = () => {
     const { user, isAuthenticated } = useAuth();
