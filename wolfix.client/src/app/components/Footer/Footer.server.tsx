@@ -1,6 +1,5 @@
 import { FC } from "react";
 import Link from "next/link";
-import "../../../styles/Footer.css";
 
 const Footer: FC = () => {
   return (

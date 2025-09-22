@@ -1,7 +1,6 @@
 "use client";
 
 import { FC, useState, useEffect } from "react";
-import "../../../styles/Banner.css";
 
 interface IBannerClientProps {
     banners: string[];

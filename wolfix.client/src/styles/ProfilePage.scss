@@ -29,22 +29,25 @@
     font-size: 16px;
 }
 
-.sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+.sidebar-nav {
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-.sidebar-nav li a {
-    display: block;
-    padding: 10px 0;
-    color: #333;
-    text-decoration: none;
-    font-size: 16px;
-}
+    li a {
+        display: block;
+        padding: 10px 0;
+        color: #333;
+        text-decoration: none;
+        font-size: 16px;
 
-.sidebar-nav li a:hover, .sidebar-nav li a.active {
-    color: #ff6600;
+        &:hover,
+        &.active {
+            color: #ff6600;
+        }
+    }
 }
 
 .sidebar-footer {
@@ -55,24 +58,26 @@
     flex-direction: column;
     gap: 10px;
     font-size: 14px;
-}
 
-.sidebar-footer a, .sidebar-footer button {
-    color: #777;
-    text-decoration: none;
-}
+    a,
+    button {
+        color: #777;
+        text-decoration: none;
+    }
 
-.sidebar-footer .logout-button {
-    background: none;
-    border: none;
-    padding: 0;
-    text-align: left;
-    cursor: pointer;
-    color: #777;
-    font-size: 14px;
-}
-.sidebar-footer .logout-button:hover {
-    color: #ff6600;
+    .logout-button {
+        background: none;
+        border: none;
+        padding: 0;
+        text-align: left;
+        cursor: pointer;
+        color: #777;
+        font-size: 14px;
+
+        &:hover {
+            color: #ff6600;
+        }
+    }
 }
 
 .profile-main-content {
@@ -104,11 +109,23 @@
     background-color: #ccc;
 }
 
+.profile-user-details {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
 .profile-user-name {
     flex-grow: 1;
     font-size: 24px;
     font-weight: 600;
     margin: 0;
+}
+
+.profile-user-email {
+    font-size: 14px;
+    color: #777;
+    margin-top: 4px;
 }
 
 .profile-actions button {
@@ -149,7 +166,7 @@
 
 .data-grid-single {
     display: grid;
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: 1fr;
     gap: 16px 32px;
     margin-top: 16px;
 }
@@ -201,14 +218,14 @@
     margin-top: 40px;
     padding-top: 20px;
     border-top: 1px solid #e0e0e0;
-}
 
-.form-actions-footer button {
-    padding: 10px 24px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
+    button {
+        padding: 10px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+    }
 }
 
 .cancel-button-footer {
@@ -249,18 +266,6 @@
     width: 100%;
 }
 
-.profile-user-details {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.profile-user-email {
-    font-size: 14px;
-    color: #777;
-    margin-top: 4px;
-}
-
 .profile-tabs-nav {
     display: flex;
     gap: 16px;
@@ -278,11 +283,11 @@
     color: #555;
     border-bottom: 3px solid transparent;
     transition: all 0.2s ease-in-out;
-}
 
-.profile-tab-button.active {
-    color: #ff6600;
-    border-bottom-color: #ff6600;
+    &.active {
+        color: #ff6600;
+        border-bottom-color: #ff6600;
+    }
 }
 
 .profile-tab-content {

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
 import { useGlobalContext } from "../../../contexts/GlobalContext";
+import api from "../../../lib/api";
 
 const CartPage = () => {
     const { isAuthenticated } = useAuth();
@@ -25,19 +26,25 @@ const CartPage = () => {
                 <div>
                     <ul style={{ listStyle: 'none', padding: 0 }}>
                         {cart.items.map(item => {
-                            const imageUrl = item.photoUrl && item.photoUrl.startsWith('http')
-                                ? item.photoUrl
-                                : 'https://placehold.co/100x100/eee/ccc?text=No+Image';
+                            let imageUrl = null;
+                            if (item.photoUrl) {
+                                imageUrl = item.photoUrl.startsWith('http')
+                                    ? item.photoUrl
+                                    : `${api.defaults.baseURL}${item.photoUrl}`;
+                            }
 
                             return (
                                 <li key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
-                                    <Image
-                                        src={imageUrl}
-                                        alt={item.title}
-                                        width={100}
-                                        height={100}
-                                        style={{ marginRight: '1rem' }}
-                                    />
+                                    {imageUrl ? (
+                                        <Image
+                                            src={imageUrl}
+                                            alt={item.title}
+                                            width={100}
+                                            height={100}
+                                            style={{ marginRight: '1rem', objectFit: 'cover' }}
+                                            onError={(e) => e.currentTarget.style.display = 'none'}
+                                        />
+                                    ) : null}
                                     <div style={{ flexGrow: 1 }}>
                                         <h3 style={{ margin: '0 0 0.5rem 0' }}>{item.title}</h3>
                                         <p style={{ margin: 0 }}><strong>Ціна:</strong> {new Intl.NumberFormat('uk-UA').format(item.price)} грн</p>

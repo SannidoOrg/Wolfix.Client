@@ -7,7 +7,6 @@ import { useGlobalContext } from '../../../contexts/GlobalContext';
 import { useRouter } from 'next/navigation';
 import api from '../../../lib/api';
 import { Category, AvailableAttribute } from '../../../types/category';
-import '../../../styles/AddListing.css';
 
 const AddListingClient = () => {
     const { user } = useAuth();
@@ -18,7 +17,7 @@ const AddListingClient = () => {
     const [parentCategories, setParentCategories] = useState<Category[]>([]);
     const [childCategories, setChildCategories] = useState<Category[]>([]);
     const [availableAttributes, setAvailableAttributes] = useState<AvailableAttribute[]>([]);
-    const [productAttributes, setProductAttributes] = useState<{ key: string, value: string }[]>([{ key: '', value: '' }]);
+    const [attributeValues, setAttributeValues] = useState<{ [key: string]: string }>({});
     
     const [selectedParentCategory, setSelectedParentCategory] = useState('');
     
@@ -48,7 +47,7 @@ const AddListingClient = () => {
         setSelectedParentCategory(parentId);
         setChildCategories([]);
         setAvailableAttributes([]);
-        setProductAttributes([{ key: '', value: '' }]);
+        setAttributeValues({});
         setProductData(prev => ({ ...prev, categoryId: '' }));
 
         if (parentId) {
@@ -65,32 +64,28 @@ const AddListingClient = () => {
         const childId = e.target.value;
         setProductData(prev => ({ ...prev, categoryId: childId }));
         setAvailableAttributes([]);
-        setProductAttributes([{ key: '', value: '' }]);
+        setAttributeValues({});
 
         if (childId) {
             try {
-                const response = await api.get(`/api/categories/child/${childId}/attributes`);
+                const response = await api.get<AvailableAttribute[]>(`/api/categories/child/${childId}/attributes`);
                 setAvailableAttributes(response.data);
+                const initialValues: { [key: string]: string } = {};
+                response.data.forEach(attr => {
+                    initialValues[attr.key] = '';
+                });
+                setAttributeValues(initialValues);
             } catch (error) {
                  console.error("Не вдалося завантажити атрибути", error);
             }
         }
     };
 
-    const handleProductAttributeChange = (index: number, field: 'key' | 'value', value: string) => {
-        const newAttributes = [...productAttributes];
-        newAttributes[index][field] = value;
-        setProductAttributes(newAttributes);
-    };
-
-    const addProductAttribute = () => {
-        setProductAttributes([...productAttributes, { key: '', value: '' }]);
-    };
-
-    const removeProductAttribute = (index: number) => {
-        const newAttributes = [...productAttributes];
-        newAttributes.splice(index, 1);
-        setProductAttributes(newAttributes);
+    const handleAttributeValueChange = (key: string, value: string) => {
+        setAttributeValues(prev => ({
+            ...prev,
+            [key]: value,
+        }));
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -120,8 +115,15 @@ const AddListingClient = () => {
             return;
         }
 
+        const unfilledAttributes = availableAttributes.filter(attr => !attributeValues[attr.key]);
+        if (unfilledAttributes.length > 0) {
+            showNotification(`Будь ласка, заповніть усі характеристики: ${unfilledAttributes.map(a => a.key).join(', ')}`, 'error');
+            return;
+        }
+
         setLoading(true);
-        const finalAttributes = productAttributes.filter(attr => attr.key && attr.value);
+
+        const finalAttributes = Object.entries(attributeValues).map(([key, value]) => ({ key, value }));
 
         const submissionData = new FormData();
         submissionData.append('title', productData.title);
@@ -130,7 +132,7 @@ const AddListingClient = () => {
         submissionData.append('status', productData.status);
         submissionData.append('categoryId', productData.categoryId);
         submissionData.append('sellerId', user.profileId);
-        submissionData.append('attributes', JSON.stringify(finalAttributes));
+        submissionData.append('attributesJson', JSON.stringify(finalAttributes));
         submissionData.append('media', mainMediaFile);
         submissionData.append('contentType', mainMediaFile.type.startsWith('video') ? 'Video' : 'Photo');
         
@@ -189,29 +191,20 @@ const AddListingClient = () => {
                 {availableAttributes.length > 0 && (
                     <section className="form-section">
                         <h2>Характеристики</h2>
-                        {productAttributes.map((attr, index) => (
-                            <div key={index} className="dynamic-row">
-                                <select 
-                                    value={attr.key} 
-                                    onChange={(e) => handleProductAttributeChange(index, 'key', e.target.value)}
-                                    className="attribute-key-select"
-                                >
-                                    <option value="">Оберіть атрибут</option>
-                                    {availableAttributes.map(availAttr => (
-                                        <option key={availAttr.id} value={availAttr.key}>{availAttr.key}</option>
-                                    ))}
-                                </select>
-                                <input 
-                                    type="text" 
-                                    value={attr.value} 
-                                    onChange={(e) => handleProductAttributeChange(index, 'value', e.target.value)}
-                                    placeholder="Значення"
-                                    className="attribute-value-input"
-                                />
-                                <button type="button" onClick={() => removeProductAttribute(index)} className="remove-button">–</button>
-                            </div>
-                        ))}
-                        <button type="button" onClick={addProductAttribute} className="add-button">+ Додати характеристику</button>
+                        <div className="form-grid">
+                            {availableAttributes.map(attr => (
+                                <div key={attr.id} className="form-field">
+                                    <label htmlFor={`attribute-${attr.key}`}>{attr.key}</label>
+                                    <input
+                                        type="text"
+                                        id={`attribute-${attr.key}`}
+                                        value={attributeValues[attr.key] || ''}
+                                        onChange={(e) => handleAttributeValueChange(attr.key, e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            ))}
+                        </div>
                     </section>
                 )}
                 

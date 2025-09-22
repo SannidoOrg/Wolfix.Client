@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Image from "next/image";
 import { useAuth } from "../../../../contexts/AuthContext";
 import AdminDashboard from "./AdminDashboard.client";
-import '../../../../styles/ProfilePage.css';
 
 const AdminProfile = () => {
     const { user } = useAuth();

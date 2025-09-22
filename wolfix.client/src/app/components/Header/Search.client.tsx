@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import '../../../styles/Search.css';
 
 interface SearchProps {
   query?: string;

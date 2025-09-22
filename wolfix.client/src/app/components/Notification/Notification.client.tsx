@@ -1,7 +1,6 @@
 "use client";
 
 import { useGlobalContext } from "../../../contexts/GlobalContext";
-import "../../../styles/Notification.css";
 
 const Notification = () => {    
     const { notification } = useGlobalContext();

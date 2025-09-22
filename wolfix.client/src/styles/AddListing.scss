@@ -7,37 +7,39 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.add-listing-form .form-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1rem;
-}
+.add-listing-form {
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+    }
 
-.add-listing-form .back-button {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    color: #555;
-}
+    .back-button {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: #555;
+    }
 
-.add-listing-form h1 {
-    font-size: 1.8rem;
-    margin: 0;
+    h1 {
+        font-size: 1.8rem;
+        margin: 0;
+    }
 }
 
 .form-section {
     margin-bottom: 2.5rem;
-}
 
-.form-section h2 {
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 0.5rem;
+    h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+    }
 }
 
 .form-grid {
@@ -50,25 +52,38 @@
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+
+    label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    input,
+    textarea,
+    select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    textarea {
+        resize: vertical;
+    }
 }
 
-.form-field label {
-    font-weight: 500;
-    color: #333;
-}
+.file-uploader {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 
-.form-field input,
-.form-field textarea,
-.form-field select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.form-field textarea {
-    resize: vertical;
+    input[type="file"] {
+        display: none;
+    }
 }
 
 .file-uploader-label {
@@ -81,19 +96,25 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
+    background-color: #f9f9f9;
+    font-size: 16px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
-.file-uploader-label span {
-    font-weight: bold;
-    font-size: 1.1rem;
-}
+    &:hover {
+        background-color: #f0f0f0;
+    }
 
-.file-uploader-label small {
-    color: #999;
-}
+    span {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
 
-.file-uploader input[type="file"] {
-    display: none;
+    small {
+        color: #999;
+    }
 }
 
 .form-actions-footer {
@@ -123,35 +144,6 @@
     color: #555;
     cursor: pointer;
     text-decoration: underline;
-}
-
-.file-uploader {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 0;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.file-uploader-label {
-    display: block;
-    padding: 10px;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    font-size: 16px;
-    color: #555;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.file-uploader-label:hover {
-    background-color: #f0f0f0;
-}
-
-.file-uploader input[type="file"] {
-    display: none;
 }
 
 .dynamic-row {

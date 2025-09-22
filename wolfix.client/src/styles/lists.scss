@@ -5,13 +5,22 @@
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
 
-.list-container h1 {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 1rem;
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 1rem;
+    }
+
+    a {
+        color: #2563eb;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
 }
 
 .list-items {
@@ -28,10 +37,10 @@
     border: 1px solid #e5e7eb;
     border-radius: 8px;
     transition: box-shadow 0.2s;
-}
 
-.list-item:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    &:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
 }
 
 .list-item-image-link {
@@ -69,10 +78,10 @@
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s;
-}
 
-.list-item-remove-button:hover {
-    background-color: #fecaca;
+    &:hover {
+        background-color: #fecaca;
+    }
 }
 
 .list-summary {
@@ -80,11 +89,11 @@
     padding-top: 2rem;
     border-top: 1px solid #e5e7eb;
     text-align: right;
-}
 
-.list-summary h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
 }
 
 .checkout-button {
@@ -96,17 +105,8 @@
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s;
-}
 
-.checkout-button:hover {
-    background-color: #1d4ed8;
-}
-
-.list-container a {
-    color: #2563eb;
-    text-decoration: none;
-}
-
-.list-container a:hover {
-    text-decoration: underline;
+    &:hover {
+        background-color: #1d4ed8;
+    }
 }

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { useAuth } from '../../../../contexts/AuthContext';
-import '../../../../styles/ProfilePage.css';
 
 const BuyerProfile = () => {
     const { user, refetchUser, updateUserFullName, updateUserPhoneNumber, updateUserAddress, updateUserBirthDate } = useAuth();

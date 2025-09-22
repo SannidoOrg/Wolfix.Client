@@ -8,7 +8,6 @@ import SearchResults from './components/ProductList/SearchResults.client';
 import Footer from './components/Footer/Footer.server';
 import Banner from './components/Banner/Banner.server';
 import { allProducts } from './data/products';
-import '../styles/page.css';
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');

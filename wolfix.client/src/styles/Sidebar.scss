@@ -12,8 +12,12 @@
   color: #2C2C2C;
   text-decoration: none;
   margin-bottom: 10px;
-  font-family: 'Inter', sans-serif; 
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
+
+  &:hover {
+    color: #f4a261;
+  }
 }
 
 .sidebar-icons {
@@ -21,8 +25,4 @@
   height: 35px;
   margin-right: 10px;
   object-fit: contain;
-}
-
-.sidebar-link:hover {
-  color: #f4a261; 
 }

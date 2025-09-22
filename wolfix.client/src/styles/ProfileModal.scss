@@ -37,10 +37,10 @@
   cursor: pointer;
   color: #888;
   transition: color 0.2s ease;
-}
 
-.modal-close-button:hover {
-  color: #333;
+  &:hover {
+    color: #333;
+  }
 }
 
 .modal-title {
@@ -76,12 +76,12 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 16px;
-}
 
-.form-input:focus {
-  outline: none;
-  border-color: #FF6B00;
-  box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
+  &:focus {
+    outline: none;
+    border-color: #FF6B00;
+    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
+  }
 }
 
 .forgot-password {
@@ -91,10 +91,10 @@
   align-self: flex-start;
   margin-top: -8px;
   transition: color 0.2s ease;
-}
 
-.forgot-password:hover {
-  color: #e65b00;
+  &:hover {
+    color: #e65b00;
+  }
 }
 
 .continue-button {
@@ -109,10 +109,10 @@
   cursor: pointer;
   margin-top: 8px;
   transition: background-color 0.2s ease;
-}
 
-.continue-button:hover {
-  background-color: #e65b00;
+  &:hover {
+    background-color: #e65b00;
+  }
 }
 
 .privacy-policy {
@@ -120,11 +120,11 @@
   color: #888;
   text-align: center;
   line-height: 1.4;
-}
 
-.privacy-policy a {
-  color: #FF6B00;
-  text-decoration: underline;
+  a {
+    color: #FF6B00;
+    text-decoration: underline;
+  }
 }
 
 .modal-separator-text-middle {
@@ -135,21 +135,21 @@
   color: #888;
   font-size: 14px;
   margin: 8px 0;
-}
 
-.modal-separator-text-middle::before,
-.modal-separator-text-middle::after {
-  content: '';
-  flex: 1;
-  border-bottom: 1px solid #e0e0e0;
-}
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+  }
 
-.modal-separator-text-middle:not(:empty)::before {
-  margin-right: .5em;
-}
+  &:not(:empty)::before {
+    margin-right: .5em;
+  }
 
-.modal-separator-text-middle:not(:empty)::after {
-  margin-left: .5em;
+  &:not(:empty)::after {
+    margin-left: .5em;
+  }
 }
 
 .social-login-options {
@@ -176,11 +176,11 @@
   color: #333;
   background-color: #fff;
   border: 1px solid #000000;
-}
 
-.social-button:hover {
-  background-color: #f5f5f5;
-  border-color: #a0a0a0;
+  &:hover {
+    background-color: #f5f5f5;
+    border-color: #a0a0a0;
+  }
 }
 
 .registration-prompt {
@@ -191,25 +191,35 @@
   width: 100%;
   padding-top: 10px;
   border-top: 1px solid #e0e0e0;
-}
 
-.registration-prompt a {
-  color: #FF6B00;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-}
+  a {
+    color: #FF6B00;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
 
-.registration-prompt a:hover {
-  text-decoration: underline;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideIn {
-  from { transform: translateY(-50px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

@@ -1,13 +1,12 @@
 .profile-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f4f5f7;
-    font-family: sans-serif;
-}
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f4f5f7;
+  font-family: sans-serif;
 
-.profile-card {
+  .profile-card {
     background: white;
     padding: 40px;
     border-radius: 12px;
@@ -15,31 +14,31 @@
     text-align: center;
     width: 100%;
     max-width: 400px;
-}
 
-.profile-card h1 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #333;
-}
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #333;
+    }
+  }
 
-.welcome-message {
+  .welcome-message {
     font-size: 18px;
     color: #555;
     margin-bottom: 30px;
-}
+  }
 
-.profile-info {
+  .profile-info {
     text-align: left;
     margin-bottom: 30px;
     color: #444;
-}
 
-.profile-info p {
-    margin-bottom: 10px;
-}
+    p {
+      margin-bottom: 10px;
+    }
+  }
 
-.logout-button {
+  .logout-button {
     background-color: #ff4d4d;
     color: white;
     border: none;
@@ -49,8 +48,9 @@
     font-size: 16px;
     font-weight: bold;
     transition: background-color 0.3s ease;
-}
 
-.logout-button:hover {
-    background-color: #e60000;
+    &:hover {
+      background-color: #e60000;
+    }
+  }
 }

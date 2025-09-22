@@ -34,6 +34,7 @@
   justify-content: space-between;
   margin-top: 15px;
 }
+
 .product-name {
   font-size: 14px;
   margin-bottom: 10px;
@@ -45,36 +46,43 @@
   line-height: 1.5;
   height: 60px;
 }
+
 .product-details {
   margin-bottom: 30px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
 }
+
 .product-pricing {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
 }
+
 .product-rating {
   display: flex;
   align-items: center;
 }
+
 .rating-star {
   width: 15px;
   height: 15px;
   margin-right: 5px;
 }
+
 .rating-value {
   font-size: 15px;
   color: #808080;
 }
+
 .product-old-price {
   font-size: 15px;
   color: #545454;
   text-decoration: line-through;
 }
+
 .product-new-price {
   font-size: 17px;
   font-family: 'Inter', sans-serif;
@@ -82,6 +90,7 @@
   color: #000000;
   display: block;
 }
+
 .product-fee {
   font-size: 14px;
   color: #F9F9F9;
@@ -98,6 +107,7 @@
   align-items: center;
   gap: 5px;
 }
+
 .bonus-icons {
   width: 16px;
   height: 16px;
@@ -106,6 +116,7 @@
   object-fit: contain;
   border: none;
 }
+
 .top-buttons {
   position: absolute;
   top: 7px;
@@ -114,6 +125,7 @@
   flex-direction: column;
   gap: 5px;
 }
+
 .cart-button {
   position: absolute;
   bottom: 35px;
@@ -123,11 +135,13 @@
   padding: 0;
   cursor: pointer;
 }
+
 .button-icon-cart {
   width: 45px;
   height: 35px;
   object-fit: contain;
 }
+
 .action-button {
   background: none;
   border: none;
@@ -135,6 +149,7 @@
   margin: 0;
   cursor: pointer;
 }
+
 .button-icon {
   width: 22px;
   height: 22px;

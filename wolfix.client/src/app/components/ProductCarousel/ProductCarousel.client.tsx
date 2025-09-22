@@ -3,7 +3,6 @@
 import { FC } from "react";
 import ProductCard from "../ProductCard/ProductCard.client";
 import { ProductShortDto } from "../../../types/product";
-import "../../../styles/ProductCarousel.css";
 
 interface IProductCarouselProps {
   products: ProductShortDto[];

@@ -9,9 +9,13 @@ export interface ProductShortDto {
 }
 
 export interface CreateProductDto {
-    name: string;
+    title: string;
     description: string;
     price: number;
     categoryId: string;
-    stock: number;
+    status: string;
+    sellerId: string;
+    attributesJson: string;
+    media: File;
+    contentType: string;
 }

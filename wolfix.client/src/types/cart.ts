@@ -1,5 +1,6 @@
 export interface CartItemDto {
   id: string;
+  productId: string;
   photoUrl: string;
   title: string;
   price: number;

@@ -4,7 +4,6 @@ import Header from "../components/Header/Header.client";
 import Footer from "../components/Footer/Footer.server";
 import BuyerSidebar from "../components/Profile/Buyer/BuyerSidebar.client";
 import { useAuth } from "../../contexts/AuthContext";
-import "../../styles/ProfilePage.css";
 
 export default function ProfileLayout({ children }: { children: React.ReactNode; }) {
   const { user, loading } = useAuth();

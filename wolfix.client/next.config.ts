@@ -8,6 +8,12 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'wolfix-api.azurewebsites.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

@@ -2,7 +2,6 @@
 
 import { FC, useRef, useEffect, useState, RefObject } from 'react';
 import Image from 'next/image';
-import '../../../styles/ProfileModal.css';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useGlobalContext } from '../../../contexts/GlobalContext';
 

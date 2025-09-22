@@ -2,17 +2,7 @@ import type { Metadata } from 'next';
 import { FC, ReactNode } from "react";
 import { Providers } from './providers';
 import Notification from './components/Notification/Notification.client';
-import '../styles/Header.css'
-import '../styles/Sidebar.css'
-import '../styles/Banner.css'
-import '../styles/ProductList.css'
-import '../styles/ProductCard.css'
-import '../styles/Footer.css'
-import '../styles/globals.css';
-import '../styles/Notification.css';
-import '../styles/ProfilePage.css';
-import '../styles/UnderConstructionPage.css';
-import '../styles/SellerRegistration.css';
+import '../styles/main.scss';
 
 export const metadata: Metadata = {
   title: 'Інтернет-магазин: Wolfix',

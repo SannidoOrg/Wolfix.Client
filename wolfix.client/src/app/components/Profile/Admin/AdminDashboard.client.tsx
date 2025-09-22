@@ -5,7 +5,6 @@ import { useAdmin } from "../../../../contexts/AdminContext";
 import { SellerApplication } from "../../../../types/auth";
 import ApplicationList from "./ApplicationList.client";
 import ApplicationDetail from "./ApplicationDetail.client";
-import "../../../../styles/Admin.css";
 
 const AdminDashboard = () => {
     const [selectedApplication, setSelectedApplication] = useState<SellerApplication | null>(null);

@@ -2,7 +2,6 @@
 
 import { FC } from "react";
 import { useRouter } from "next/navigation";
-import "../../../styles/BrandCard.css";
 
 export interface IBrandCardProps {
   category: string;

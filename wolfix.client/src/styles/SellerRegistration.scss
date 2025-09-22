@@ -49,18 +49,17 @@ body {
     color: #fff;
     text-decoration: none;
     font-weight: 500;
-}
 
-.return-link:hover {
-    text-decoration: underline;
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 .seller-main-content {
     flex-grow: 1;
     display: flex;
     justify-content: center;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding: 40px 0;
     box-sizing: border-box;
 }
 
@@ -92,17 +91,17 @@ body {
     position: relative;
     padding-bottom: 12px;
     color: #222;
-}
 
-.form-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 3px;
-    background-color: #ff6600;
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 3px;
+        background-color: #ff6600;
+    }
 }
 
 .form-fieldset {
@@ -137,11 +136,11 @@ body {
     border-radius: 4px;
     font-size: 16px;
     box-sizing: border-box;
-}
 
-.form-input:disabled {
-    background-color: #e9ecef;
-    cursor: not-allowed;
+    &:disabled {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
 }
 
 .input-with-prefix {
@@ -170,12 +169,12 @@ body {
     align-items: center;
     gap: 8px;
     margin-top: 12px;
-}
 
-.form-group-checkbox input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #ff6600;
+    input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #ff6600;
+    }
 }
 
 .checkbox-label {
@@ -206,10 +205,10 @@ body {
     font-size: 16px;
     font-weight: bold;
     transition: background-color 0.3s ease;
-}
 
-.submit-button:hover {
-    background-color: #e65c00;
+    &:hover {
+        background-color: #e65c00;
+    }
 }
 
 .seller-footer {

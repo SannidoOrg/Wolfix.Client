@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useAuth } from '../../../../contexts/AuthContext';
-import '../../../styles/ProfileSidebar.css';
 
 const SellerSidebar = () => {
     const { user, logout } = useAuth();

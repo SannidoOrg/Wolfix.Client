@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ProductShortDto } from "../../../types/product";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
-import '../../../styles/ProductCard.css';
 
 interface IProductCardProps {
   product: ProductShortDto;

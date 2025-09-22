@@ -1,7 +1,6 @@
 "use client";
 
 import { FC } from "react";
-import "../../../styles/LoadMoreButton.css";
 
 interface ILoadMoreButtonProps {
   onLoadMore: () => void;

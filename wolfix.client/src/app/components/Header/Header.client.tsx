@@ -2,7 +2,6 @@
 
 import { FC, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import "../../../styles/Header.css";
 import ProfileModal from "../ProfileModal/ProfileModal.client";
 import Search from "./Search.client";
 import { useAuth } from "../../../contexts/AuthContext";

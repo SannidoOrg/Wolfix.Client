@@ -7,9 +7,7 @@
   width: 85%;
   max-width: 1200px;
   min-height: 350px;
-  margin: 0 auto;
-  margin-bottom: 10px;
-  margin-left: -10px;
+  margin: 0 auto 10px -10px;
   margin-top: -15px;
   position: relative;
 }
@@ -30,7 +28,8 @@
   margin-left: 5px;
 }
 
-.carousel-prev, .carousel-next {
+.carousel-prev,
+.carousel-next {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -49,7 +48,8 @@
   right: 10px;
 }
 
-.carousel-prev img, .carousel-next img {
+.carousel-prev img,
+.carousel-next img {
   display: block;
   width: 25px;
   height: 25px;
