@@ -1,22 +1,76 @@
 "use client";
 
+import React, { useState } from "react";
 import Image from "next/image";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useUser } from "../../../contexts/UserContext";
-import { useGlobalContext } from "../../../contexts/GlobalContext";
 import api from "../../../lib/api";
 
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import CheckoutForm from "./CheckoutForm";
+
+const stripePromise = loadStripe("your_stripe_publishable_key");
+
 const CartPage = () => {
-    const { isAuthenticated } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const { cart, removeFromCart } = useUser();
-    const { loading } = useGlobalContext();
+    
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+
+    const handlePlaceOrder = async () => {
+        if (!cart || !user) return;
+
+        const orderData = {
+            customerFirstName: user.firstName || '',
+            customerLastName: user.lastName || '',
+            customerMiddleName: user.middleName || '',
+            customerPhoneNumber: user.phoneNumber || '',
+            customerEmail: user.email,
+            customerId: user.profileId,
+            recipientFirstName: user.firstName || '',
+            recipientLastName: user.lastName || '',
+            recipientMiddleName: user.middleName || '',
+            recipientPhoneNumber: user.phoneNumber || '',
+            deliveryMethodName: "Default",
+            deliveryInfoCity: user.address?.city || '',
+            deliveryInfoStreet: user.address?.street || '',
+            deliveryInfoHouseNumber: user.address?.houseNumber || '',
+            withBonuses: false,
+            usedBonusesAmount: 0,
+            price: cart.totalCartPriceWithoutBonuses,
+            orderItems: cart.items.map(item => ({
+                productId: item.id,
+                photoUrl: item.photoUrl || '',
+                title: item.title,
+                quantity: 1,
+                price: item.price
+            }))
+        };
+
+        try {
+            const response = await api.post('/api/orders/with-payment', orderData);
+            const { clientSecret } = response.data;
+            setClientSecret(clientSecret);
+        } catch (error) {
+            console.error("Не удалось создать заказ:", error);
+        }
+    };
 
     if (!isAuthenticated) {
         return <div style={{ padding: '2rem' }}>Будь ласка, увійдіть до свого акаунту, щоб переглянути кошик.</div>;
     }
-
-    if (loading) {
-        return <div style={{ padding: '2rem' }}>Завантаження...</div>;
+    
+    if (clientSecret) {
+        const options = { clientSecret };
+        return (
+            <div style={{ padding: '2rem' }}>
+                <h2>Підтвердьте ваш платіж</h2>
+                <Elements options={options} stripe={stripePromise}>
+                    <CheckoutForm />
+                </Elements>
+            </div>
+        );
     }
 
     return (
@@ -32,7 +86,6 @@ const CartPage = () => {
                                     ? item.photoUrl
                                     : `${api.defaults.baseURL}${item.photoUrl}`;
                             }
-
                             return (
                                 <li key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '1rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
@@ -43,7 +96,7 @@ const CartPage = () => {
                                                 width={100}
                                                 height={100}
                                                 style={{ marginRight: '1rem', objectFit: 'cover' }}
-                                                onError={(e) => e.currentTarget.style.display = 'none'}
+                                                onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => e.currentTarget.style.display = 'none'}
                                             />
                                         ) : <div style={{width: 100, height: 100, marginRight: '1rem', backgroundColor: '#f0f0f0'}}></div>}
                                         <div style={{ flexGrow: 1 }}>
@@ -61,7 +114,9 @@ const CartPage = () => {
                     <div style={{ marginTop: '2rem', textAlign: 'right' }}>
                         <h3>Загальна сума: {new Intl.NumberFormat('uk-UA').format(cart.totalCartPriceWithoutBonuses)} грн</h3>
                         <p>Доступно бонусів: {cart.bonusesAmount}</p>
-                        <button style={{ background: 'darkorange', color: 'white', border: 'none', padding: '12px 24px', fontSize: '1rem', cursor: 'pointer' }}>
+                        <button 
+                            onClick={handlePlaceOrder} 
+                            style={{ background: 'darkorange', color: 'white', border: 'none', padding: '12px 24px', fontSize: '1rem', cursor: 'pointer' }}>
                             Оформити замовлення
                         </button>
                     </div>

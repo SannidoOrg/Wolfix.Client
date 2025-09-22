@@ -6,7 +6,6 @@ import Header from '../../../components/Header/Header.client';
 import Footer from '../../../components/Footer/Footer.server';
 import FilterSidebar from '../../../components/FilterSidebar/FilterSidebar.client';
 import ProductCard from '../../../components/ProductCard/ProductCard.client';
-import "../../../../styles/ProductPage.css";
 import { categoryNameMap } from '../../../(utils)/categories.config';
 
 export interface Filters {

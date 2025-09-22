@@ -5,7 +5,6 @@ import Header from '../../components/Header/Header.client';
 import Footer from '../../components/Footer/Footer.server';
 import BrandCard from '../../components/BrandCard/BrandCard.server';
 import { categorySlugMap } from '../../(utils)/categories.config';
-import '../../../styles/CategoryPage.css';
 import { notFound } from 'next/navigation';
 import {ProductContext} from "@/contexts/ProductContext";
 
