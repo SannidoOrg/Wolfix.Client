@@ -1,53 +1,54 @@
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/Header/Header.client';
-import Sidebar from './components/Sidebar/Sidebar.server';
-import ProductList from './components/ProductList/ProductList.server';
+// ИЗМЕНЕНИЕ ЗДЕСЬ: Импортируем клиентскую версию
+import Sidebar from './components/Sidebar/Sidebar.client';
+import ProductList from './components/ProductList/ProductList.client'; // Убедитесь, что здесь .client
 import SearchResults from './components/ProductList/SearchResults.client';
 import Footer from './components/Footer/Footer.server';
 import Banner from './components/Banner/Banner.server';
-import { allProducts } from './data/products';
+import { useProducts } from '@/contexts/ProductContext';
 import '../styles/page.css';
 
 const Home = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const { searchResults, searchProducts, clearSearch } = useProducts();
 
-  const filteredProducts = useMemo(() => {
-    if (!searchQuery) return [];
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            if (searchQuery) {
+                searchProducts(searchQuery);
+            } else {
+                clearSearch();
+            }
+        }, 500);
 
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    
-    return allProducts.filter(product => {
-      const productName = product.name.toLowerCase();
-      const productKeywords = product.keywords?.join(' ').toLowerCase() || '';
+        return () => clearTimeout(delayDebounceFn);
+    }, [searchQuery]);
 
-      return productName.includes(lowerCaseQuery) || productKeywords.includes(lowerCaseQuery);
-    });
-  }, [searchQuery]);
-
-  return (
-    <div className="page-container">
-      <Header
-        logoAlt="Wolfix Logo"
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-      <div className="main-content">
-        <Sidebar className="sidebar" />
-        <div className="divider" />
-        <div className="content-area">
-          <Banner />
-          {searchQuery ? (
-            <SearchResults products={filteredProducts} />
-          ) : (
-            <ProductList />
-          )}
+    return (
+        <div className="page-container">
+            <Header
+                logoAlt="Wolfix Logo"
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+            />
+            <div className="main-content">
+                <Sidebar className="sidebar" />
+                <div className="divider" />
+                <div className="content-area">
+                    <Banner />
+                    {searchQuery ? (
+                        <SearchResults products={searchResults} />
+                    ) : (
+                        <ProductList />
+                    )}
+                </div>
+            </div>
+            <Footer />
         </div>
-      </div>
-      <Footer />
-    </div>
-  );
+    );
 };
 
 export default Home;

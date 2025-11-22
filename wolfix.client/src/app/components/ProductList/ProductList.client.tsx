@@ -5,92 +5,99 @@ import ProductCard from "../ProductCard/ProductCard.client";
 import ProductCarousel from "../ProductCarousel/ProductCarousel.client";
 import LoadMoreButton from "../LoadMoreButton/LoadMoreButton.client";
 import { useProducts } from "@/contexts/ProductContext";
-import { useGlobalContext } from "@/contexts/GlobalContext";
+import "../../../styles/ProductList.css";
 
 const ProductListClient: FC = () => {
-  const [carouselIndex, setCarouselIndex] = useState<number>(0);
-  const [visibleProductsCount, setVisibleProductsCount] = useState<number>(12);
+    const {
+        products,
+        promoProducts,
+        fetchHomeProducts,
+        fetchPromoProducts
+    } = useProducts();
 
-  const { products, promoProducts, fetchRandomProducts, fetchPromoProducts } = useProducts();
-  const { loading } = useGlobalContext();
-  const [isLoadMoreLoading, setIsLoadMoreLoading] = useState<boolean>(false);
+    const [carouselIndex, setCarouselIndex] = useState<number>(0);
+    const [isLoadMoreLoading, setIsLoadMoreLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    fetchRandomProducts();
-    fetchPromoProducts(1);
-  }, []);
+    // Инициализация данных при монтировании
+    useEffect(() => {
+        fetchHomeProducts(false);
+        fetchPromoProducts(1);
+    }, []); // Пустой массив зависимостей - вызываем один раз при загрузке
 
-  const safePromoProducts = promoProducts || [];
-  const safeProducts = products || [];
+    // Логика карусели
+    const safePromoProducts = promoProducts || [];
+    const handlePrev = () => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : safePromoProducts.length - 4));
+    const handleNext = () => setCarouselIndex((prev) => (prev < safePromoProducts.length - 4 ? prev + 1 : 0));
 
-  const handlePrev = () => setCarouselIndex((prev) => (prev > 0 ? prev - 1 : safePromoProducts.length - 4));
-  const handleNext = () => setCarouselIndex((prev) => (prev < safePromoProducts.length - 4 ? prev + 1 : 0));
+    const totalSteps = safePromoProducts.length > 4 ? safePromoProducts.length - 4 : 0;
+    const progressWidth = totalSteps > 0 ? `${(carouselIndex / totalSteps) * 100}%` : "0%";
 
-  const handleLoadMore = () => {
-    setIsLoadMoreLoading(true);
-    setVisibleProductsCount((prev) => prev + 4);
-    setIsLoadMoreLoading(false);
-  };
+    // Логика "Показати ще"
+    const handleLoadMore = async () => {
+        setIsLoadMoreLoading(true);
+        await fetchHomeProducts(true); // true означает append mode
+        setIsLoadMoreLoading(false);
+    };
 
-  const totalSteps = safePromoProducts.length > 4 ? safePromoProducts.length - 4 : 0;
-  const progressWidth = totalSteps > 0 ? `${(carouselIndex / totalSteps) * 100}%` : "0%";
+    // Разделение товаров для вставки баннера (согласно дизайну баннер разрывает сетку)
+    const firstGridPart = products.slice(0, 12);
+    const secondGridPart = products.slice(12);
 
-  const initialGridProducts = safeProducts.slice(0, 12);
-  const remainingProducts = safeProducts.slice(12, visibleProductsCount);
+    return (
+        <div className="product-list-wrapper">
+            {/* Секция акций */}
+            {safePromoProducts.length > 0 && (
+                <>
+                    <div className="separator-container">
+                        <span className="separator-text">Акційні товари</span>
+                        <div className="separator-line" />
+                    </div>
+                    <ProductCarousel
+                        products={safePromoProducts}
+                        currentIndex={carouselIndex}
+                        onPrev={handlePrev}
+                        onNext={handleNext}
+                    />
+                    <div className="progress-bar">
+                        <div className="progress-fill" style={{ width: progressWidth }}></div>
+                    </div>
+                </>
+            )}
 
-  if (loading && safeProducts.length === 0) {
-    return <div>Завантаження товарів...</div>;
-  }
+            {/* Секция всех товаров (Верхняя часть) */}
+            <div className="separator-container">
+                <span className="separator-text">Всі товари</span>
+                <div className="separator-line" />
+            </div>
 
-  return (
-    <div className="product-list-wrapper">
-      <div className="separator-container">
-        <span className="separator-text">Акційні товари</span>
-        <div className="separator-line" />
-      </div>
-      <ProductCarousel
-        products={safePromoProducts}
-        currentIndex={carouselIndex}
-        onPrev={handlePrev}
-        onNext={handleNext}
-      />
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: progressWidth }}></div>
-      </div>
+            <div className="products-grid">
+                {firstGridPart.map((product) => (
+                    <ProductCard key={`${product.id}-top`} product={product} />
+                ))}
+            </div>
 
-      <div className="separator-container">
-        <span className="separator-text">Всі товари</span>
-        <div className="separator-line" />
-      </div>
-      <div className="products-grid">
-        {initialGridProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+            {/* Баннер "Продавайте легко" - вставляем после 12 товаров если они есть */}
+            <div className="custom-separator" />
+            <div className="custom-banner">
+                <img src="/banners/Banner_4.png" alt="Продавайте легко з Wolfix" />
+            </div>
+            <div className="custom-separator" />
 
-      {safeProducts.length > 12 && (
-        <>
-          <div className="custom-separator" />
-          <div className="custom-banner">
-            <img src="/banners/Banner_4.png" alt="Продавайте легко з Wolfix" />
-          </div>
-          <div className="custom-separator" />
+            {/* Секция всех товаров (Нижняя часть) */}
+            {secondGridPart.length > 0 && (
+                <div className="products-grid">
+                    {secondGridPart.map((product) => (
+                        <ProductCard key={`${product.id}-bottom`} product={product} />
+                    ))}
+                </div>
+            )}
 
-          <div className="products-grid">
-            {remainingProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </>
-      )}
-
-      {visibleProductsCount < safeProducts.length && (
-        <div className="load-more-container">
-          <LoadMoreButton onLoadMore={handleLoadMore} isLoading={isLoadMoreLoading} />
+            {/* Кнопка загрузки */}
+            <div className="load-more-container">
+                <LoadMoreButton onLoadMore={handleLoadMore} isLoading={isLoadMoreLoading} />
+            </div>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default ProductListClient;

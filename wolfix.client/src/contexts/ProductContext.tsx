@@ -1,20 +1,27 @@
 "use client";
 
-import { createContext, useState, ReactNode, FC, useContext } from "react";
+import { createContext, useState, ReactNode, FC, useContext, useCallback } from "react";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
 import { ProductShortDto, CreateProductDto } from "@/types/product";
 import { AddProductReviewDto } from "@/types/review";
-import {PaginationDto} from "@/types/pagination";
+import { PaginationDto } from "@/types/pagination";
 
 interface ProductContextType {
     products: ProductShortDto[];
     promoProducts: ProductShortDto[];
     recommendedProducts: ProductShortDto[];
+    searchResults: ProductShortDto[];
+    isSearching: boolean;
+
     fetchProductsByCategory: (categoryId: string, page: number) => Promise<void>;
-    fetchPromoProducts: (page: number) => Promise<void>;
+    fetchPromoProducts: (page?: number) => Promise<void>;
     fetchRecommendedProducts: () => Promise<void>;
-    fetchRandomProducts: () => Promise<void>;
+
+    fetchHomeProducts: (isLoadMore?: boolean) => Promise<void>;
+    searchProducts: (query: string) => Promise<void>;
+    clearSearch: () => void;
+
     fetchProductReviews: (productId: string) => Promise<any>;
     addProductReview: (productId: string, reviewData: AddProductReviewDto) => Promise<any>;
     createProduct: (productData: CreateProductDto) => Promise<any>;
@@ -29,17 +36,21 @@ export const useProducts = () => {
 };
 
 export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [products, setProducts] = useState<ProductShortDto[]>([{} as ProductShortDto]);
-    const [promoProducts, setPromoProducts] = useState<ProductShortDto[]>([{} as ProductShortDto]);
+    const [products, setProducts] = useState<ProductShortDto[]>([]);
+    const [promoProducts, setPromoProducts] = useState<ProductShortDto[]>([]);
     const [recommendedProducts, setRecommendedProducts] = useState<ProductShortDto[]>([]);
+    const [searchResults, setSearchResults] = useState<ProductShortDto[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+
     const { setLoading } = useGlobalContext();
 
     const fetchProductsByCategory = async (categoryId: string, page: number = 1) => {
         setLoading(true);
         try {
-            const response = await api.get(`https://wolfix-api.azurewebsites.net/api/products/category/${categoryId}/page/${page}`);
+            // БЫЛО: https://wolfix-api.azurewebsites.net/api/...
+            // СТАЛО: /api/...
+            const response = await api.get(`/api/products/category/${categoryId}/page/${page}`);
             const data: PaginationDto<ProductShortDto> = response.data;
-
             setProducts(data.items);
         } catch (error) {
             console.error("Failed to fetch products by category:", error);
@@ -49,66 +60,84 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     };
 
     const fetchPromoProducts = async (page: number = 1) => {
-        setLoading(true);
         try {
-            const response = await api.get(`https://wolfix-api.azurewebsites.net/api/products/with-discount/page/${page}`);
+            const response = await api.get(`/api/products/with-discount/page/${page}?pageSize=10`);
             const data: PaginationDto<ProductShortDto> = response.data;
-
-            setPromoProducts(data.items);
+            setPromoProducts(data.items || []);
         } catch (error) {
             console.error("Failed to fetch promo products:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
     const fetchRecommendedProducts = async () => {
-        setLoading(true);
         try {
-            const response = await api.get('https://wolfix-api.azurewebsites.net/api/products/recommended');
-            const data: ProductShortDto[] = response.data;
-
-            setRecommendedProducts(data);
+            const response = await api.get('/api/products/recommended');
+            setRecommendedProducts(response.data);
         } catch (error) {
             console.error("Failed to fetch recommended products:", error);
+        }
+    };
+
+    const fetchHomeProducts = useCallback(async (isLoadMore: boolean = false) => {
+        if (!isLoadMore) setLoading(true);
+
+        try {
+            const response = await api.get('/api/products/random?pageSize=12');
+            const newItems: ProductShortDto[] = response.data;
+
+            setProducts(prev => {
+                if (isLoadMore) {
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const uniqueNewItems = newItems.filter(p => !existingIds.has(p.id));
+                    return [...prev, ...uniqueNewItems];
+                }
+                return newItems;
+            });
+        } catch (error) {
+            console.error("Failed to fetch home products:", error);
+        } finally {
+            if (!isLoadMore) setLoading(false);
+        }
+    }, [setLoading]);
+
+    const searchProducts = async (query: string) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            setIsSearching(false);
+            return;
+        }
+        setIsSearching(true);
+        setLoading(true);
+        try {
+            const response = await api.get(`/api/products/search?searchQuery=${encodeURIComponent(query)}&pageSize=20`);
+            setSearchResults(response.data || []);
+        } catch (error) {
+            console.error("Search failed:", error);
+            setSearchResults([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchRandomProducts = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('https://wolfix-api.azurewebsites.net/api/products/random');
-            const data: ProductShortDto[] = response.data;
-
-            setProducts(data);
-        } catch (error) {
-            console.error("Failed to fetch random products:", error);
-        } finally {
-            setLoading(false);
-        }
+    const clearSearch = () => {
+        setSearchResults([]);
+        setIsSearching(false);
     };
 
     const fetchProductReviews = async (productId: string) => {
-        setLoading(true);
         try {
-            const response = await api.get(`https://wolfix-api.azurewebsites.net/api/products/${productId}/reviews`);
+            const response = await api.get(`/api/products/${productId}/reviews`);
             return response.data;
         } catch (error) {
             console.error("Failed to fetch reviews:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
     const addProductReview = async (productId: string, reviewData: AddProductReviewDto) => {
         setLoading(true);
         try {
-            const response = await api.post(`https://wolfix-api.azurewebsites.net/api/products/${productId}/reviews`, reviewData);
-            return response;
+            return await api.post(`/api/products/${productId}/reviews`, reviewData);
         } catch (error: any) {
-            console.error("Failed to add review:", error);
             return error.response;
         } finally {
             setLoading(false);
@@ -118,24 +147,26 @@ export const ProductContextProvider: FC<{ children: ReactNode }> = ({ children }
     const createProduct = async (productData: CreateProductDto) => {
         setLoading(true);
         try {
-            const response = await api.post('https://wolfix-api.azurewebsites.net/api/products', productData);
-            return response;
+            return await api.post('/api/products', productData);
         } catch (error: any) {
-            console.error("Failed to create product:", error);
             return error.response;
         } finally {
             setLoading(false);
         }
     }
 
-    const value : ProductContextType = {
+    const value: ProductContextType = {
         products,
         promoProducts,
         recommendedProducts,
+        searchResults,
+        isSearching,
         fetchProductsByCategory,
         fetchPromoProducts,
         fetchRecommendedProducts,
-        fetchRandomProducts,
+        fetchHomeProducts,
+        searchProducts,
+        clearSearch,
         fetchProductReviews,
         addProductReview,
         createProduct,

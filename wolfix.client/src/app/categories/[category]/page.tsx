@@ -1,129 +1,123 @@
-'use client';
+// Отключаем проверку SSL для локальной разработки (Fix DEPTH_ZERO_SELF_SIGNED_CERT)
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-import {FC, useContext, useEffect} from 'react';
+import { notFound } from 'next/navigation';
 import Header from '../../components/Header/Header.client';
 import Footer from '../../components/Footer/Footer.server';
-import BrandCard from '../../components/BrandCard/BrandCard.server';
-import { categorySlugMap } from '../../(utils)/categories.config';
+import BrandCardClient from '../../components/BrandCard/BrandCard.client';
+import StandaloneCarousel from '../../components/ProductCarousel/StandaloneCarousel.client';
+import { CategoryFullDto } from '@/types/category';
+import { ProductShortDto } from '@/types/product';
 import '../../../styles/CategoryPage.css';
-import { notFound } from 'next/navigation';
-import {ProductContext} from "@/contexts/ProductContext";
 
-interface BrandInfo {
-  displayName: string;
-  brandSlug: string;
-  models: string[];
-  imageUrl: string;
+// Устанавливаем базовый URL
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7168";
+
+// Получение дочерних категорий
+async function getChildCategories(parentId: string): Promise<CategoryFullDto[]> {
+    try {
+        console.log(`Fetching: ${API_BASE_URL}/api/categories/child/${parentId}`);
+
+        const res = await fetch(`${API_BASE_URL}/api/categories/child/${parentId}`, {
+            cache: 'no-store',
+        });
+
+        if (!res.ok) {
+            console.error(`API Error: ${res.status} ${res.statusText}`);
+            return [];
+        }
+        return res.json();
+    } catch (error) {
+        console.error("Network Error fetching child categories:", error);
+        return [];
+    }
 }
 
-const brandData: { [key: string]: BrandInfo[] } = {
-  smartfony: [
-    { displayName: 'Смартфони Apple', brandSlug: 'apple', models: ["iPhone 16 Pro", "iPhone 15"], imageUrl: "/Categoryes/image8.png" },
-    { displayName: 'Смартфони Samsung', brandSlug: 'samsung', models: ["Galaxy S24", "Galaxy Fold"], imageUrl: "/Categoryes/samsung.png" },
-  ],
-  noutbuky: [
-    { displayName: 'Ноутбуки Apple', brandSlug: 'apple', models: ["MacBook Pro", "MacBook Air"], imageUrl: "/Categoryes/apple-notebook.png" },
-    { displayName: 'Ноутбуки ASUS', brandSlug: 'asus', models: ["TUF Gaming", "Zenbook"], imageUrl: "/Categoryes/asus-notebook.png" },
-  ],
-  televizory: [
-    { displayName: 'Телевізори Samsung', brandSlug: 'samsung', models: ["Neo QLED 8K", "OLED 4K"], imageUrl: "/Categoryes/samsung-tv.png" },
-    { displayName: 'Телевізори LG', brandSlug: 'lg', models: ["OLED evo", "QNED"], imageUrl: "/Categoryes/lg-tv.png" },
-  ],
-  'smart-godynnyky': [
-    { displayName: 'Годинники Apple', brandSlug: 'apple', models: ["Watch Series 9", "Watch Ultra 2"], imageUrl: "/Categoryes/apple-watch.png" },
-    { displayName: 'Годинники Samsung', brandSlug: 'samsung', models: ["Galaxy Watch 6", "Galaxy Fit 3"], imageUrl: "/Categoryes/samsung-watch.png" },
-  ],
-  'tovary-dlya-domu': [
-      { displayName: 'Техніка Roborock', brandSlug: 'roborock', models: ["Роботи-пилососи"], imageUrl: "/Categoryes/roborock.png" },
-      { displayName: 'Техніка Philips', brandSlug: 'philips', models: ["Зволожувачі повітря"], imageUrl: "/Categoryes/philips.png" },
-  ],
-  'pobutova-tekhnika': [
-      { displayName: 'Техніка Samsung', brandSlug: 'samsung', models: ["Пральні машини"], imageUrl: "/Categoryes/samsung.png" },
-      { displayName: 'Техніка Dyson', brandSlug: 'dyson', models: ["Пилососи"], imageUrl: "/Categoryes/dyson.png" },
-  ],
-  audiotekhnika: [
-      { displayName: 'Аудіо Apple', brandSlug: 'apple', models: ["AirPods"], imageUrl: "/Categoryes/image8.png" },
-      { displayName: 'Аудіо Sony', brandSlug: 'sony', models: ["Навушники"], imageUrl: "/Categoryes/sony-tv.png" },
-  ],
-  heyminh: [
-      { displayName: 'Консолі Sony', brandSlug: 'sony', models: ["PlayStation 5"], imageUrl: "/Categoryes/sony-console.png" },
-      { displayName: 'Консолі Microsoft', brandSlug: 'microsoft', models: ["Xbox Series X"], imageUrl: "/Categoryes/xbox-console.png" },
-  ],
-  'krasa-i-zdorovya': [
-      { displayName: 'Техніка Dyson', brandSlug: 'dyson', models: ["Стайлери", "Фени"], imageUrl: "/Categoryes/dyson.png" },
-      { displayName: 'Техніка Philips', brandSlug: 'philips', models: ["Зубні щітки"], imageUrl: "/Categoryes/philips.png" },
-  ],
-  'dytyachi-tovary': [
-      { displayName: 'Візочки Anex', brandSlug: 'anex', models: ["m/type", "e/type"], imageUrl: "/Categoryes/anex.png" },
-      { displayName: 'Конструктори LEGO', brandSlug: 'lego', models: ["Technic", "Creator"], imageUrl: "/Categoryes/lego.png" },
-  ],
-  zootovary: [
-      { displayName: 'Корм Royal Canin', brandSlug: 'royal canin', models: ["Для котів", "Для собак"], imageUrl: "/Categoryes/royalcanin.png" },
-      { displayName: 'Аксесуари Petkit', brandSlug: 'petkit', models: ["Автоматичні годівниці"], imageUrl: "/Categoryes/petkit.png" },
-  ],
-  'odyah-ta-vzuttya': [
-      { displayName: 'Одяг та взуття Nike', brandSlug: 'nike', models: ["Кросівки", "Спортивний одяг"], imageUrl: "/Categoryes/nike.png" },
-      { displayName: 'Одяг The North Face', brandSlug: 'the north face', models: ["Худі", "Куртки"], imageUrl: "/Categoryes/tnf.png" },
-  ],
-  instrumenty: [
-      { displayName: 'Інструменти Bosch', brandSlug: 'bosch', models: ["Шуруповерти", "Дрилі"], imageUrl: "/Categoryes/bosch.png" },
-      { displayName: 'Набори TOPTUL', brandSlug: 'toptul', models: ["Для авто"], imageUrl: "/Categoryes/toptul.png" },
-  ],
-  enerhozabezpechennya: [
-      { displayName: 'Зарядні станції EcoFlow', brandSlug: 'ecoflow', models: ["DELTA", "RIVER"], imageUrl: "/Categoryes/ecoflow.png" },
-      { displayName: 'Павербанки Anker', brandSlug: 'anker', models: ["PowerCore", "MagGo"], imageUrl: "/Categoryes/anker.png" },
-  ],
-  transport: [
-      { displayName: 'Електросамокати Xiaomi', brandSlug: 'xiaomi', models: ["Scooter 4 Pro", "Scooter 3 Lite"], imageUrl: "/Categoryes/xiaomi.png" },
-      { displayName: 'Електровелосипеди Engwe', brandSlug: 'engwe', models: ["EP-2 Pro", "Engine Pro"], imageUrl: "/Categoryes/engwe.png" },
-  ],
-  'yizha-ta-napoyi': [
-      { displayName: 'Кава Lavazza', brandSlug: 'lavazza', models: ["Qualita Oro", "Espresso"], imageUrl: "/Categoryes/lavazza.png" },
-      { displayName: 'Олії Monini', brandSlug: 'monini', models: ["Classico", "Delicato"], imageUrl: "/Categoryes/monini.png" },
-  ],
-  'dim-ta-vidpochynok': [
-      { displayName: 'Спорядження Terra Incognita', brandSlug: 'terra incognita', models: ["Намети", "Спальники"], imageUrl: "/Categoryes/terra.png" },
-      { displayName: 'Спорттовари 4FIZJO', brandSlug: '4fizjo', models: ["Гантелі", "Килимки"], imageUrl: "/Categoryes/4fizjo.png" },
-  ]
-};
+// Получение популярных товаров
+async function getPopularProducts(): Promise<ProductShortDto[]> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/products/recommended`, {
+            next: { revalidate: 3600 },
+        });
+        if (!res.ok) return [];
+        return res.json();
+    } catch (error) {
+        console.error("Error fetching popular products:", error);
+        return [];
+    }
+}
 
-const CategoryPage: FC<{ params: { category: string } }> = ({ params }) => {
-  const { category } = params;
-  const categoryName = categorySlugMap[category] || 'Категорія';
-  const categoryBrands = brandData[category] || [];
+// Получение имени родительской категории
+async function getParentCategoryName(parentId: string): Promise<string> {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/categories/parent`, {
+            cache: 'force-cache',
+        });
+        if(!res.ok) return "Категорія";
+        const parents: CategoryFullDto[] = await res.json();
+        const current = parents.find(p => p.id === parentId);
+        return current ? current.name : "Категорія";
+    } catch {
+        return "Категорія";
+    }
+}
 
-  // const {fetchProductsByCategory, products} = useContext(ProductContext)!;
-  //
-  // if (categoryBrands.length === 0) {
-  //   return notFound();
-  // }
-  //
-  // //todo
-  // useEffect(() => {
-  //     fetchProductsByCategory()
-  // }, []);
+interface CategoryPageProps {
+    params: {
+        category: string;
+    }
+}
 
-  return (
-    <div className="page-container">
-      <Header logoAlt="Wolfix Logo" />
-      <main className="main-content-category">
-        <div className="breadcrumbs">Головна / {categoryName}</div>
-        <h1 className="category-title">{categoryName}</h1>
-        <div className="cards-grid">
-          {categoryBrands.map((brandInfo) => (
-            <BrandCard
-              key={brandInfo.displayName}
-              category={category}
-              brandName={brandInfo.displayName}
-              models={brandInfo.models}
-              imageUrl={brandInfo.imageUrl}
-            />
-          ))}
+export default async function CategoryPage({ params }: CategoryPageProps) {
+    const parentId = params.category;
+
+    const [childCategories, popularProducts, categoryName] = await Promise.all([
+        getChildCategories(parentId),
+        getPopularProducts(),
+        getParentCategoryName(parentId)
+    ]);
+
+    if (!childCategories) {
+        // return notFound();
+    }
+
+    return (
+        <div className="page-container">
+            <Header logoAlt="Wolfix Logo" />
+            <main className="main-content-category">
+                <div className="breadcrumbs">Головна / {categoryName}</div>
+
+                <h1 className="category-title">{categoryName}</h1>
+
+                {childCategories.length > 0 ? (
+                    <div className="cards-grid">
+                        {childCategories.map((child) => (
+                            <BrandCardClient
+                                key={child.id}
+                                parentId={parentId}
+                                childId={child.id}
+                                brandName={child.name}
+                                imageUrl={child.photoUrl || null}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div style={{ padding: '40px 0', textAlign: 'center', color: '#666' }}>
+                        У цій категорії поки немає підкатегорій.
+                    </div>
+                )}
+
+                {popularProducts.length > 0 && (
+                    <div className="popular-section" style={{ marginTop: '60px' }}>
+                        <div className="separator-container">
+                            <span className="separator-text">Популярні товари</span>
+                            <div className="separator-line" />
+                        </div>
+                        <StandaloneCarousel products={popularProducts} />
+                    </div>
+                )}
+            </main>
+            <Footer />
         </div>
-      </main>
-      <Footer />
-    </div>
-  );
+    );
 };
-
-export default CategoryPage;
