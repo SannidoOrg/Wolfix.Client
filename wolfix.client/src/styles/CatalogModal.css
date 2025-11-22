@@ -1,0 +1,142 @@
+/* src/styles/CatalogModal.css */
+
+.catalog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 110px; /* Отступ сверху, чтобы не перекрывать Хедер */
+    opacity: 0;
+    animation: fadeIn 0.2s forwards;
+}
+
+.catalog-content {
+    width: 100%;
+    max-width: 1400px;
+    height: 600px; /* Фиксированная высота меню */
+    background-color: #fff;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- Левая колонка: Родительские категории --- */
+.catalog-sidebar {
+    width: 280px;
+    background-color: #fff;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+    padding: 10px 0;
+    flex-shrink: 0;
+}
+
+.catalog-parent-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 15px;
+    color: #333;
+    gap: 12px;
+}
+
+.catalog-parent-item:hover,
+.catalog-parent-item.active {
+    background-color: #FFF0E6; /* Светло-оранжевый фон */
+    color: #FF6B00;
+    font-weight: 500;
+}
+
+.catalog-parent-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+/* --- Центральная колонка: Дочерние категории (Подкатегории) --- */
+.catalog-subcategories {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 колонки подкатегорий */
+    align-content: start;
+    gap: 20px;
+}
+
+.subcategory-group {
+    margin-bottom: 20px;
+}
+
+.subcategory-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+    display: block;
+    text-decoration: none;
+}
+
+.subcategory-title:hover {
+    color: #FF6B00;
+    text-decoration: underline;
+}
+
+/* Списки моделей под заголовком (имитация) */
+.subcategory-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.subcategory-item {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.subcategory-item:hover {
+    color: #FF6B00;
+}
+
+/* --- Правая колонка: Баннер --- */
+.catalog-banner {
+    width: 300px;
+    flex-shrink: 0;
+    border-left: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #fafafa;
+}
+
+.catalog-banner img {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.loading-state {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #888;
+}
+
+@keyframes fadeIn {
+    to { opacity: 1; }
+}

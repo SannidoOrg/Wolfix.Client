@@ -1,31 +1,38 @@
 "use client";
 
 import { useAuth } from "../../../contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from 'next/link';
 import Image from "next/image";
 
 const ProfileSidebar = () => {
     const { user, logout } = useAuth();
     const router = useRouter();
-    
-    const userName = "Романенко Олексій";
+    const pathname = usePathname();
+
+    // Имя берем из токена или контекста, если есть, иначе заглушка
+    // В идеале нужно загрузить профиль и сюда тоже, но пока оставим просто email или статику
+    const userName = user?.email || "Користувач";
 
     const handleLogout = () => {
         logout();
         router.push('/');
     };
 
+    const isActive = (path: string) => pathname === path ? 'active' : '';
+
     return (
         <aside className="profile-sidebar">
             <div className="sidebar-user-info">
-                <Image src="/icons/prof.png" alt="User Avatar" width={48} height={48} className="user-avatar" />
+                <Image src="/icons/prof.png" alt="User Avatar" width={60} height={60} className="user-avatar" />
                 <span className="sidebar-user-name">{userName}</span>
             </div>
             <nav className="sidebar-nav">
                 <ul>
-                    <li><Link href="/wip">Бонуси</Link></li>
-                    <li><Link href="/wip">Замовлення</Link></li>
+                    {/* Главная страница профиля - это "Особисті дані" */}
+                    <li><Link href="/profile" className={isActive('/profile')}>Особисті дані</Link></li>
+                    <li><Link href="/profile/bonuses" className={isActive('/profile/bonuses')}>Бонуси</Link></li>
+                    <li><Link href="/wip" className={isActive('/profile/orders')}>Замовлення</Link></li>
                     <li><Link href="/wip">Відгуки</Link></li>
                     <li><Link href="/wip">Обране</Link></li>
                     <li><Link href="/wip">Список порівнянь</Link></li>
@@ -36,9 +43,9 @@ const ProfileSidebar = () => {
                 </ul>
             </nav>
             <div className="sidebar-footer">
-                 <a href="#infocenter">Інфоцентр</a>
-                 <a href="#support">Технічна підтримка</a>
-                 <button onClick={handleLogout} className="logout-button">Вихід</button>
+                <a href="#infocenter">Інфоцентр</a>
+                <a href="#support">Технічна підтримка</a>
+                <button onClick={handleLogout} style={{background:'none', border:'none', textAlign:'left', cursor:'pointer', fontSize:'16px', color:'#555', padding:0}}>Вихід</button>
             </div>
         </aside>
     );
