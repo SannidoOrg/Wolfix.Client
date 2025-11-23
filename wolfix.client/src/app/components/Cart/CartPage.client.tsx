@@ -1,127 +1,150 @@
 "use client";
 
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/contexts/UserContext";
 import { useProducts } from "@/contexts/ProductContext";
-import ProductCard from "../ProductCard/ProductCard.client";
+import { useGlobalContext } from "@/contexts/GlobalContext";
 import StandaloneCarousel from "../ProductCarousel/StandaloneCarousel.client";
 import "../../../styles/Cart.css";
+import "../../../styles/ProfilePage.css"; // Используем стили профиля для контейнера
 
 const CartPageClient: FC = () => {
-    const { cart, removeFromCart } = useUser();
+    const { cart, removeFromCart, addToFavorites, isProductInFavorites } = useUser();
     const { recommendedProducts, fetchRecommendedProducts } = useProducts();
+    const { setLoading } = useGlobalContext();
     const router = useRouter();
+
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     useEffect(() => {
         fetchRecommendedProducts();
     }, []);
 
-    const handleRemove = (id: string) => {
+    const items = cart?.items || [];
+    const totalPrice = cart?.totalCartPriceWithoutBonuses || 0;
+
+    // --- Selection Logic ---
+    const isAllSelected = items.length > 0 && selectedIds.length === items.length;
+
+    const handleSelectAll = () => {
+        if (isAllSelected) setSelectedIds([]);
+        else setSelectedIds(items.map(i => i.id));
+    };
+
+    const handleSelectOne = (id: string) => {
+        if (selectedIds.includes(id)) setSelectedIds(prev => prev.filter(i => i !== id));
+        else setSelectedIds(prev => [...prev, id]);
+    };
+
+    // --- Actions ---
+    const handleDelete = async (id: string) => {
         if (confirm("Видалити товар з кошика?")) {
-            removeFromCart(id);
+            await removeFromCart(id);
+            setSelectedIds(prev => prev.filter(i => i !== id));
         }
     };
 
-    const totalPrice = cart?.totalCartPriceWithoutBonuses || 0;
-    const items = cart?.items || [];
-
-    if (!items.length) {
-        return (
-            <div className="cart-page-container" style={{textAlign: 'center', padding: '100px'}}>
-                <h2>Кошик порожній</h2>
-                <p>Додайте товари, щоб зробити замовлення</p>
-                <button onClick={() => router.push('/')} className="checkout-btn" style={{maxWidth: '200px', marginTop: '20px'}}>
-                    На головну
-                </button>
-            </div>
-        );
-    }
+    const handleToggleFav = (id: string) => {
+        // TODO: Логика добавления в избранное из корзины
+        // Так как у нас в CartItemDto нет productId (только id записи корзины?),
+        // или id и есть productId? По Swagger CartItemDto.id - это ID товара.
+        // Значит можно добавлять.
+        addToFavorites(id);
+    };
 
     return (
-        <div className="cart-page-container">
+        <div className="profile-card-content"> {/* Стиль белой карточки профиля */}
             <h1 className="cart-title">Кошик</h1>
 
-            <div className="cart-layout">
-                {/* Left Column: Items */}
-                <div className="cart-items-column">
-                    <div className="cart-list-header">
-                        <label className="select-all-label">
-                            <input type="checkbox" />
-                            Обрати все
-                        </label>
-                    </div>
-
-                    {items.map((item) => (
-                        <div key={item.id} className="cart-item-card">
-                            <input type="checkbox" className="cart-item-checkbox" />
-                            <img
-                                src={item.photoUrl || "/placeholder.png"}
-                                alt={item.title}
-                                className="cart-item-image"
-                                onError={(e) => (e.currentTarget.src = '/placeholder.png')}
-                            />
-
-                            <div className="cart-item-details">
-                                <div>
-                                    <div className="cart-item-title">{item.title}</div>
-                                    {/* Заглушка для продавца, так как в CartItemDto его нет */}
-                                    <div className="cart-item-seller">Продавець: Wolfix</div>
-                                </div>
-
-                                <div className="cart-item-actions">
-                                    {/* Счетчик (визуальный, так как API DELETE работает по ID строки) */}
-                                    <div className="quantity-control">
-                                        <button className="qty-btn" disabled>-</button>
-                                        <span className="qty-value">1</span>
-                                        <button className="qty-btn" disabled>+</button>
-                                    </div>
-
-                                    <div className="cart-item-price">
-                                        {item.price.toLocaleString()} грн
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="cart-item-icons">
-                                <img src="/icons/Vector79.png" alt="Favorite" className="action-icon" title="В обране" />
-                                <img
-                                    src="/icons/close-icon.png"
-                                    alt="Delete"
-                                    className="action-icon"
-                                    title="Видалити"
-                                    onClick={() => handleRemove(item.id)}
-                                    style={{opacity: 0.4, width: 16}}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Right Column: Summary */}
-                <div className="cart-summary-column">
-                    <div className="cart-total-row">
-                        <span className="total-label">Всього:</span>
-                        <span className="total-amount">{totalPrice.toLocaleString()} грн</span>
-                    </div>
-
-                    <button className="checkout-btn" onClick={() => router.push('/checkout')}>
-                        Оформити замовлення
-                    </button>
-
-                    <button className="continue-shopping" onClick={() => router.push('/')}>
-                        Продовжити покупки
-                    </button>
-                </div>
+            <div className="cart-list-header">
+                <label className="select-all-label">
+                    <input type="checkbox" checked={isAllSelected} onChange={handleSelectAll} disabled={items.length === 0} />
+                    Обрати все
+                </label>
+                {/* Кнопки удаления выбранных можно добавить сюда */}
             </div>
 
-            {/* Recommended Section */}
-            {recommendedProducts.length > 0 && (
-                <div className="recommended-section">
-                    <h2 className="recommended-title">Ви переглядали раніше</h2>
-                    <StandaloneCarousel products={recommendedProducts} />
+            <div className="cart-layout-profile">
+                {/* Список товаров */}
+                <div className="cart-items-list">
+                    {items.length === 0 ? (
+                        <p style={{textAlign:'center', color:'#888', padding:'40px'}}>Кошик порожній</p>
+                    ) : (
+                        items.map((item) => (
+                            <div key={item.id} className="cart-item-card">
+                                <div className="checkbox-area">
+                                    <input
+                                        type="checkbox"
+                                        className="cart-item-checkbox"
+                                        checked={selectedIds.includes(item.id)}
+                                        onChange={() => handleSelectOne(item.id)}
+                                    />
+                                </div>
+
+                                <img
+                                    src={item.photoUrl || "/placeholder.png"}
+                                    alt={item.title}
+                                    className="cart-item-image"
+                                    onError={(e) => (e.currentTarget.src = '/placeholder.png')}
+                                />
+
+                                <div className="cart-item-info">
+                                    <div className="item-title-row">
+                                        <span className="item-title">{item.title}</span>
+                                    </div>
+                                    <div className="item-seller">Продавець: Wolfix</div> {/* Заглушка */}
+
+                                    <div className="item-controls">
+                                        {/* Счетчик отключен (сервер не поддерживает) */}
+                                        <div className="qty-control disabled">
+                                            <button>-</button>
+                                            <span>1</span>
+                                            <button>+</button>
+                                        </div>
+                                        <div className="item-price">{item.price.toLocaleString()} грн</div>
+                                    </div>
+                                </div>
+
+                                <div className="cart-item-actions-right">
+                                    <button onClick={() => handleToggleFav(item.id)} className="icon-btn">
+                                        <img
+                                            src={isProductInFavorites(item.id) ? "/icons/selected.png" : "/icons/Vector79.png"}
+                                            alt="Fav"
+                                            style={{width: 20, height: 20}}
+                                        />
+                                    </button>
+                                    <button onClick={() => handleDelete(item.id)} className="icon-btn">
+                                        <img src="/icons/X.png" alt="Del" style={{width: 16, height: 16, opacity: 0.5}} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
-            )}
+
+                {/* Итого и кнопка */}
+                {items.length > 0 && (
+                    <div className="cart-summary-right">
+                        <div className="total-row">
+                            <span>Всього:</span>
+                            <span className="total-val">{totalPrice.toLocaleString()} грн</span>
+                        </div>
+                        <button className="checkout-btn" onClick={() => router.push('/checkout')}>
+                            Оформити замовлення
+                        </button>
+                        <button className="continue-btn" onClick={() => router.push('/')}>
+                            Продовжити покупки
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Ранее просмотренные */}
+            <div className="recommended-section">
+                <h3 style={{textAlign:'center', marginBottom:'20px', fontSize:'20px'}}>Ви переглядали раніше</h3>
+                <StandaloneCarousel products={recommendedProducts} />
+            </div>
         </div>
     );
 };

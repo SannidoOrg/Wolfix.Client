@@ -1,5 +1,6 @@
 export interface FavoriteItemDto {
-    id: string; // Это ID товара (Product ID), судя по логике удаления
+    id: string;        // ID записи в избранном (для удаления)
+    productId?: string; // ID самого товара (для корзины/ссылок). Если сервер не шлет, будем пробовать id.
     photoUrl: string | null;
     title: string;
     averageRating: number;

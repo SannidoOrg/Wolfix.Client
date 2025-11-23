@@ -16,7 +16,6 @@ const CartModal: FC<CartModalProps> = ({ isOpen, onClose, anchorRef }) => {
     const router = useRouter();
     const modalRef = useRef<HTMLDivElement>(null);
 
-    // Закрытие по клику вне
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (

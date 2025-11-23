@@ -65,7 +65,6 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         if (!user?.customerId) return;
         setLoading(true);
         try {
-            // Swagger: DELETE /api/customers/cart-items/{customerId}/{cartItemId}
             await api.delete(`/api/customers/cart-items/${user.customerId}/${cartItemId}`);
             showNotification("Товар видалено з кошика", "success");
             await fetchCart();
@@ -107,11 +106,16 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
     const removeFromFavorites = async (productId: string) => {
         if (!user?.customerId) return;
+
+        // Находим ID записи в избранном по ID товара
+        const favoriteItem = favorites.find(f => (f.productId === productId) || (f.id === productId));
+        const idToDelete = favoriteItem ? favoriteItem.id : productId;
+
         setLoading(true);
         try {
-            await api.delete(`/api/customers/favorites/${user.customerId}/${productId}`);
+            await api.delete(`/api/customers/favorites/${user.customerId}/${idToDelete}`);
             showNotification("Видалено з обраного", "success");
-            setFavorites(prev => prev.filter(item => item.id !== productId));
+            setFavorites(prev => prev.filter(item => item.id !== idToDelete && item.productId !== productId));
         } catch (error) {
             console.error("Failed to remove from favorites:", error);
             showNotification("Помилка видалення", "error");
@@ -121,7 +125,8 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     const isProductInFavorites = (productId: string): boolean => {
-        return favorites.some(item => item.id === productId);
+        // Проверяем и по productId, и по id (на случай путаницы)
+        return favorites.some(item => item.productId === productId || item.id === productId);
     };
 
     useEffect(() => {
