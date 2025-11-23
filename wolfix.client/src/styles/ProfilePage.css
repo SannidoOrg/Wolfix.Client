@@ -1,145 +1,235 @@
+/* src/styles/ProfilePage.css */
+
+/* --- ГЛОБАЛЬНЫЙ КОНТЕЙНЕР --- */
 .profile-page-container {
     display: flex;
-    max-width: 1200px;
-    margin: 20px auto;
-    gap: 24px;
-    font-family: Arial, sans-serif;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 40px;
+    gap: 40px;
+    min-height: 80vh;
+    background-color: #F4F5F7; /* Светло-серый фон страницы */
+    align-items: flex-start;
 }
 
+/* --- САЙДБАР --- */
 .profile-sidebar {
-    flex: 0 0 250px;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid #e0e0e0;
-    padding-right: 24px;
+    flex: 0 0 280px;
+    background-color: transparent;
 }
 
 .sidebar-user-info {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 24px;
+    align-items: center; /* Центрируем в сайдбаре */
     text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Аватар в сайдбаре */
+.user-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .sidebar-user-name {
-    color: #ff6600;
-    font-weight: bold;
-    font-size: 16px;
+    color: #FF6B00;
+    font-weight: 700;
+    font-size: 18px;
+    word-break: break-word;
 }
 
 .sidebar-nav ul {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
 
 .sidebar-nav li a {
     display: block;
-    padding: 10px 0;
+    padding: 12px 20px;
     color: #333;
     text-decoration: none;
     font-size: 16px;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
 }
 
 .sidebar-nav li a:hover, .sidebar-nav li a.active {
-    color: #ff6600;
+    background-color: #fff;
+    color: #FF6B00;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .sidebar-footer {
-    margin-top: 24px;
-    padding-top: 16px;
+    margin-top: 40px;
+    padding-top: 20px;
     border-top: 1px solid #e0e0e0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    font-size: 14px;
-}
-
-.sidebar-footer a, .sidebar-footer button {
-    color: #777;
-    text-decoration: none;
-}
-
-.sidebar-footer .logout-button {
-    background: none;
-    border: none;
-    padding: 0;
-    text-align: left;
-    cursor: pointer;
-    color: #777;
-    font-size: 14px;
-}
-.sidebar-footer .logout-button:hover {
-    color: #ff6600;
-}
-
-.profile-main-content {
-    flex-grow: 1;
-}
-
-.profile-content {
-    background-color: #fff;
-    padding: 0 24px;
-}
-
-.profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 16px;
-    margin-bottom: 24px;
-}
-
-.profile-header h1 {
-    font-size: 24px;
-    margin: 0;
-}
-
-.profile-actions {
-    display: flex;
     gap: 12px;
 }
 
-.action-button-primary {
-    background-color: #ff6600;
-    color: white;
+.sidebar-footer a, .sidebar-footer button {
+    color: #666;
+    font-size: 14px;
+    text-decoration: none;
+    background: none;
     border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
+    text-align: left;
     cursor: pointer;
-    font-weight: bold;
+    padding: 0;
 }
 
+/* --- ОСНОВНОЙ КОНТЕНТ (БЕЛАЯ КАРТОЧКА) --- */
+.profile-main-wrapper {
+    flex: 1;
+    min-width: 0; /* Fix для flex элементов */
+}
+
+/* Класс для самой белой плашки */
+.profile-card-content {
+    background-color: #FFFFFF;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+/* Шапка профиля */
+.profile-header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* ОГРОМНЫЙ АВАТАР - ФИКС */
+.profile-big-avatar {
+    width: 120px !important;
+    height: 120px !important;
+    min-width: 120px;
+    min-height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: 4px solid #f9f9f9;
+    display: block;
+}
+
+.profile-header-center h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #222;
+    margin: 0;
+}
+
+/* Кнопки действий */
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-bottom: 40px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btn-text:hover { color: #666; }
+
+.btn-edit {
+    background-color: #fff;
+    border: 1px solid #FF6B00;
+    color: #FF6B00;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-edit:hover {
+    background-color: #FF6B00;
+    color: #fff;
+}
+
+/* Секции данных */
 .profile-section {
-    margin-bottom: 32px;
+    margin-bottom: 40px;
 }
 
 .profile-section h2 {
-    font-size: 18px;
-    margin-bottom: 16px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 20px;
 }
 
-.data-grid {
+/* Сетка данных (Grid) */
+.info-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px 24px;
+    grid-template-columns: 1fr 1fr; /* Две равные колонки */
+    gap: 30px;
 }
 
-.data-item {
-    font-size: 14px;
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.data-label {
-    display: block;
-    color: #777;
-    margin-bottom: 4px;
+.info-label {
+    font-size: 13px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.data-value {
+.info-value {
+    font-size: 16px;
+    color: #333;
     font-weight: 500;
+    min-height: 20px;
+}
+
+/* Адрес */
+.address-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.address-text {
+    font-size: 16px;
+    color: #333;
+}
+
+.address-badge {
+    font-size: 12px;
+    color: #999;
+    background: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #eee;
 }

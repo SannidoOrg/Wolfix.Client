@@ -6,13 +6,15 @@ import ProductCard from '../../../components/ProductCard/ProductCard.client';
 import api from '@/lib/api';
 import { ProductShortDto } from '@/types/product';
 import { AttributeValueDto } from '@/types/filter';
+
+// ИМПОРТИРУЕМ СТИЛИ ПРЯМО СЮДА
 import '../../../../styles/ProductPage.css';
 
 interface Props {
     initialProducts: ProductShortDto[];
     attributes: AttributeValueDto[];
     childCategoryId: string;
-    categoryName: string; // Имя подкатегории (бренда)
+    categoryName: string;
 }
 
 export default function CategoryClientPage({ initialProducts, attributes, childCategoryId, categoryName }: Props) {
@@ -20,9 +22,7 @@ export default function CategoryClientPage({ initialProducts, attributes, childC
     const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
     const [loading, setLoading] = useState(false);
 
-    // Обработчик клика по чекбоксу
     const handleFilterChange = async (key: string, value: string, attributeId: string) => {
-        // 1. Обновляем UI стейт фильтров
         const newFilters = { ...selectedFilters };
         if (!newFilters[key]) newFilters[key] = [];
 
@@ -34,16 +34,8 @@ export default function CategoryClientPage({ initialProducts, attributes, childC
         }
         setSelectedFilters(newFilters);
 
-        // 2. Формируем запрос к API
-        // Нам нужно превратить объект selectedFilters обратно в массив DTO для бэкенда
-        // Нам нужны ID атрибутов. Мы их берем из props.attributes или сохраняем в мапу.
-        // Для простоты я передаю attributeId прямо в change handler.
-
-        // Соберем все выбранные фильтры в плоский массив для API
         const filtrationAttribute: { attributeId: string; key: string; value: string }[] = [];
-
         Object.entries(newFilters).forEach(([filterKey, values]) => {
-            // Находим ID атрибута
             const attrObj = attributes.find(a => a.key === filterKey);
             if (attrObj) {
                 values.forEach(val => {
@@ -56,19 +48,16 @@ export default function CategoryClientPage({ initialProducts, attributes, childC
             }
         });
 
-        // 3. Делаем запрос
         setLoading(true);
         try {
             if (filtrationAttribute.length === 0) {
-                // Если фильтров нет, грузим дефолтную страницу (сброс)
                 const res = await api.get(`/api/products/category/${childCategoryId}/page/1?pageSize=20`);
                 setProducts(res.data.items);
             } else {
-                // Фильтрация
                 const res = await api.post('/api/products/filter-by-attributes', {
                     categoryId: childCategoryId,
                     filtrationAttribute,
-                    pageSize: 20 // Пока хардкод, можно добавить пагинацию
+                    pageSize: 20
                 });
                 setProducts(res.data);
             }
@@ -81,13 +70,12 @@ export default function CategoryClientPage({ initialProducts, attributes, childC
 
     return (
         <div className="content-wrapper">
-            <div className="filter-sidebar-wrapper">
-                <FilterSidebar
-                    attributes={attributes}
-                    selectedFilters={selectedFilters}
-                    onFilterChange={handleFilterChange}
-                />
-            </div>
+            {/* Убрали лишнюю обертку div className="filter-sidebar-wrapper", которая ломала flex */}
+            <FilterSidebar
+                attributes={attributes}
+                selectedFilters={selectedFilters}
+                onFilterChange={handleFilterChange}
+            />
 
             <div className="product-listing">
                 <div className="listing-header">
@@ -104,7 +92,7 @@ export default function CategoryClientPage({ initialProducts, attributes, childC
                         ))}
                     </div>
                 ) : (
-                    <div style={{ padding: '40px', textAlign: 'center', width: '100%' }}>
+                    <div style={{ padding: '40px', textAlign: 'center', width: '100%', color: '#666' }}>
                         Товарів за вибраними фільтрами не знайдено.
                     </div>
                 )}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
 import { CustomerDto } from "@/types/customer";
+// Убедитесь, что путь импорта CSS правильный
 import "../../../styles/ProfilePage.css";
 
 const defaultCustomer: CustomerDto = {
@@ -40,8 +41,8 @@ const PersonalData = () => {
 
     if (loading) {
         return (
-            <div className="profile-main-content" style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: '400px'}}>
-                <span style={{color: '#888'}}>Завантаження профілю...</span>
+            <div className="profile-card-content" style={{display:'flex', justifyContent:'center', alignItems:'center', height:'400px'}}>
+                Завантаження профілю...
             </div>
         );
     }
@@ -55,64 +56,57 @@ const PersonalData = () => {
 
     const fullAddress = address && address.city
         ? `м. ${address.city}, вул. ${address.street || ''}, буд. ${address.houseNumber || ''}${address.apartmentNumber ? `, кв. ${address.apartmentNumber}` : ''}`
-        : "Адреса не додана";
+        : "Адреса не вказана";
 
     return (
-        <div className="profile-main-content">
+        <div className="profile-card-content">
 
-            {/* Аватар и Имя */}
-            <div className="profile-title-center">
+            {/* Шапка: Аватар и Имя */}
+            <div className="profile-header-center">
                 <img
                     src={data.photoUrl || "/icons/prof.png"}
                     alt="Avatar"
-                    className="profile-avatar-center"
+                    className="profile-big-avatar"
                 />
                 <h1>{displayName}</h1>
             </div>
 
             {/* Кнопки */}
-            <div className="profile-actions-right">
+            <div className="profile-actions">
                 <button className="btn-text">Видалити</button>
-                <button className="btn-outline">Редагувати</button>
+                <button className="btn-edit">Редагувати</button>
             </div>
 
             {/* Личные данные */}
-            <section className="data-section">
+            <section className="profile-section">
                 <h2>Особисті дані</h2>
-                <div className="data-grid-row">
-                    {/* Левая колонка */}
-                    <div>
-                        <div className="data-field">
-                            <span className="data-label">Телефон</span>
-                            <span className="data-value">{phoneNumber || "Не вказано"}</span>
-                        </div>
-                        <div className="data-field">
-                            <span className="data-label">Дата народження</span>
-                            <span className="data-value">
-                                {birthDate ? new Date(birthDate).toLocaleDateString('uk-UA') : "Не вказано"}
-                            </span>
-                        </div>
+                <div className="info-grid">
+                    <div className="info-item">
+                        <span className="info-label">Телефон</span>
+                        <span className="info-value">{phoneNumber || "Не вказано"}</span>
                     </div>
-
-                    {/* Правая колонка */}
-                    <div>
-                        <div className="data-field">
-                            <span className="data-label">Електронна пошта</span>
-                            <span className="data-value">{user?.email}</span>
-                        </div>
+                    <div className="info-item">
+                        <span className="info-label">Електронна пошта</span>
+                        <span className="info-value">{user?.email}</span>
+                    </div>
+                    <div className="info-item">
+                        <span className="info-label">Дата народження</span>
+                        <span className="info-value">
+                            {birthDate ? new Date(birthDate).toLocaleDateString('uk-UA') : "Не вказано"}
+                        </span>
                     </div>
                 </div>
             </section>
 
             {/* Адреса */}
-            <section className="data-section">
+            <section className="profile-section">
                 <h2>Мої адреси доставки</h2>
-                <div className="address-item">
-                    <div>
-                        <span className="data-label">Адреса доставки замовлення:</span>
-                        <div className="address-text">{fullAddress}</div>
+                <div className="address-row">
+                    <div className="address-text">
+                        <div style={{fontSize: '13px', color: '#888', marginBottom: '4px'}}>Адреса доставки:</div>
+                        {fullAddress}
                     </div>
-                    <span className="address-status">Адреса за замовчуванням</span>
+                    <span className="address-badge">Основна</span>
                 </div>
             </section>
         </div>
