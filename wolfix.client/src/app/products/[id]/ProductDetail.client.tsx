@@ -1,11 +1,13 @@
 "use client";
 
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useCallback } from "react";
 import { ProductFullDto } from "@/types/product";
 import { ProductReviewDto } from "@/types/review";
 import { useUser } from "@/contexts/UserContext";
+import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
 import "../../../styles/ProductDetailPage.css";
+import ReviewModal from "../../components/ReviewModal/ReviewModal.client";
 
 interface Props {
     product: ProductFullDto;
@@ -14,33 +16,52 @@ interface Props {
 const ProductDetailClient: FC<Props> = ({ product }) => {
     const [activeImage, setActiveImage] = useState(product.medias.find(m => m.isMain)?.url || "/placeholder.png");
 
+    // Состояние отзывов
     const [reviews, setReviews] = useState<ProductReviewDto[]>([]);
     const [loadingReviews, setLoadingReviews] = useState(true);
 
+    // Состояние модалки отзыва
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
     const { addToCart } = useUser();
+    const { isAuthenticated } = useAuth();
+
+    // Выносим загрузку отзывов в функцию, чтобы вызывать её после добавления нового отзыва
+    const fetchReviews = useCallback(async () => {
+        try {
+            // Если API поддерживает пагинацию, здесь можно добавить параметры. Пока грузим первые 20.
+            const response = await api.get(`/api/products/${product.id}/reviews?pageSize=20`);
+            setReviews(response.data.items || []);
+        } catch (error) {
+            console.error("Failed to load reviews", error);
+        } finally {
+            setLoadingReviews(false);
+        }
+    }, [product.id]);
 
     useEffect(() => {
-        const fetchReviews = async () => {
-            try {
-                const response = await api.get(`/api/products/${product.id}/reviews?pageSize=10`);
-                setReviews(response.data.items || []);
-            } catch (error) {
-                console.error("Failed to load reviews", error);
-            } finally {
-                setLoadingReviews(false);
-            }
-        };
-
         fetchReviews();
-    }, [product.id]);
+    }, [fetchReviews]);
 
     const handleAddToCart = () => {
         addToCart(product.id);
-        alert("Товар додано до кошика!");
+        // Можно добавить уведомление через GlobalContext, если нужно
+    };
+
+    const handleOpenReviewModal = () => {
+        if (!isAuthenticated) {
+            alert("Будь ласка, увійдіть в акаунт, щоб залишити відгук.");
+            return;
+        }
+        setIsReviewModalOpen(true);
     };
 
     const renderStars = (rating: number) => {
-        return "★".repeat(rating) + "☆".repeat(5 - rating);
+        return (
+            <span style={{ color: '#FF6B00', fontSize: '18px', letterSpacing: '2px' }}>
+                {"★".repeat(Math.round(rating)) + "☆".repeat(5 - Math.round(rating))}
+            </span>
+        );
     };
 
     const formatDate = (dateString: string) => {
@@ -75,10 +96,10 @@ const ProductDetailClient: FC<Props> = ({ product }) => {
                     <h1>{product.title}</h1>
 
                     <div className="rating-row">
-                        <span style={{color: '#FF6B00', fontSize: '18px'}}>{renderStars(Math.round(product.averageRating))}</span>
-                        <span style={{marginLeft: '8px'}}>{product.averageRating}</span>
+                        {renderStars(product.averageRating)}
+                        <span style={{marginLeft: '8px', color: '#666'}}>({reviews.length} відгуків)</span>
                         <span style={{marginLeft: '15px'}}>Код: {product.id.slice(0, 8)}</span>
-                        <span style={{marginLeft: '15px', color: product.status === 'InStock' ? 'green' : 'red'}}>
+                        <span style={{marginLeft: '15px', color: product.status === 'InStock' ? 'green' : 'red', fontWeight: 500}}>
                             {product.status === 'InStock' ? 'В наявності' : 'Немає в наявності'}
                         </span>
                     </div>
@@ -107,11 +128,13 @@ const ProductDetailClient: FC<Props> = ({ product }) => {
                         </ul>
                     </div>
 
-                    <div style={{marginTop: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '8px'}}>
+                    <div style={{marginTop: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '8px', backgroundColor: '#fff'}}>
                         <p style={{margin:0, fontSize: '14px', color:'#777'}}>Продавець:</p>
                         <div style={{display:'flex', alignItems:'center', gap:'10px', marginTop:'5px'}}>
-                            {product.seller.sellerPhotoUrl && (
+                            {product.seller.sellerPhotoUrl ? (
                                 <img src={product.seller.sellerPhotoUrl} style={{width:30, height:30, borderRadius:'50%', objectFit: 'cover'}} alt="Seller" />
+                            ) : (
+                                <div style={{width:30, height:30, borderRadius:'50%', backgroundColor:'#eee', display:'flex', alignItems:'center', justifyContent:'center'}}>🏪</div>
                             )}
                             <b>{product.seller.sellerFullName}</b>
                         </div>
@@ -122,7 +145,7 @@ const ProductDetailClient: FC<Props> = ({ product }) => {
             {product.description && (
                 <div className="info-section">
                     <h2>Опис</h2>
-                    <div dangerouslySetInnerHTML={{ __html: product.description }} style={{lineHeight: '1.6'}} />
+                    <div dangerouslySetInnerHTML={{ __html: product.description }} style={{lineHeight: '1.6', color: '#444'}} />
                 </div>
             )}
 
@@ -141,31 +164,69 @@ const ProductDetailClient: FC<Props> = ({ product }) => {
             </div>
 
             <div className="info-section">
-                <h2 style={{marginBottom: '20px'}}>Відгуки ({reviews.length})</h2>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #eee', paddingBottom: '15px'}}>
+                    <h2 style={{margin: 0, border: 'none', padding: 0}}>Відгуки ({reviews.length})</h2>
+                    <button
+                        onClick={handleOpenReviewModal}
+                        style={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #FF6B00',
+                            color: '#FF6B00',
+                            padding: '8px 20px',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontWeight: 500,
+                            fontSize: '14px'
+                        }}
+                    >
+                        Написати відгук
+                    </button>
+                </div>
 
                 {loadingReviews ? (
-                    <p style={{color: '#777'}}>Завантаження відгуків...</p>
+                    <p style={{color: '#777', textAlign: 'center', padding: '20px'}}>Завантаження відгуків...</p>
                 ) : reviews.length > 0 ? (
                     <div className="reviews-list">
                         {reviews.map((review) => (
-                            <div key={review.id} style={{borderBottom: '1px solid #eee', paddingBottom: '20px', marginBottom: '20px'}}>
+                            <div key={review.id} style={{borderBottom: '1px solid #f0f0f0', paddingBottom: '20px', marginBottom: '20px'}}>
                                 <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
-                                    <div style={{fontWeight: 'bold'}}>
-                                        {review.title || "Користувач"}
+                                    <div style={{fontWeight: 'bold', fontSize: '16px'}}>
+                                        {/* Имя пользователя не приходит в DTO отзыва, выводим заглушку или Title как имя, если подходит по логике */}
+                                        Користувач
                                     </div>
-                                    <div style={{color: '#888', fontSize: '14px'}}>{formatDate(review.createdAt)}</div>
+                                    <div style={{color: '#999', fontSize: '13px'}}>{formatDate(review.createdAt)}</div>
                                 </div>
-                                <div style={{color: '#FF6B00', marginBottom: '8px', fontSize: '14px'}}>
+
+                                <div style={{marginBottom: '10px'}}>
                                     {renderStars(review.rating)}
                                 </div>
-                                <p style={{lineHeight: '1.5', margin: 0}}>{review.text}</p>
+
+                                {review.title && (
+                                    <div style={{fontWeight: '600', marginBottom: '5px', color: '#333'}}>
+                                        {review.title}
+                                    </div>
+                                )}
+
+                                <p style={{lineHeight: '1.5', margin: 0, color: '#555'}}>{review.text}</p>
                             </div>
                         ))}
                     </div>
                 ) : (
-                    <p style={{color: '#777'}}>До цього товару ще немає відгуків. Будьте першим!</p>
+                    <div style={{textAlign: 'center', padding: '40px 0', color: '#888'}}>
+                        <p>До цього товару ще немає відгуків.</p>
+                        <p>Будьте першим, хто поділиться враженнями!</p>
+                    </div>
                 )}
             </div>
+
+            {/* Модальное окно отзыва */}
+            <ReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={() => setIsReviewModalOpen(false)}
+                productId={product.id}
+                productTitle={product.title}
+                onSuccess={fetchReviews}
+            />
         </div>
     );
 };

@@ -1,0 +1,140 @@
+.review-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s forwards;
+}
+
+.review-modal-content {
+    background-color: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.review-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+}
+
+.review-modal-close:hover {
+    color: #333;
+}
+
+.review-modal-title {
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    margin: 0;
+    color: #333;
+}
+
+.review-product-name {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    margin-top: -10px;
+}
+
+/* Рейтинг (Звезды) */
+.star-rating-input {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.star-input-label {
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.star-input-label:hover {
+    transform: scale(1.1);
+}
+
+.star-icon-large {
+    width: 32px;
+    height: 32px;
+    /* SVG fill logic handled in React via inline styles or classes */
+}
+
+/* Форма */
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.review-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.review-form-group label {
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+}
+
+.review-input, .review-textarea {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+}
+
+.review-input:focus, .review-textarea:focus {
+    outline: none;
+    border-color: #FF6B00;
+}
+
+.review-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.review-submit-btn {
+    background-color: #FF6B00;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+.review-submit-btn:hover {
+    background-color: #e65c00;
+}
+
+.review-submit-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
