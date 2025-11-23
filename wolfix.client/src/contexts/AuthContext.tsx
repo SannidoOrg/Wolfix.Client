@@ -19,6 +19,7 @@ interface AuthContextType {
     loginWithRole: (credentials: TokenRequestDto) => Promise<boolean>;
     register: (details: RegisterDto) => Promise<boolean>;
     logout: () => void;
+    assignRole: (data: any) => Promise<boolean>; // Добавил заглушку для assignRole, так как она используется в ProfilePage
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,7 +37,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const decodeAndNormalizeUser = (token: string): User | null => {
         try {
             const raw: any = jwtDecode(token);
-            console.log("🔐 Decoded Token:", raw);
+            console.log("🔐 Raw Token Claims:", raw);
 
             // 1. ID Аккаунта (Identity)
             const accountId =
@@ -45,34 +46,33 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
                 raw.accountId ||
                 raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
-            // 2. ID Покупателя (Business Logic) - ЭТО ГЛАВНОЕ
-            const customerId =
-                raw.profile_id ||  // <-- Берем из твоего токена
-                raw.customerId ||
-                raw.CustomerId ||
-                raw.customer_id;
+            // 2. ВАЖНО: ID Профиля (Покупателя/Продавца) из токена
+            // На твоем скриншоте поле называется "profile_id"
+            const customerId = raw.profile_id || raw.customerId;
 
+            // Роль
             const rawRole =
                 raw.role ||
                 raw.roles ||
                 raw["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-
             const userRole = Array.isArray(rawRole) ? rawRole[0] : rawRole;
 
-            const userEmail =
-                raw.email ||
-                raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
+            // Email
+            const userEmail = raw.email || raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
 
             if (!accountId) return null;
 
-            return {
-                userId: accountId,
+            const normalizedUser = {
+                userId: accountId,      // Alias
                 accountId: accountId,
-                customerId: customerId, // Теперь это поле заполнено правильным ID
+                customerId: customerId, // Здесь теперь точно будет значение из profile_id
                 email: userEmail,
                 role: userRole,
                 ...raw
             };
+
+            console.log("✅ Normalized User:", normalizedUser);
+            return normalizedUser;
         } catch (error) {
             console.error("Token decode error:", error);
             return null;
@@ -118,7 +118,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
             if (token) {
                 handleAuthSuccess(token);
-                showNotification("Вхід успішний!", "success");
+                // showNotification("Вхід успішний!", "success"); // Можно раскомментировать
                 return true;
             }
             return false;
@@ -154,13 +154,20 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
+    // Заглушка, так как endpoint для смены роли не был описан в последнем swagger,
+    // но он используется в ProfilePage.client.tsx
+    const assignRole = async (data: any) => {
+        console.log("Assign role logic placeholder", data);
+        return true;
+    };
+
     const logout = () => {
         sessionStorage.removeItem("authToken");
         setUser(null);
         window.location.href = '/';
     };
 
-    const value = { user, isAuthenticated: !!user, fetchUserRoles, loginWithRole, register, logout };
+    const value = { user, isAuthenticated: !!user, fetchUserRoles, loginWithRole, register, logout, assignRole };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

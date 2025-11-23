@@ -25,12 +25,21 @@ const PersonalData = () => {
 
     useEffect(() => {
         const fetchData = async () => {
-            // ВАЖНО: Используем customerId
             if (user?.customerId) {
                 try {
                     const res = await api.get(`/api/customers/${user.customerId}`);
-                    setCustomer(res.data);
-                    setFormData(res.data);
+                    const apiData = res.data;
+
+                    // Нормализация данных при загрузке
+                    const normalizedData: CustomerDto = {
+                        ...defaultCustomer,
+                        ...apiData,
+                        fullName: apiData.fullName || defaultCustomer.fullName,
+                        address: apiData.address || defaultCustomer.address,
+                    };
+
+                    setCustomer(normalizedData);
+                    setFormData(normalizedData);
                 } catch (error) {
                     console.error("Profile fetch error:", error);
                     setCustomer(defaultCustomer);
@@ -38,6 +47,8 @@ const PersonalData = () => {
                 } finally {
                     setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         };
         fetchData();
@@ -50,69 +61,129 @@ const PersonalData = () => {
     const handleFullNameChange = (field: string, value: string) => {
         setFormData(prev => ({
             ...prev,
-            fullName: { ...prev.fullName, [field]: value }
+            fullName: { ...(prev.fullName || {}), [field]: value }
         }));
     };
 
-    const handleAddressChange = (field: string, value: string | number) => {
+    const handleAddressChange = (field: string, value: string) => {
         setFormData(prev => ({
             ...prev,
             address: {
-                city: prev.address?.city || "",
-                street: prev.address?.street || "",
-                houseNumber: prev.address?.houseNumber || 0,
-                apartmentNumber: prev.address?.apartmentNumber || null,
-                ...prev.address!,
+                city: "",
+                street: "",
+                houseNumber: null,
+                apartmentNumber: null,
+                ...(prev.address || {}),
                 [field]: value
             }
         }));
     };
 
     const handleSaveChanges = async () => {
-        // ВАЖНО: Используем customerId
-        if (!user?.customerId) return;
+        if (!user?.customerId) {
+            alert("Помилка: ID користувача не знайдено.");
+            return;
+        }
 
         try {
             setLoading(true);
             const requests = [];
 
-            // Patch fullName
-            requests.push(api.patch(`/api/customers/${user.customerId}/full-name`, {
-                firstName: formData.fullName.firstName,
-                lastName: formData.fullName.lastName,
-                middleName: formData.fullName.middleName
-            }));
+            // --- 1. Full Name ---
+            const isNameChanged =
+                (formData.fullName?.firstName || "") !== (customer?.fullName?.firstName || "") ||
+                (formData.fullName?.lastName || "") !== (customer?.fullName?.lastName || "") ||
+                (formData.fullName?.middleName || "") !== (customer?.fullName?.middleName || "");
 
-            // Patch phone if changed
-            if (formData.phoneNumber !== customer?.phoneNumber) {
+            if (isNameChanged) {
+                requests.push(api.patch(`/api/customers/${user.customerId}/full-name`, {
+                    firstName: formData.fullName?.firstName || "",
+                    lastName: formData.fullName?.lastName || "",
+                    middleName: formData.fullName?.middleName || ""
+                }));
+            }
+
+            // --- 2. Phone ---
+            // Сравниваем строки, учитывая null как пустую строку
+            const formPhone = formData.phoneNumber || "";
+            const dbPhone = customer?.phoneNumber || "";
+
+            if (formPhone !== dbPhone) {
                 requests.push(api.patch(`/api/customers/${user.customerId}/phone-number`, {
-                    phoneNumber: formData.phoneNumber
+                    phoneNumber: formPhone || null // Отправляем null если пусто
                 }));
             }
 
-            // Patch birth date if changed
-            if (formData.birthDate !== customer?.birthDate) {
+            // --- 3. Birth Date ---
+            const formDate = formData.birthDate ? new Date(formData.birthDate).toISOString().split('T')[0] : null;
+            const dbDate = customer?.birthDate ? new Date(customer.birthDate).toISOString().split('T')[0] : null;
+
+            if (formDate !== dbDate) {
                 requests.push(api.patch(`/api/customers/${user.customerId}/birth-date`, {
-                    birthDate: formData.birthDate
+                    birthDate: formDate
                 }));
             }
 
-            // Patch address
-            requests.push(api.patch(`/api/customers/${user.customerId}/address`, {
-                city: formData.address?.city,
-                street: formData.address?.street,
-                houseNumber: Number(formData.address?.houseNumber),
-                apartmentNumber: Number(formData.address?.apartmentNumber)
-            }));
+            // --- 4. Address ---
+            // Приводим типы для корректного сравнения и отправки
+            const formHouse = formData.address?.houseNumber ? Number(formData.address.houseNumber) : 0;
+            const dbHouse = customer?.address?.houseNumber || 0;
 
+            const formApt = formData.address?.apartmentNumber ? Number(formData.address.apartmentNumber) : null;
+            const dbApt = customer?.address?.apartmentNumber || null;
+
+            const formCity = formData.address?.city || "";
+            const dbCity = customer?.address?.city || "";
+
+            const formStreet = formData.address?.street || "";
+            const dbStreet = customer?.address?.street || "";
+
+            const isAddressChanged =
+                formCity !== dbCity ||
+                formStreet !== dbStreet ||
+                formHouse !== dbHouse ||
+                formApt !== dbApt;
+
+            if (isAddressChanged) {
+                requests.push(api.patch(`/api/customers/${user.customerId}/address`, {
+                    city: formCity || null,
+                    street: formStreet || null,
+                    houseNumber: formHouse, // int32
+                    apartmentNumber: formApt // int32 | null
+                }));
+            }
+
+            // Если изменений нет, просто выходим из режима редактирования
+            if (requests.length === 0) {
+                setIsEditing(false);
+                setLoading(false);
+                return;
+            }
+
+            // Выполняем только нужные запросы
             await Promise.all(requests);
 
-            setCustomer(formData);
+            // Обновляем локальный "чистовик", приводя типы к правильным (числам)
+            setCustomer({
+                ...formData,
+                address: {
+                    ...formData.address!,
+                    houseNumber: formHouse,
+                    apartmentNumber: formApt
+                }
+            });
+
             setIsEditing(false);
             alert("Дані успішно збережено!");
-        } catch (error) {
+
+        } catch (error: any) {
             console.error("Update error:", error);
-            alert("Помилка при збереженні даних.");
+            if (error.response?.data?.errors) {
+                // Выводим детали валидации, если они есть
+                alert(`Помилка валідації: ${JSON.stringify(error.response.data.errors)}`);
+            } else {
+                alert("Помилка при збереженні даних. Перевірте правильність введених полів.");
+            }
         } finally {
             setLoading(false);
         }
@@ -131,15 +202,16 @@ const PersonalData = () => {
         );
     }
 
-    const data = customer || defaultCustomer;
-    const { fullName, address, phoneNumber, birthDate } = data;
+    const data = formData;
+    const fullName = data.fullName || defaultCustomer.fullName;
+    const address = data.address || defaultCustomer.address;
 
-    const displayName = [fullName?.lastName, fullName?.firstName, fullName?.middleName]
+    const displayName = [fullName.lastName, fullName.firstName, fullName.middleName]
         .filter(Boolean)
         .join(" ") || "Гість";
 
-    const fullAddress = address && address.city
-        ? `м. ${address.city}, вул. ${address.street || ''}, буд. ${address.houseNumber || ''}${address.apartmentNumber ? `, кв. ${address.apartmentNumber}` : ''}`
+    const displayAddress = (address.city || address.street)
+        ? `м. ${address.city || '...'}, вул. ${address.street || '...'}, буд. ${address.houseNumber || '...'}${address.apartmentNumber ? `, кв. ${address.apartmentNumber}` : ''}`
         : "Адреса не вказана";
 
     return (
@@ -151,10 +223,25 @@ const PersonalData = () => {
                     className="profile-big-avatar"
                 />
                 {isEditing ? (
-                    <div style={{display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'center'}}>
-                        <input className="profile-input" placeholder="Прізвище" value={formData.fullName.lastName || ""} onChange={e => handleFullNameChange("lastName", e.target.value)} />
-                        <input className="profile-input" placeholder="Ім'я" value={formData.fullName.firstName || ""} onChange={e => handleFullNameChange("firstName", e.target.value)} />
-                        <input className="profile-input" placeholder="По батькові" value={formData.fullName.middleName || ""} onChange={e => handleFullNameChange("middleName", e.target.value)} />
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px', width: '100%', maxWidth: '400px'}}>
+                        <input
+                            className="profile-input"
+                            placeholder="Прізвище"
+                            value={fullName.lastName || ""}
+                            onChange={e => handleFullNameChange("lastName", e.target.value)}
+                        />
+                        <input
+                            className="profile-input"
+                            placeholder="Ім'я"
+                            value={fullName.firstName || ""}
+                            onChange={e => handleFullNameChange("firstName", e.target.value)}
+                        />
+                        <input
+                            className="profile-input"
+                            placeholder="По батькові"
+                            value={fullName.middleName || ""}
+                            onChange={e => handleFullNameChange("middleName", e.target.value)}
+                        />
                     </div>
                 ) : (
                     <h1>{displayName}</h1>
@@ -180,12 +267,12 @@ const PersonalData = () => {
                         {isEditing ? (
                             <input
                                 className="profile-input"
-                                value={formData.phoneNumber || ""}
+                                value={data.phoneNumber || ""}
                                 onChange={e => handleInputChange("phoneNumber", e.target.value)}
                                 placeholder="+380..."
                             />
                         ) : (
-                            <span className="info-value">{phoneNumber || "Не вказано"}</span>
+                            <span className="info-value">{data.phoneNumber || "Не вказано"}</span>
                         )}
                     </div>
 
@@ -200,12 +287,12 @@ const PersonalData = () => {
                             <input
                                 type="date"
                                 className="profile-input"
-                                value={formData.birthDate ? new Date(formData.birthDate).toISOString().split('T')[0] : ""}
+                                value={data.birthDate ? String(data.birthDate).split('T')[0] : ""}
                                 onChange={e => handleInputChange("birthDate", e.target.value)}
                             />
                         ) : (
                             <span className="info-value">
-                                {birthDate ? new Date(birthDate).toLocaleDateString('uk-UA') : "Не вказано"}
+                                {data.birthDate ? new Date(data.birthDate).toLocaleDateString('uk-UA') : "Не вказано"}
                             </span>
                         )}
                     </div>
@@ -216,16 +303,16 @@ const PersonalData = () => {
                 <h2>Мої адреси доставки</h2>
                 {isEditing ? (
                     <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
-                        <input className="profile-input" placeholder="Місто" value={formData.address?.city || ""} onChange={e => handleAddressChange("city", e.target.value)} />
-                        <input className="profile-input" placeholder="Вулиця" value={formData.address?.street || ""} onChange={e => handleAddressChange("street", e.target.value)} />
-                        <input className="profile-input" type="number" placeholder="Будинок" value={formData.address?.houseNumber || ""} onChange={e => handleAddressChange("houseNumber", e.target.value)} />
-                        <input className="profile-input" type="number" placeholder="Квартира" value={formData.address?.apartmentNumber || ""} onChange={e => handleAddressChange("apartmentNumber", e.target.value)} />
+                        <input className="profile-input" placeholder="Місто" value={address.city || ""} onChange={e => handleAddressChange("city", e.target.value)} />
+                        <input className="profile-input" placeholder="Вулиця" value={address.street || ""} onChange={e => handleAddressChange("street", e.target.value)} />
+                        <input className="profile-input" type="number" placeholder="Будинок" value={address.houseNumber || ""} onChange={e => handleAddressChange("houseNumber", e.target.value)} />
+                        <input className="profile-input" type="number" placeholder="Квартира" value={address.apartmentNumber || ""} onChange={e => handleAddressChange("apartmentNumber", e.target.value)} />
                     </div>
                 ) : (
                     <div className="address-row">
                         <div className="address-text">
                             <div style={{fontSize: '13px', color: '#888', marginBottom: '4px'}}>Адреса доставки:</div>
-                            {fullAddress}
+                            {displayAddress}
                         </div>
                         <span className="address-badge">Основна</span>
                     </div>
