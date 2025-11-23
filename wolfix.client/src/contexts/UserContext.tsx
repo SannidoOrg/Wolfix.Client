@@ -31,23 +31,25 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const { user, isAuthenticated } = useAuth();
 
     const fetchCart = async () => {
-        if (!user?.userId) return;
-        setLoading(true);
+        // ВАЖНО: Используем customerId
+        if (!user?.customerId) return;
+
         try {
-            const response = await api.get(`/api/customer/cart-items/${user.userId}`);
+            const response = await api.get(`/api/customers/cart-items/${user.customerId}`);
             setCart(response.data);
         } catch (error) {
             console.error("Failed to fetch cart:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
     const addToCart = async (productId: string) => {
-        if (!user?.userId) return;
+        if (!user?.customerId) return;
         setLoading(true);
         try {
-            await api.post('/api/customer/cart-items', { customerId: user.userId, productId });
+            await api.post('/api/customers/cart-items', {
+                customerId: user.customerId,
+                productId
+            });
             await fetchCart();
         } catch (error) {
             console.error("Failed to add to cart:", error);
@@ -57,23 +59,23 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     const fetchFavorites = async () => {
-        if (!user?.userId) return;
-        setLoading(true);
+        if (!user?.customerId) return;
         try {
-            const response = await api.get(`/api/customer/favorites/${user.userId}`);
+            const response = await api.get(`/api/customers/favorites/${user.customerId}`);
             setFavorites(response.data);
         } catch (error) {
             console.error("Failed to fetch favorites:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
     const addToFavorites = async (productId: string) => {
-        if (!user?.userId) return;
+        if (!user?.customerId) return;
         setLoading(true);
         try {
-            await api.post('/api/customer/favorites', { customerId: user.userId, productId });
+            await api.post('/api/customers/favorites', {
+                customerId: user.customerId,
+                productId
+            });
             await fetchFavorites();
         } catch (error) {
             console.error("Failed to add to favorites:", error);
@@ -83,14 +85,14 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && user?.customerId) {
             fetchCart();
             fetchFavorites();
         } else {
             setCart(null);
             setFavorites([]);
         }
-    }, [isAuthenticated, user]);
+    }, [isAuthenticated, user?.customerId]);
 
     const value = {
         cart,

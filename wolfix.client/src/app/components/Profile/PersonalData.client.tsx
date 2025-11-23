@@ -20,37 +20,29 @@ const PersonalData = () => {
     const { user } = useAuth();
     const [customer, setCustomer] = useState<CustomerDto | null>(null);
     const [loading, setLoading] = useState(true);
-
-    // Режим редактирования
     const [isEditing, setIsEditing] = useState(false);
-
-    // Временное состояние формы
     const [formData, setFormData] = useState<CustomerDto>(defaultCustomer);
 
     useEffect(() => {
         const fetchData = async () => {
-            // ИЗМЕНЕНИЕ: Проверяем customerId
+            // ВАЖНО: Используем customerId
             if (user?.customerId) {
                 try {
-                    // ИЗМЕНЕНИЕ: Используем customerId в URL
                     const res = await api.get(`/api/customers/${user.customerId}`);
                     setCustomer(res.data);
                     setFormData(res.data);
                 } catch (error) {
-                    // ...
+                    console.error("Profile fetch error:", error);
+                    setCustomer(defaultCustomer);
+                    setFormData(defaultCustomer);
                 } finally {
                     setLoading(false);
                 }
-            } else if (user) {
-                // Если пользователь есть, но customerId нет (например, Админ зашел в профиль покупателя)
-                console.warn("No customerId found in token");
-                setLoading(false);
             }
         };
         fetchData();
     }, [user]);
 
-    // Обработчики изменений в инпутах
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
@@ -70,44 +62,42 @@ const PersonalData = () => {
                 street: prev.address?.street || "",
                 houseNumber: prev.address?.houseNumber || 0,
                 apartmentNumber: prev.address?.apartmentNumber || null,
-                ...prev.address!, // Non-null assertion т.к. мы инициализировали дефолт
+                ...prev.address!,
                 [field]: value
             }
         }));
     };
 
-    // Сохранение данных
     const handleSaveChanges = async () => {
+        // ВАЖНО: Используем customerId
         if (!user?.customerId) return;
 
         try {
             setLoading(true);
-
-            // Отправляем запросы параллельно согласно Swagger
             const requests = [];
 
-            // 1. ФИО
+            // Patch fullName
             requests.push(api.patch(`/api/customers/${user.customerId}/full-name`, {
                 firstName: formData.fullName.firstName,
                 lastName: formData.fullName.lastName,
                 middleName: formData.fullName.middleName
             }));
 
-            // 2. Телефон
+            // Patch phone if changed
             if (formData.phoneNumber !== customer?.phoneNumber) {
                 requests.push(api.patch(`/api/customers/${user.customerId}/phone-number`, {
                     phoneNumber: formData.phoneNumber
                 }));
             }
 
-            // 3. Дата рождения
+            // Patch birth date if changed
             if (formData.birthDate !== customer?.birthDate) {
                 requests.push(api.patch(`/api/customers/${user.customerId}/birth-date`, {
                     birthDate: formData.birthDate
                 }));
             }
 
-            // 4. Адрес
+            // Patch address
             requests.push(api.patch(`/api/customers/${user.customerId}/address`, {
                 city: formData.address?.city,
                 street: formData.address?.street,
@@ -117,7 +107,6 @@ const PersonalData = () => {
 
             await Promise.all(requests);
 
-            // Обновляем основные данные
             setCustomer(formData);
             setIsEditing(false);
             alert("Дані успішно збережено!");
@@ -130,39 +119,39 @@ const PersonalData = () => {
     };
 
     const handleCancel = () => {
-        setFormData(customer || defaultCustomer); // Сбрасываем изменения
+        setFormData(customer || defaultCustomer);
         setIsEditing(false);
     };
 
     if (loading && !isEditing) {
         return (
             <div className="profile-card-content" style={{display:'flex', justifyContent:'center', alignItems:'center', minHeight: '400px'}}>
-                <span style={{color: '#888'}}>Завантаження...</span>
+                <span style={{color: '#888'}}>Завантаження профілю...</span>
             </div>
         );
     }
 
-    const displayName = [formData.fullName?.lastName, formData.fullName?.firstName, formData.fullName?.middleName]
+    const data = customer || defaultCustomer;
+    const { fullName, address, phoneNumber, birthDate } = data;
+
+    const displayName = [fullName?.lastName, fullName?.firstName, fullName?.middleName]
         .filter(Boolean)
         .join(" ") || "Гість";
 
-    const fullAddress = formData.address && formData.address.city
-        ? `м. ${formData.address.city}, вул. ${formData.address.street || ''}, буд. ${formData.address.houseNumber || ''}${formData.address.apartmentNumber ? `, кв. ${formData.address.apartmentNumber}` : ''}`
+    const fullAddress = address && address.city
+        ? `м. ${address.city}, вул. ${address.street || ''}, буд. ${address.houseNumber || ''}${address.apartmentNumber ? `, кв. ${address.apartmentNumber}` : ''}`
         : "Адреса не вказана";
 
     return (
         <div className="profile-card-content">
-
-            {/* Шапка */}
             <div className="profile-header-center">
                 <img
-                    src={formData.photoUrl || "/icons/prof.png"}
+                    src={data.photoUrl || "/icons/prof.png"}
                     alt="Avatar"
                     className="profile-big-avatar"
                 />
-                {/* В режиме редактирования показываем инпуты для имени */}
                 {isEditing ? (
-                    <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
+                    <div style={{display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'center'}}>
                         <input className="profile-input" placeholder="Прізвище" value={formData.fullName.lastName || ""} onChange={e => handleFullNameChange("lastName", e.target.value)} />
                         <input className="profile-input" placeholder="Ім'я" value={formData.fullName.firstName || ""} onChange={e => handleFullNameChange("firstName", e.target.value)} />
                         <input className="profile-input" placeholder="По батькові" value={formData.fullName.middleName || ""} onChange={e => handleFullNameChange("middleName", e.target.value)} />
@@ -172,10 +161,7 @@ const PersonalData = () => {
                 )}
             </div>
 
-            {/* Кнопки управления */}
             <div className="profile-actions">
-                {/* Кнопку "Видалити" убрали по запросу */}
-
                 {isEditing ? (
                     <div className="edit-actions">
                         <button className="btn-cancel" onClick={handleCancel}>Скасувати</button>
@@ -186,7 +172,6 @@ const PersonalData = () => {
                 )}
             </div>
 
-            {/* Секция: Личные данные */}
             <section className="profile-section">
                 <h2>Особисті дані</h2>
                 <div className="info-grid">
@@ -200,13 +185,12 @@ const PersonalData = () => {
                                 placeholder="+380..."
                             />
                         ) : (
-                            <span className="info-value">{formData.phoneNumber || "Не вказано"}</span>
+                            <span className="info-value">{phoneNumber || "Не вказано"}</span>
                         )}
                     </div>
 
                     <div className="info-item">
                         <span className="info-label">Електронна пошта</span>
-                        {/* Email обычно read-only или меняется через отдельный процесс, оставляем текстом */}
                         <span className="info-value">{user?.email}</span>
                     </div>
 
@@ -221,14 +205,13 @@ const PersonalData = () => {
                             />
                         ) : (
                             <span className="info-value">
-                                {formData.birthDate ? new Date(formData.birthDate).toLocaleDateString('uk-UA') : "Не вказано"}
+                                {birthDate ? new Date(birthDate).toLocaleDateString('uk-UA') : "Не вказано"}
                             </span>
                         )}
                     </div>
                 </div>
             </section>
 
-            {/* Секция: Адреса */}
             <section className="profile-section">
                 <h2>Мої адреси доставки</h2>
                 {isEditing ? (

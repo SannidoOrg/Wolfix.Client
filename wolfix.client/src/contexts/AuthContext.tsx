@@ -6,7 +6,6 @@ import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
 import { User, RoleRequestDto, TokenRequestDto, RegisterDto } from "../types/auth";
 
-// Ответ от /api/account/roles
 interface UserRolesResponse {
     accountId: string;
     email: string;
@@ -34,27 +33,25 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     const [user, setUser] = useState<User | null>(null);
     const { setLoading, showNotification } = useGlobalContext();
 
-    // --- ЛОГИКА ПАРСИНГА ТОКЕНА ---
     const decodeAndNormalizeUser = (token: string): User | null => {
         try {
             const raw: any = jwtDecode(token);
-            console.log("🔐 Decoded Token:", raw); // Лог для проверки в консоли
+            console.log("🔐 Decoded Token:", raw);
 
-            // 1. Ищем Account ID (обычно это 'sub' или 'nameidentifier')
+            // 1. ID Аккаунта (Identity)
             const accountId =
                 raw.sub ||
                 raw.id ||
                 raw.accountId ||
                 raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
-            // 2. Ищем Customer ID (Ваш кастомный клейм profile_id)
+            // 2. ID Покупателя (Business Logic) - ЭТО ГЛАВНОЕ
             const customerId =
-                raw.profile_id ||  // <-- ГЛАВНОЕ ИСПРАВЛЕНИЕ
+                raw.profile_id ||  // <-- Берем из твоего токена
                 raw.customerId ||
                 raw.CustomerId ||
                 raw.customer_id;
 
-            // 3. Ищем Роль
             const rawRole =
                 raw.role ||
                 raw.roles ||
@@ -62,7 +59,6 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
             const userRole = Array.isArray(rawRole) ? rawRole[0] : rawRole;
 
-            // 4. Ищем Email
             const userEmail =
                 raw.email ||
                 raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"];
@@ -70,12 +66,12 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             if (!accountId) return null;
 
             return {
-                userId: accountId,      // Для совместимости
-                accountId: accountId,   // Истинный ID аккаунта
-                customerId: customerId, // ID профиля для запросов данных
+                userId: accountId,
+                accountId: accountId,
+                customerId: customerId, // Теперь это поле заполнено правильным ID
                 email: userEmail,
                 role: userRole,
-                ...raw                  // Сохраняем остальные поля
+                ...raw
             };
         } catch (error) {
             console.error("Token decode error:", error);
@@ -83,29 +79,21 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
-    // Проверка токена при старте приложения
     useEffect(() => {
         const token = sessionStorage.getItem("authToken");
         if (token) {
             const userData = decodeAndNormalizeUser(token);
-            if (userData) {
-                setUser(userData);
-            } else {
-                // Если токен битый, удаляем его
-                sessionStorage.removeItem("authToken");
-            }
+            if (userData) setUser(userData);
+            else sessionStorage.removeItem("authToken");
         }
     }, []);
 
     const handleAuthSuccess = (token: string) => {
         sessionStorage.setItem("authToken", token);
         const userData = decodeAndNormalizeUser(token);
-        if (userData) {
-            setUser(userData);
-        }
+        if (userData) setUser(userData);
     };
 
-    // 1. Получение списка ролей (Шаг 1 входа)
     const fetchUserRoles = async (credentials: RoleRequestDto) => {
         setLoading(true);
         try {
@@ -116,20 +104,16 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             return null;
         } catch (error: any) {
             console.error("Fetch roles error:", error);
-            // Не показываем алерт здесь, чтобы ProfileModal мог сам обработать ошибку (показать красный текст)
             return null;
         } finally {
             setLoading(false);
         }
     };
 
-    // 2. Получение токена с конкретной ролью (Шаг 2 входа)
     const loginWithRole = async (credentials: TokenRequestDto) => {
         setLoading(true);
         try {
             const response = await api.post('/api/account/token', credentials);
-
-            // Бэкенд возвращает строку токена напрямую или объект { token: "..." }
             const token = typeof response.data === 'string' ? response.data : response.data?.token;
 
             if (token) {
@@ -147,14 +131,11 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
-    // 3. Регистрация
     const register = async (details: RegisterDto) => {
         setLoading(true);
         try {
             const response = await api.post('/api/account/customer/register', details);
-
             if (response.status === 200 || response.status === 201) {
-                // После успешной регистрации пытаемся сразу войти как Customer
                 const loginSuccess = await loginWithRole({
                     email: details.email,
                     password: details.password,
@@ -179,14 +160,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         window.location.href = '/';
     };
 
-    const value = {
-        user,
-        isAuthenticated: !!user,
-        fetchUserRoles,
-        loginWithRole,
-        register,
-        logout,
-    };
+    const value = { user, isAuthenticated: !!user, fetchUserRoles, loginWithRole, register, logout };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
