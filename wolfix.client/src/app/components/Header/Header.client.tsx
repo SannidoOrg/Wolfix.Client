@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ProfileModal from "../ProfileModal/ProfileModal.client";
 import Search from "./Search.client";
-import CatalogModal from "../CatalogModal/CatalogModal.client"; // Импортируем новый компонент
+import CatalogModal from "../CatalogModal/CatalogModal.client";
+import CartModal from "./CartModal.client"; // Импорт модалки корзины
 import { useAuth } from "../../../contexts/AuthContext";
+import { useUser } from "../../../contexts/UserContext"; // Для отображения кол-ва товаров (бейджик)
 import "../../../styles/Header.css";
 
 interface IHeaderClientProps {
@@ -16,12 +18,16 @@ interface IHeaderClientProps {
 }
 
 const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchChange }) => {
-    const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Для профиля
-    const [isCatalogOpen, setIsCatalogOpen] = useState<boolean>(false); // Для каталога
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [isCatalogOpen, setIsCatalogOpen] = useState<boolean>(false);
+    const [isCartOpen, setIsCartOpen] = useState<boolean>(false); // Состояние корзины
 
     const profileButtonRef = useRef<HTMLButtonElement | null>(null);
+    const cartButtonRef = useRef<HTMLAnchorElement | null>(null); // Реф для кнопки корзины
+
     const router = useRouter();
     const { isAuthenticated } = useAuth();
+    const { cart } = useUser(); // Получаем корзину для бейджика
 
     const handleProfileClick = () => {
         if (isAuthenticated) {
@@ -37,16 +43,26 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
         document.body.style.overflow = 'auto';
     };
 
-    // Управление каталогом
     const toggleCatalog = () => {
         if (isCatalogOpen) {
             setIsCatalogOpen(false);
             document.body.style.overflow = 'auto';
         } else {
             setIsCatalogOpen(true);
-            document.body.style.overflow = 'hidden'; // Блокируем скролл страницы
+            document.body.style.overflow = 'hidden';
         }
     };
+
+    const handleCartClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (isCartOpen) {
+            setIsCartOpen(false);
+        } else {
+            setIsCartOpen(true);
+        }
+    };
+
+    const itemsCount = cart?.items.length || 0;
 
     return (
         <div className="header-container">
@@ -71,9 +87,7 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
                     </div>
                 </a>
 
-                {/* КНОПКА КАТАЛОГА */}
                 <div className="catalog-container">
-                    {/* Заменили Link на button-like div */}
                     <div className="catalog-link" onClick={toggleCatalog} style={{cursor: 'pointer'}}>
                         <img src="/icons/Cataloge.png" alt="Cataloge Icon" />
                         {isCatalogOpen ? 'Закрити' : 'Каталог'}
@@ -85,18 +99,43 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
                     <div className="user-icons">
                         <div className="icon-group">
                             <Link href="/wip" className="icon"><img src="/icons/notification.png" alt="Notification Icon" /></Link>
-                            <Link href="/wip" className="icon"><img src="/icons/selected.png" alt="Selected Icon" /></Link>
+                            <Link href="/profile/favorites" className="icon"><img src="/icons/selected.png" alt="Favorites" /></Link>
                             <Link href="/wip" className="icon"><img src="/icons/comparison.png" alt="Comparison Icon" /></Link>
-                            <Link href="/wip" className="icon"><img src="/icons/cart.png" alt="Cart Icon" /></Link>
+
+                            {/* КОРЗИНА */}
+                            <div className="icon" style={{position: 'relative'}}>
+                                <a href="/profile/cart" onClick={handleCartClick} ref={cartButtonRef}>
+                                    <img src="/icons/cart.png" alt="Cart Icon" />
+                                    {itemsCount > 0 && (
+                                        <span style={{
+                                            position: 'absolute',
+                                            top: '-5px',
+                                            right: '-5px',
+                                            backgroundColor: '#FF6B00',
+                                            color: 'white',
+                                            borderRadius: '50%',
+                                            width: '18px',
+                                            height: '18px',
+                                            fontSize: '11px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}>
+                                            {itemsCount}
+                                        </span>
+                                    )}
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </header>
 
             <ProfileModal isOpen={isModalOpen} onClose={handleCloseModal} anchorRef={profileButtonRef} />
-
-            {/* Вставляем модалку каталога */}
             <CatalogModal isOpen={isCatalogOpen} onClose={() => { setIsCatalogOpen(false); document.body.style.overflow = 'auto'; }} />
+
+            {/* Вставляем модалку корзины */}
+            <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} anchorRef={cartButtonRef} />
         </div>
     );
 };

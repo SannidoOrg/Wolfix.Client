@@ -12,6 +12,7 @@ interface UserContextType {
     favorites: FavoriteItemDto[];
     fetchCart: () => Promise<void>;
     addToCart: (productId: string) => Promise<void>;
+    removeFromCart: (cartItemId: string) => Promise<void>;
     fetchFavorites: () => Promise<void>;
     addToFavorites: (productId: string) => Promise<void>;
     removeFromFavorites: (productId: string) => Promise<void>;
@@ -60,6 +61,22 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
+    const removeFromCart = async (cartItemId: string) => {
+        if (!user?.customerId) return;
+        setLoading(true);
+        try {
+            // Swagger: DELETE /api/customers/cart-items/{customerId}/{cartItemId}
+            await api.delete(`/api/customers/cart-items/${user.customerId}/${cartItemId}`);
+            showNotification("Товар видалено з кошика", "success");
+            await fetchCart();
+        } catch (error) {
+            console.error("Failed to remove from cart:", error);
+            showNotification("Помилка видалення з кошика", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const fetchFavorites = async () => {
         if (!user?.customerId) return;
         try {
@@ -72,7 +89,6 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
     const addToFavorites = async (productId: string) => {
         if (!user?.customerId) return;
-        // Оптимистичное обновление UI (чтобы сердечко загоралось мгновенно)
         setLoading(true);
         try {
             await api.post('/api/customers/favorites', {
@@ -93,11 +109,8 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         if (!user?.customerId) return;
         setLoading(true);
         try {
-            // Важно: используем productId как favoriteItemId согласно нашей логике
             await api.delete(`/api/customers/favorites/${user.customerId}/${productId}`);
             showNotification("Видалено з обраного", "success");
-
-            // Обновляем локальный стейт мгновенно
             setFavorites(prev => prev.filter(item => item.id !== productId));
         } catch (error) {
             console.error("Failed to remove from favorites:", error);
@@ -126,6 +139,7 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         favorites,
         fetchCart,
         addToCart,
+        removeFromCart,
         fetchFavorites,
         addToFavorites,
         removeFromFavorites,
