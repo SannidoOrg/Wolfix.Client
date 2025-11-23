@@ -14,6 +14,8 @@ interface UserContextType {
     addToCart: (productId: string) => Promise<void>;
     fetchFavorites: () => Promise<void>;
     addToFavorites: (productId: string) => Promise<void>;
+    removeFromFavorites: (productId: string) => Promise<void>;
+    isProductInFavorites: (productId: string) => boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -27,13 +29,11 @@ export const useUser = () => {
 export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [cart, setCart] = useState<CustomerCartItemsDto | null>(null);
     const [favorites, setFavorites] = useState<FavoriteItemDto[]>([]);
-    const { setLoading } = useGlobalContext();
+    const { setLoading, showNotification } = useGlobalContext();
     const { user, isAuthenticated } = useAuth();
 
     const fetchCart = async () => {
-        // ВАЖНО: Используем customerId
         if (!user?.customerId) return;
-
         try {
             const response = await api.get(`/api/customers/cart-items/${user.customerId}`);
             setCart(response.data);
@@ -50,9 +50,11 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
                 customerId: user.customerId,
                 productId
             });
+            showNotification("Товар додано до кошика", "success");
             await fetchCart();
         } catch (error) {
             console.error("Failed to add to cart:", error);
+            showNotification("Помилка додавання до кошика", "error");
         } finally {
             setLoading(false);
         }
@@ -70,18 +72,43 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
     const addToFavorites = async (productId: string) => {
         if (!user?.customerId) return;
+        // Оптимистичное обновление UI (чтобы сердечко загоралось мгновенно)
         setLoading(true);
         try {
             await api.post('/api/customers/favorites', {
                 customerId: user.customerId,
                 productId
             });
+            showNotification("Додано до обраного", "success");
             await fetchFavorites();
         } catch (error) {
             console.error("Failed to add to favorites:", error);
+            showNotification("Помилка додавання до обраного", "error");
         } finally {
             setLoading(false);
         }
+    };
+
+    const removeFromFavorites = async (productId: string) => {
+        if (!user?.customerId) return;
+        setLoading(true);
+        try {
+            // Важно: используем productId как favoriteItemId согласно нашей логике
+            await api.delete(`/api/customers/favorites/${user.customerId}/${productId}`);
+            showNotification("Видалено з обраного", "success");
+
+            // Обновляем локальный стейт мгновенно
+            setFavorites(prev => prev.filter(item => item.id !== productId));
+        } catch (error) {
+            console.error("Failed to remove from favorites:", error);
+            showNotification("Помилка видалення", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const isProductInFavorites = (productId: string): boolean => {
+        return favorites.some(item => item.id === productId);
     };
 
     useEffect(() => {
@@ -101,6 +128,8 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         addToCart,
         fetchFavorites,
         addToFavorites,
+        removeFromFavorites,
+        isProductInFavorites
     };
 
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

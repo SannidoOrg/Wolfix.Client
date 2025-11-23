@@ -34,7 +34,7 @@ const ProfileSidebar = () => {
                     <li><Link href="/profile/bonuses" className={isActive('/profile/bonuses')}>Бонуси</Link></li>
                     <li><Link href="/wip" className={isActive('/profile/orders')}>Замовлення</Link></li>
                     <li><Link href="/wip">Відгуки</Link></li>
-                    <li><Link href="/wip">Обране</Link></li>
+                    <li><Link href="/profile/favorites">Обране</Link></li>
                     <li><Link href="/wip">Список порівнянь</Link></li>
                     <li><Link href="/wip">Кошик</Link></li>
                     <li><Link href="/wip">Мої картки</Link></li>
