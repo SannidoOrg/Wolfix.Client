@@ -12,9 +12,9 @@ const BonusesClient = () => {
 
     useEffect(() => {
         const fetchBonuses = async () => {
-            if (user?.userId) {
+            if (user?.customerId) {
                 try {
-                    const res = await api.get(`/api/customers/${user.userId}`);
+                    const res = await api.get(`/api/customers/${user.customerId}`);
                     // Если API вернул данные, берем бонусы
                     if (res.data) {
                         setBonuses(res.data.bonusesAmount || 0);

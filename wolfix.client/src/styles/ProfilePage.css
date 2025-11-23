@@ -233,3 +233,59 @@
     border-radius: 4px;
     border: 1px solid #eee;
 }
+
+/* ... (предыдущий код) ... */
+
+/* --- РЕДАКТИРОВАНИЕ --- */
+.profile-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    color: #333;
+    font-family: inherit;
+    background-color: #fff;
+    transition: border-color 0.2s;
+}
+
+.profile-input:focus {
+    outline: none;
+    border-color: #FF6B00;
+    box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.1);
+}
+
+/* Группа кнопок при редактировании */
+.edit-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-save {
+    background-color: #FF6B00;
+    color: white;
+    border: none;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-save:hover {
+    background-color: #e65c00;
+}
+
+.btn-cancel {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    padding: 8px 24px;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background-color: #e0e0e0;
+}
