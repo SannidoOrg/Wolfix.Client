@@ -10,7 +10,7 @@ import Footer from "../components/Footer/Footer.server";
 import api from "@/lib/api";
 import { DeliveryOption, OrderPaymentOption, PlaceOrderDto } from "@/types/order";
 import { CustomerDto } from "@/types/customer";
-import { DeliveryMethodDto, CityDto, DepartmentDto } from "@/types/delivery"; // Импорт новых типов
+import { DeliveryMethodDto } from "@/types/delivery";
 import "../../styles/Checkout.css";
 
 const CheckoutPage = () => {
@@ -22,6 +22,7 @@ const CheckoutPage = () => {
     // --- Данные Заказчика ---
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [middleName, setMiddleName] = useState("");
     const [phone, setPhone] = useState("");
     const [email, setEmail] = useState("");
 
@@ -29,16 +30,16 @@ const CheckoutPage = () => {
     const [isRecipientSame, setIsRecipientSame] = useState(true);
     const [recFirstName, setRecFirstName] = useState("");
     const [recLastName, setRecLastName] = useState("");
+    const [recMiddleName, setRecMiddleName] = useState("");
     const [recPhone, setRecPhone] = useState("");
 
     // --- Данные для доставки (API) ---
     const [apiDeliveryMethods, setApiDeliveryMethods] = useState<DeliveryMethodDto[]>([]);
 
     // --- Выбор пользователя ---
-    // 0 = NovaPoshta, 1 = UkrPoshta, 2 = Courier (Enum с сервера)
     const [deliveryOptionEnum, setDeliveryOptionEnum] = useState<DeliveryOption>(DeliveryOption.NovaPoshta);
 
-    // Состояние для селекторов (ID выбранных объектов)
+    // ID выбранных объектов
     const [selectedMethodId, setSelectedMethodId] = useState<string>("");
     const [selectedCityId, setSelectedCityId] = useState<string>("");
     const [selectedDeptId, setSelectedDeptId] = useState<string>("");
@@ -62,10 +63,12 @@ const CheckoutPage = () => {
                 const res = await api.get<DeliveryMethodDto[]>("/api/delivery-methods/delivery-methods");
                 setApiDeliveryMethods(res.data);
 
-                // По умолчанию выбираем первый метод, если есть
                 if (res.data.length > 0) {
-                    setSelectedMethodId(res.data[0].id);
-                    determineDeliveryEnum(res.data[0].name);
+                    const firstMethod = res.data[0];
+                    setSelectedMethodId(firstMethod.id);
+                    const lowerName = firstMethod.name.toLowerCase();
+                    if (lowerName.includes("нова")) setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
+                    else if (lowerName.includes("укр")) setDeliveryOptionEnum(DeliveryOption.UkrPoshta);
                 }
             } catch (e) {
                 console.error("Failed to fetch delivery methods", e);
@@ -81,34 +84,54 @@ const CheckoutPage = () => {
             try {
                 const res = await api.get<CustomerDto>(`/api/customers/${user.customerId}`);
                 const profile = res.data;
+
                 setFirstName(profile.fullName?.firstName || '');
                 setLastName(profile.fullName?.lastName || '');
+                setMiddleName(profile.fullName?.middleName || '');
                 setPhone(profile.phoneNumber || '');
                 setEmail(user.email || '');
+
                 setRecFirstName(profile.fullName?.firstName || '');
                 setRecLastName(profile.fullName?.lastName || '');
+                setRecMiddleName(profile.fullName?.middleName || '');
                 setRecPhone(profile.phoneNumber || '');
 
-                if (profile.address?.city) setManualCity(profile.address.city);
-                if (profile.address?.street) setStreet(profile.address.street);
-                if (profile.address?.houseNumber) setHouse(String(profile.address.houseNumber));
+                if (profile.address) {
+                    if (profile.address.city) setManualCity(profile.address.city);
+                    if (profile.address.street) setStreet(profile.address.street);
+                    if (profile.address.houseNumber) setHouse(String(profile.address.houseNumber));
+                }
             } catch (e) { console.error(e); }
         };
+
         if (user) loadProfileData();
     }, [user]);
 
-    // --- Хелперы для выборки данных ---
-    const currentApiMethod = apiDeliveryMethods.find(m => m.id === selectedMethodId);
+    // --- ОПТИМИЗАЦИЯ: Мемоизация ---
+    const currentApiMethod = useMemo(() => {
+        return apiDeliveryMethods.find(m => m.id === selectedMethodId);
+    }, [apiDeliveryMethods, selectedMethodId]);
 
-    const currentCityList = currentApiMethod?.cities || [];
-    const currentCity = currentCityList.find(c => c.id === selectedCityId);
+    const currentCityList = useMemo(() => {
+        return currentApiMethod?.cities || [];
+    }, [currentApiMethod]);
 
-    const currentDepartmentList = currentCity?.departments || [];
-    const currentDepartment = currentDepartmentList.find(d => d.id === selectedDeptId);
+    const currentCity = useMemo(() => {
+        return currentCityList.find(c => c.id === selectedCityId);
+    }, [currentCityList, selectedCityId]);
 
-    // Определяем Enum (0, 1) на основе имени метода с сервера
-    const determineDeliveryEnum = (name: string) => {
-        const lowerName = name.toLowerCase();
+    const currentDepartmentList = useMemo(() => {
+        return currentCity?.departments || [];
+    }, [currentCity]);
+
+    // Обработчик смены метода (API методы)
+    const handleMethodChange = (methodId: string, methodName: string) => {
+        setSelectedMethodId(methodId);
+        // Сбрасываем селекты
+        setSelectedCityId("");
+        setSelectedDeptId("");
+
+        const lowerName = methodName.toLowerCase();
         if (lowerName.includes("нова") || lowerName.includes("nova")) {
             setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
         } else if (lowerName.includes("укр") || lowerName.includes("ukr")) {
@@ -116,30 +139,20 @@ const CheckoutPage = () => {
         }
     };
 
-    // Обработчик смены метода
-    const handleMethodChange = (methodId: string) => {
-        setSelectedMethodId(methodId);
-        const method = apiDeliveryMethods.find(m => m.id === methodId);
-        if (method) determineDeliveryEnum(method.name);
-
-        // Сброс вложенных выборов
-        setSelectedCityId("");
-        setSelectedDeptId("");
-    };
-
-    // Обработчик выбора курьера
+    // Обработчик курьера
     const handleCourierSelect = () => {
         setDeliveryOptionEnum(DeliveryOption.Courier);
-        // Сбрасываем ID метода API, чтобы скрыть селекты
+        // Сбрасываем ID метода, чтобы useMemo вернул undefined и не искал в списках
         setSelectedMethodId("courier");
     };
 
-    // --- Валидация и Сабмит ---
+    // --- Сабмит ---
     const handleSubmit = async () => {
         if (!user?.customerId) {
             showNotification("Необхідна авторизація", "error");
             return;
         }
+
         if (!firstName || !lastName || !phone) {
             showNotification("Заповніть контактні дані", "error");
             return;
@@ -149,45 +162,52 @@ const CheckoutPage = () => {
         let finalDeptNumber: number | undefined = undefined;
         let finalStreet: string | undefined = undefined;
         let finalHouse: number | undefined = undefined;
-        let methodName = "";
+        let methodNameString = "";
 
-        // Логика сбора данных доставки
         if (deliveryOptionEnum === DeliveryOption.Courier) {
             if (!manualCity || !street || !house) {
-                showNotification("Заповніть адресу доставки", "error");
+                showNotification("Заповніть адресу для кур'єра", "error");
                 return;
             }
             finalCity = manualCity;
             finalStreet = street;
             finalHouse = Number(house);
-            methodName = "Адресна доставка кур'єром";
+            methodNameString = "Адресна доставка кур'єром";
         } else {
-            // Доставка в отделение (API)
-            if (!selectedCityId || !selectedDeptId || !currentCity || !currentDepartment) {
+            if (!selectedCityId || !selectedDeptId) {
                 showNotification("Оберіть місто та відділення", "error");
                 return;
             }
+            const dept = currentDepartmentList.find(d => d.id === selectedDeptId);
+            if (!currentCity || !dept) return;
+
             finalCity = currentCity.name;
-            finalDeptNumber = currentDepartment.number;
-            methodName = currentApiMethod?.name || "Доставка у відділення";
+            finalDeptNumber = dept.number;
+            methodNameString = currentApiMethod?.name || "Доставка";
         }
 
         setLoading(true);
+
+        const totalItemsPrice = cart?.totalCartPriceWithoutBonuses || 0;
+        const deliveryPrice = deliveryOptionEnum === DeliveryOption.Courier ? 70 : 0;
+        const grandTotal = totalItemsPrice - appliedBonuses + deliveryPrice;
 
         const orderDto: PlaceOrderDto = {
             order: {
                 customerId: user.customerId,
                 customerFirstName: firstName,
                 customerLastName: lastName,
+                customerMiddleName: middleName,
                 customerEmail: email,
                 customerPhoneNumber: phone,
 
                 recipientFirstName: isRecipientSame ? firstName : recFirstName,
                 recipientLastName: isRecipientSame ? lastName : recLastName,
+                recipientMiddleName: isRecipientSame ? middleName : recMiddleName,
                 recipientPhoneNumber: isRecipientSame ? phone : recPhone,
 
                 deliveryOption: deliveryOptionEnum,
-                deliveryMethodName: methodName,
+                deliveryMethodName: methodNameString,
 
                 deliveryInfoCity: finalCity,
                 deliveryInfoNumber: finalDeptNumber,
@@ -196,9 +216,9 @@ const CheckoutPage = () => {
 
                 withBonuses: appliedBonuses > 0,
                 usedBonusesAmount: appliedBonuses,
-                price: cart!.totalCartPriceWithoutBonuses - appliedBonuses + (deliveryOptionEnum === DeliveryOption.Courier ? 70 : 0)
+                price: grandTotal
             },
-            orderItems: cart!.items.map(item => ({
+            orderItems: (cart?.items || []).map(item => ({
                 productId: item.id,
                 quantity: 1,
                 price: item.price,
@@ -208,25 +228,38 @@ const CheckoutPage = () => {
         };
 
         try {
-            await api.post("/api/orders", orderDto);
-            showNotification("Замовлення успішно створено!", "success");
+            const endpoint = paymentMethod === OrderPaymentOption.Card ? "/api/orders/with-payment" : "/api/orders";
+            await api.post(endpoint, orderDto);
+            showNotification("Замовлення успішно оформлено!", "success");
             await fetchCart();
             router.push("/profile/orders");
-        } catch (error) {
-            console.error(error);
-            showNotification("Помилка створення замовлення", "error");
+        } catch (error: any) {
+            console.error("Order error:", error);
+            showNotification("Помилка оформлення", "error");
         } finally {
             setLoading(false);
         }
     };
 
-    // --- Render Helpers ---
-    if (!cart || cart.items.length === 0) return null; // Или лоадер
+    if (!cart || cart.items.length === 0) {
+        return (
+            <div className="checkout-page">
+                <Header logoAlt="Wolfix" />
+                <div style={{ padding: '100px', textAlign: 'center' }}>
+                    <h2>Кошик порожній</h2>
+                    <button onClick={() => router.push("/")} className="checkout-btn" style={{width: 'auto', marginTop: '20px'}}>
+                        На головну
+                    </button>
+                </div>
+                <Footer />
+            </div>
+        );
+    }
 
     const totalItemsPrice = cart.totalCartPriceWithoutBonuses;
-    const courierPrice = 70;
-    const deliveryCost = deliveryOptionEnum === DeliveryOption.Courier ? courierPrice : 0;
-    const grandTotal = totalItemsPrice - appliedBonuses + deliveryCost;
+    const deliveryPrice = deliveryOptionEnum === DeliveryOption.Courier ? 70 : 0;
+    const grandTotal = totalItemsPrice - appliedBonuses + deliveryPrice;
+    const userBonuses = cart.bonusesAmount;
 
     return (
         <div className="checkout-page">
@@ -235,25 +268,39 @@ const CheckoutPage = () => {
 
             <div className="checkout-layout">
                 <div className="checkout-form-column">
-                    {/* 1. Контакты */}
+
+                    {/* 1. ЗАМОВНИК */}
                     <div className="checkout-section">
                         <h2 className="section-title">Замовник</h2>
                         <div className="form-grid-row">
-                            <input className="form-input" placeholder="Прізвище" value={lastName} onChange={e => setLastName(e.target.value)} />
-                            <input className="form-input" placeholder="Ім'я" value={firstName} onChange={e => setFirstName(e.target.value)} />
+                            <div className="form-control">
+                                <input className="form-input" placeholder="Прізвище" value={lastName} onChange={e => setLastName(e.target.value)} />
+                            </div>
+                            <div className="form-control">
+                                <input className="form-input" placeholder="Ім'я" value={firstName} onChange={e => setFirstName(e.target.value)} />
+                            </div>
                         </div>
                         <div className="form-grid-row">
-                            <input className="form-input" placeholder="Телефон" value={phone} onChange={e => setPhone(e.target.value)} />
-                            <input className="form-input" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+                            <div className="form-control">
+                                <input className="form-input" placeholder="По батькові" value={middleName} onChange={e => setMiddleName(e.target.value)} />
+                            </div>
+                            <div className="form-control">
+                                <input className="form-input" placeholder="Телефон (+380...)" value={phone} onChange={e => setPhone(e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="form-grid-row">
+                            <div className="form-control">
+                                <input className="form-input" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+                            </div>
                         </div>
                     </div>
 
-                    {/* 2. Доставка */}
+                    {/* 2. СПОСІБ ДОСТАВКИ */}
                     <div className="checkout-section">
                         <h2 className="section-title">Спосіб доставки</h2>
                         <div className="radio-group">
 
-                            {/* Динамические методы с сервера (Отделения) */}
+                            {/* API Методы (Нова Пошта, Укрпошта) */}
                             {apiDeliveryMethods.map(method => (
                                 <label key={method.id} className="radio-label">
                                     <div className="radio-content">
@@ -261,8 +308,9 @@ const CheckoutPage = () => {
                                             type="radio"
                                             className="custom-radio"
                                             name="delivery"
+                                            // Проверяем строго ID метода, если он выбран
                                             checked={selectedMethodId === method.id}
-                                            onChange={() => handleMethodChange(method.id)}
+                                            onChange={() => handleMethodChange(method.id, method.name)}
                                         />
                                         <span className="radio-text">{method.name} (Відділення)</span>
                                     </div>
@@ -270,7 +318,7 @@ const CheckoutPage = () => {
                                 </label>
                             ))}
 
-                            {/* Статический метод: Курьер */}
+                            {/* Курьер */}
                             <label className="radio-label">
                                 <div className="radio-content">
                                     <input
@@ -282,12 +330,14 @@ const CheckoutPage = () => {
                                     />
                                     <span className="radio-text">Адресна доставка кур'єром</span>
                                 </div>
-                                <span className="delivery-price">{courierPrice} грн</span>
+                                <span className="delivery-price">70 грн</span>
                             </label>
                         </div>
 
-                        {/* Селекторы для API методов */}
-                        {selectedMethodId !== "courier" && selectedMethodId !== "" && (
+                        {/* БЛОК ВЫБОРА: ВЗАИМОИСКЛЮЧАЮЩИЙ РЕНДЕРИНГ */}
+
+                        {/* 1. Если выбрана доставка в отделение (ЛЮБОЕ кроме курьера) */}
+                        {deliveryOptionEnum !== DeliveryOption.Courier && (
                             <div style={{marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px'}}>
                                 <select
                                     className="form-input"
@@ -316,7 +366,7 @@ const CheckoutPage = () => {
                             </div>
                         )}
 
-                        {/* Поля для Курьера */}
+                        {/* 2. Если выбран курьер */}
                         {deliveryOptionEnum === DeliveryOption.Courier && (
                             <div style={{marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px'}}>
                                 <input className="form-input" placeholder="Місто" value={manualCity} onChange={e => setManualCity(e.target.value)} />
@@ -328,7 +378,7 @@ const CheckoutPage = () => {
                         )}
                     </div>
 
-                    {/* 3. Оплата */}
+                    {/* 3. ОПЛАТА */}
                     <div className="checkout-section">
                         <h2 className="section-title">Спосіб оплати</h2>
                         <div className="radio-group">
@@ -347,36 +397,49 @@ const CheckoutPage = () => {
                         </div>
                     </div>
 
-                    {/* 4. Получатель */}
+                    {/* 4. ОТРИМУВАЧ */}
                     <div className="checkout-section">
-                        <h2 className="section-title">Отримувач</h2>
-                        <div className="recipient-block">
-                            <div className="recipient-info">
-                                {isRecipientSame ? `${lastName} ${firstName}, ${phone}` : `${recLastName} ${recFirstName}, ${recPhone}`}
-                            </div>
+                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px'}}>
+                            <h2 className="section-title" style={{margin:0}}>Отримувач</h2>
                             <button className="change-recipient-btn" onClick={() => setIsRecipientSame(!isRecipientSame)}>
                                 {isRecipientSame ? "Змінити" : "Я отримувач"}
                             </button>
                         </div>
-                        {!isRecipientSame && (
-                            <div style={{marginTop: '15px'}}>
+
+                        {isRecipientSame ? (
+                            <div className="recipient-block">
+                                <div className="recipient-info">
+                                    {lastName} {firstName} {middleName}, {phone}
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{marginTop: '10px'}}>
                                 <div className="form-grid-row">
                                     <input className="form-input" placeholder="Прізвище" value={recLastName} onChange={e => setRecLastName(e.target.value)} />
                                     <input className="form-input" placeholder="Ім'я" value={recFirstName} onChange={e => setRecFirstName(e.target.value)} />
                                 </div>
-                                <input className="form-input" placeholder="Телефон" value={recPhone} onChange={e => setRecPhone(e.target.value)} />
+                                <div className="form-grid-row">
+                                    <input className="form-input" placeholder="По батькові" value={recMiddleName} onChange={e => setRecMiddleName(e.target.value)} />
+                                    <input className="form-input" placeholder="Телефон" value={recPhone} onChange={e => setRecPhone(e.target.value)} />
+                                </div>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Правая колонка (Итоги) */}
+                {/* ПРАВАЯ КОЛОНКА */}
                 <div className="checkout-summary-column">
                     <h3 className="summary-title">Разом</h3>
+
                     <div className="summary-items-list">
                         {cart.items.map(item => (
                             <div key={item.id} className="summary-item">
-                                <img src={item.photoUrl || '/placeholder.png'} className="summary-item-img" onError={e => e.currentTarget.src='/placeholder.png'}/>
+                                <img
+                                    src={item.photoUrl || "/placeholder.png"}
+                                    className="summary-item-img"
+                                    onError={e => e.currentTarget.src='/placeholder.png'}
+                                    alt={item.title}
+                                />
                                 <div className="summary-item-info">
                                     <div className="summary-item-title">{item.title}</div>
                                     <div className="summary-item-price">{item.price.toLocaleString()} грн</div>
@@ -385,34 +448,55 @@ const CheckoutPage = () => {
                         ))}
                     </div>
 
-                    {/* Бонусы */}
                     <div className="bonuses-section">
-                        <div className="bonuses-balance"><span>Бонусів доступно:</span><strong>{cart.bonusesAmount}</strong></div>
+                        <div className="bonuses-balance">
+                            <span>Бонусів доступно:</span>
+                            <strong>{userBonuses}</strong>
+                        </div>
                         <div className="bonuses-input-group">
                             <input
                                 type="number"
                                 className="bonus-input"
                                 value={bonusesToUse}
                                 onChange={e => setBonusesToUse(Number(e.target.value))}
-                                placeholder="Сума списання"
                             />
-                            <button className="apply-bonus-btn" onClick={() => {
-                                const max = Math.floor(cart.totalCartPriceWithoutBonuses * 0.5);
-                                const valid = Math.min(bonusesToUse, cart.bonusesAmount, max);
-                                setAppliedBonuses(valid);
-                                showNotification(`Списано ${valid} бонусів`, "success");
-                            }}>ОК</button>
+                            <button
+                                className="apply-bonus-btn"
+                                onClick={() => {
+                                    const max = Math.floor(cart.totalCartPriceWithoutBonuses * 0.5);
+                                    const valid = Math.min(bonusesToUse, userBonuses, max);
+                                    setAppliedBonuses(valid);
+                                    setBonusesToUse(valid);
+                                    showNotification(`Списано ${valid} бонусів`, "success");
+                                }}
+                            >
+                                ОК
+                            </button>
                         </div>
                     </div>
 
                     <div className="summary-totals">
-                        <div className="total-row"><span>Товари</span><span>{totalItemsPrice.toLocaleString()} грн</span></div>
-                        <div className="total-row"><span>Доставка</span><span>{deliveryCost} грн</span></div>
-                        <div className="total-row" style={{color:'green'}}><span>Знижка</span><span>-{appliedBonuses} грн</span></div>
-                        <div className="total-main-row"><span>До сплати</span><span className="grand-total">{grandTotal.toLocaleString()} грн</span></div>
+                        <div className="total-row">
+                            <span>Товари</span>
+                            <span>{totalItemsPrice.toLocaleString()} грн</span>
+                        </div>
+                        <div className="total-row">
+                            <span>Доставка</span>
+                            <span>{deliveryPrice > 0 ? `${deliveryPrice} грн` : 'За тарифами'}</span>
+                        </div>
+                        <div className="total-row" style={{color: '#28a745'}}>
+                            <span>Знижка</span>
+                            <span>-{appliedBonuses} грн</span>
+                        </div>
+                        <div className="total-main-row">
+                            <span>До сплати</span>
+                            <span className="grand-total">{grandTotal.toLocaleString()} грн</span>
+                        </div>
                     </div>
 
-                    <button className="confirm-order-btn" onClick={handleSubmit}>Підтвердити замовлення</button>
+                    <button className="confirm-order-btn" onClick={handleSubmit}>
+                        Підтвердити замовлення
+                    </button>
                 </div>
             </div>
             <Footer />
