@@ -8,7 +8,7 @@ import { useGlobalContext } from "@/contexts/GlobalContext";
 import Header from "../components/Header/Header.client";
 import Footer from "../components/Footer/Footer.server";
 import api from "@/lib/api";
-import { DeliveryOption, OrderPaymentOption, PlaceOrderDto } from "@/types/order";
+import { DeliveryOption, OrderPaymentOption, PlaceOrderDto, OrderPlacedWithPaymentDto } from "@/types/order";
 import { CustomerDto } from "@/types/customer";
 import { DeliveryMethodDto } from "@/types/delivery";
 import "../../styles/Checkout.css";
@@ -234,14 +234,16 @@ const CheckoutPage = () => {
         try {
             const endpoint = paymentMethod === OrderPaymentOption.Card ? "/api/orders/with-payment" : "/api/orders";
 
-            const response = await api.post(endpoint, orderDto);
+            // Внимание: теперь типизируем ответ как any или OrderPlacedWithPaymentDto
+            // Для простоты используем any, чтобы обработать оба случая (void для cash, object для card)
+            const response = await api.post<any>(endpoint, orderDto);
 
             if (paymentMethod === OrderPaymentOption.Card) {
-                // Получаем ClientSecret и делаем редирект на страницу оплаты
-                const secret = response.data;
-                if (secret && typeof secret === 'string') {
-                    // Кодируем secret, так как он содержит спецсимволы
-                    router.push(`/payment?clientSecret=${encodeURIComponent(secret)}`);
+                const data = response.data as OrderPlacedWithPaymentDto;
+
+                if (data && data.clientSecret && data.orderId) {
+                    // Перенаправляем на страницу оплаты с clientSecret и orderId
+                    router.push(`/payment?clientSecret=${encodeURIComponent(data.clientSecret)}&orderId=${data.orderId}`);
                 } else {
                     showNotification("Помилка отримання даних для оплати", "error");
                 }
@@ -399,6 +401,7 @@ const CheckoutPage = () => {
                     <div className="checkout-section">
                         <h2 className="section-title">Спосіб оплати</h2>
                         <div className="radio-group">
+                            {/* Оплата при получении */}
                             <label className="radio-label">
                                 <div className="radio-content">
                                     <input
@@ -411,6 +414,7 @@ const CheckoutPage = () => {
                                 </div>
                             </label>
 
+                            {/* Оплата картой */}
                             <label className="radio-label">
                                 <div className="radio-content">
                                     <input
@@ -419,7 +423,7 @@ const CheckoutPage = () => {
                                         checked={paymentMethod === OrderPaymentOption.Card}
                                         onChange={() => setPaymentMethod(OrderPaymentOption.Card)}
                                     />
-                                    <span className="radio-text">Оплата карткою</span>
+                                    <span className="radio-text">Оплатити карткою</span>
                                 </div>
                             </label>
                         </div>

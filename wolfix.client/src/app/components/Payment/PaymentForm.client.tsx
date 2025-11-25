@@ -5,8 +5,13 @@ import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { useRouter } from "next/navigation";
 import { useUser } from "@/contexts/UserContext";
 import { useGlobalContext } from "@/contexts/GlobalContext";
+import api from "@/lib/api";
 
-const PaymentForm: FC = () => {
+interface PaymentFormProps {
+    orderId: string; // ID заказа обязателен для подтверждения
+}
+
+const PaymentForm: FC<PaymentFormProps> = ({ orderId }) => {
     const stripe = useStripe();
     const elements = useElements();
     const router = useRouter();
@@ -26,25 +31,35 @@ const PaymentForm: FC = () => {
         setIsLoading(true);
         setMessage(null);
 
-        // Получаем URL сайта для редиректа
+        // Получаем URL для редиректа на случай 3D Secure или подобных сценариев
         const returnUrl = typeof window !== 'undefined'
             ? `${window.location.origin}/profile/orders`
             : undefined;
 
+        // 1. Подтверждаем платеж в Stripe
         const { error, paymentIntent } = await stripe.confirmPayment({
             elements,
             confirmParams: {
                 return_url: returnUrl || "",
             },
+            // Важно: используем 'if_required', чтобы обработать успешную оплату вручную без редиректа, если это возможно
             redirect: "if_required",
         });
 
         if (error) {
             setMessage(error.message || "Сталася помилка під час оплати.");
         } else if (paymentIntent && paymentIntent.status === "succeeded") {
-            showNotification("Оплата пройшла успішно!", "success");
-            await fetchCart(); // Очищаем корзину
-            router.push("/profile/orders");
+            // 2. Если оплата успешна, вызываем наш API для смены статуса заказа
+            try {
+                await api.patch(`/api/orders/${orderId}/paid`);
+
+                showNotification("Оплата пройшла успішно!", "success");
+                await fetchCart(); // Очищаем корзину
+                router.push("/profile/orders");
+            } catch (apiError) {
+                console.error("Error marking order as paid:", apiError);
+                setMessage("Оплата пройшла, але виникла помилка при оновленні статусу замовлення. Зверніться до підтримки.");
+            }
         } else {
             setMessage("Платіж не пройшов. Спробуйте ще раз.");
         }

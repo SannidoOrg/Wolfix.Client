@@ -12,16 +12,15 @@ import "../../styles/PaymentPage.css";
 const PaymentPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
+
     const clientSecretParam = searchParams.get("clientSecret");
+    const orderIdParam = searchParams.get("orderId"); // Получаем ID заказа
 
     const [clientSecret, setClientSecret] = useState<string | null>(null);
 
     useEffect(() => {
         if (clientSecretParam) {
             setClientSecret(clientSecretParam);
-        } else {
-            // Если секрета нет, редиректим на главную или историю заказов
-            // router.push("/");
         }
     }, [clientSecretParam]);
 
@@ -44,9 +43,10 @@ const PaymentPage = () => {
                     <h1 className="payment-title">Оплата замовлення</h1>
                     <p className="payment-subtitle">Введіть дані картки для завершення покупки</p>
 
-                    {clientSecret ? (
+                    {clientSecret && orderIdParam ? (
                         <Elements stripe={stripePromise} options={options}>
-                            <PaymentForm />
+                            {/* Передаем orderId в форму */}
+                            <PaymentForm orderId={orderIdParam} />
                         </Elements>
                     ) : (
                         <div className="loading-payment">Завантаження платіжної системи...</div>
