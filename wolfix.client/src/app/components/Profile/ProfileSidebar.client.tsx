@@ -36,7 +36,7 @@ const ProfileSidebar = () => {
                     <li><Link href="/profile/favorites">Обране</Link></li>
                     <li><Link href="/profile/cart">Кошик</Link></li>
                     <li><Link href="/wip">Сповіщення</Link></li>
-                    <li><Link href="/become-seller">Стати продавцем</Link></li>
+                    <li><Link href="/profile/become-seller">Стати продавцем</Link></li>
                 </ul>
             </nav>
             <div className="sidebar-footer">
