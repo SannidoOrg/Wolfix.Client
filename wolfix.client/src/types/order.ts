@@ -36,6 +36,7 @@ export interface CustomerOrderDto {
 }
 
 export interface CreateOrderItemDto {
+    cartItemId?: string; // Новое поле (опционально, т.к. может быть заказ не из корзины)
     productId: string;
     photoUrl?: string;
     title?: string;

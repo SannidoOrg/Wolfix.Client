@@ -136,7 +136,6 @@ const CheckoutPage = () => {
 
         const lowerName = methodName.toLowerCase();
 
-        // Логика переключения Enum (исправление с прошлого шага сохранено)
         if (lowerName.includes("укр") || lowerName.includes("ukr")) {
             setDeliveryOptionEnum(DeliveryOption.UkrPoshta);
         } else {
@@ -147,7 +146,6 @@ const CheckoutPage = () => {
     // Обработчик курьера
     const handleCourierSelect = () => {
         setDeliveryOptionEnum(DeliveryOption.Courier);
-        // Сбрасываем ID метода
         setSelectedMethodId("courier");
     };
 
@@ -224,7 +222,8 @@ const CheckoutPage = () => {
                 price: grandTotal
             },
             orderItems: (cart?.items || []).map(item => ({
-                productId: item.id,
+                cartItemId: item.id,       // <--- FIX: Передаем ID элемента корзины
+                productId: item.productId, // <--- FIX: Передаем ID продукта
                 quantity: 1,
                 price: item.price,
                 title: item.title,
@@ -233,15 +232,8 @@ const CheckoutPage = () => {
         };
 
         try {
-            // ИЗМЕНЕНИЕ: Выбор эндпоинта в зависимости от метода оплаты
             const endpoint = paymentMethod === OrderPaymentOption.Card ? "/api/orders/with-payment" : "/api/orders";
-
-            // Делаем запрос
-            const response = await api.post(endpoint, orderDto);
-
-            // Если оплата картой, сервер может вернуть clientSecret или URL.
-            // Пока просто уведомляем и редиректим, как для обычного заказа.
-            // В будущем здесь можно добавить редирект на платежный шлюз.
+            await api.post(endpoint, orderDto);
 
             showNotification("Замовлення успішно оформлено!", "success");
             await fetchCart();
@@ -407,7 +399,7 @@ const CheckoutPage = () => {
                                 </div>
                             </label>
 
-                            {/* Оплата картой (АКТИВИРОВАНО) */}
+                            {/* Оплата картой */}
                             <label className="radio-label">
                                 <div className="radio-content">
                                     <input
