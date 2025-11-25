@@ -186,6 +186,9 @@ const CheckoutPage = () => {
 
             finalCity = currentCity.name;
             finalDeptNumber = dept.number;
+            // ИСПРАВЛЕНИЕ ЗДЕСЬ: Заполняем улицу и дом из выбранного отделения
+            finalStreet = dept.street || undefined;
+            finalHouse = dept.houseNumber || undefined;
             methodNameString = currentApiMethod?.name || "Доставка";
         }
 
@@ -234,15 +237,12 @@ const CheckoutPage = () => {
         try {
             const endpoint = paymentMethod === OrderPaymentOption.Card ? "/api/orders/with-payment" : "/api/orders";
 
-            // Внимание: теперь типизируем ответ как any или OrderPlacedWithPaymentDto
-            // Для простоты используем any, чтобы обработать оба случая (void для cash, object для card)
             const response = await api.post<any>(endpoint, orderDto);
 
             if (paymentMethod === OrderPaymentOption.Card) {
                 const data = response.data as OrderPlacedWithPaymentDto;
 
                 if (data && data.clientSecret && data.orderId) {
-                    // Перенаправляем на страницу оплаты с clientSecret и orderId
                     router.push(`/payment?clientSecret=${encodeURIComponent(data.clientSecret)}&orderId=${data.orderId}`);
                 } else {
                     showNotification("Помилка отримання даних для оплати", "error");
