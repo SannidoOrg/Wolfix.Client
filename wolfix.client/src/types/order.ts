@@ -17,6 +17,12 @@ export enum OrderPaymentStatus {
     Failed = 2
 }
 
+// Новый enum согласно изменениям на бэкенде (0 - Preparing, 1 - Sent/Delivered)
+export enum OrderDeliveryStatus {
+    Preparing = 0,
+    Sent = 1
+}
+
 export interface DeliveryInfo {
     number?: number;
     city?: string;
@@ -27,9 +33,11 @@ export interface DeliveryInfo {
 
 export interface CustomerOrderDto {
     id: string;
-    number?: string; // Новое поле из Swagger
+    number?: string;
     paymentOption: OrderPaymentOption;
     paymentStatus: OrderPaymentStatus;
+    // Добавлено поле статуса доставки
+    deliveryStatus: OrderDeliveryStatus;
     deliveryInfo: DeliveryInfo;
     deliveryMethodName?: string;
     price: number;

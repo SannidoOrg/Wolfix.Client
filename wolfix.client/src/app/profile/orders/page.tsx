@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
-import { CustomerOrderDto, OrderPaymentStatus } from "@/types/order";
+import { CustomerOrderDto, OrderPaymentStatus, OrderDeliveryStatus } from "@/types/order";
 import "../../../styles/Orders.css";
 import Link from "next/link";
 
@@ -47,8 +47,8 @@ export default function OrdersPage() {
         }).format(date);
     };
 
-    // Получение статуса и класса стилей
-    const getStatusInfo = (status: OrderPaymentStatus) => {
+    // Получение статуса оплаты и класса стилей
+    const getPaymentStatusInfo = (status: OrderPaymentStatus) => {
         switch (status) {
             case OrderPaymentStatus.Paid:
                 return { label: "Оплачено", className: "status-paid" };
@@ -58,6 +58,18 @@ export default function OrdersPage() {
                 return { label: "Скасовано / Помилка", className: "status-failed" };
             default:
                 return { label: "Невідомо", className: "" };
+        }
+    };
+
+    // Получение статуса доставки
+    const getDeliveryStatusInfo = (status: OrderDeliveryStatus) => {
+        switch (status) {
+            case OrderDeliveryStatus.Preparing:
+                return { label: "Готується до відправлення", color: "#eab308" }; // Желтый/Оранжевый
+            case OrderDeliveryStatus.Sent:
+                return { label: "В дорозі до вас", color: "#22c55e" }; // Зеленый
+            default:
+                return { label: "В обробці", color: "#6b7280" }; // Серый
         }
     };
 
@@ -71,7 +83,6 @@ export default function OrdersPage() {
                 <h1 className="orders-title">Мої замовлення</h1>
                 <div className="orders-tabs">
                     <div className="orders-tab active">Історія</div>
-                    {/* Другие вкладки убраны согласно требованию */}
                 </div>
             </div>
 
@@ -85,7 +96,8 @@ export default function OrdersPage() {
             ) : (
                 <div className="orders-list">
                     {orders.map((order) => {
-                        const statusInfo = getStatusInfo(order.paymentStatus);
+                        const paymentStatusInfo = getPaymentStatusInfo(order.paymentStatus);
+                        const deliveryStatusInfo = getDeliveryStatusInfo(order.deliveryStatus);
 
                         return (
                             <div key={order.id} className="order-card">
@@ -94,8 +106,20 @@ export default function OrdersPage() {
                                         <span className="order-number">
                                             № {order.number || order.id.slice(0, 8)}
                                         </span>
-                                        <span className={`order-status ${statusInfo.className}`}>
-                                            {statusInfo.label}
+                                        {/* Статус оплаты */}
+                                        <span className={`order-status ${paymentStatusInfo.className}`}>
+                                            {paymentStatusInfo.label}
+                                        </span>
+                                        {/* Статус доставки (новый) */}
+                                        <span
+                                            className="order-status"
+                                            style={{
+                                                color: deliveryStatusInfo.color,
+                                                marginLeft: '8px',
+                                                fontWeight: 500
+                                            }}
+                                        >
+                                            | {deliveryStatusInfo.label}
                                         </span>
                                     </div>
                                     <div className="order-date">
@@ -110,7 +134,6 @@ export default function OrdersPage() {
                                     <div className="order-price">
                                         {order.price.toLocaleString()} ₴
                                     </div>
-                                    {/* Кнопка "Оцінити" убрана */}
                                     <Link href={`/profile/orders/${order.id}`} className="order-details-btn">
                                         Деталі замовлення
                                     </Link>

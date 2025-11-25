@@ -32,7 +32,7 @@ const ProfileSidebar = () => {
                     {/* Главная страница профиля - это "Особисті дані" */}
                     <li><Link href="/profile" className={isActive('/profile')}>Особисті дані</Link></li>
                     <li><Link href="/profile/bonuses" className={isActive('/profile/bonuses')}>Бонуси</Link></li>
-                    <li><Link href="/wip" className={isActive('/profile/orders')}>Замовлення</Link></li>
+                    <li><Link href="/profile/orders" className={isActive('/profile/orders')}>Замовлення</Link></li>
                     <li><Link href="/profile/favorites">Обране</Link></li>
                     <li><Link href="/profile/cart">Кошик</Link></li>
                     <li><Link href="/wip">Сповіщення</Link></li>
