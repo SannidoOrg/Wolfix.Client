@@ -70,7 +70,6 @@ const CheckoutPage = () => {
                     if (lowerName.includes("укр") || lowerName.includes("ukr")) {
                         setDeliveryOptionEnum(DeliveryOption.UkrPoshta);
                     } else {
-                        // По умолчанию считаем Новой Почтой или просто отделением
                         setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
                     }
                 }
@@ -137,13 +136,10 @@ const CheckoutPage = () => {
 
         const lowerName = methodName.toLowerCase();
 
-        // Логика переключения Enum.
-        // ВАЖНО: Если это не Укрпочта, мы принудительно ставим NovaPoshta,
-        // чтобы гарантированно выйти из режима Courier.
+        // Логика переключения Enum (исправление с прошлого шага сохранено)
         if (lowerName.includes("укр") || lowerName.includes("ukr")) {
             setDeliveryOptionEnum(DeliveryOption.UkrPoshta);
         } else {
-            // Для Новой почты и всех остальных методов API (кроме курьера, который отдельной кнопкой)
             setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
         }
     };
@@ -151,7 +147,7 @@ const CheckoutPage = () => {
     // Обработчик курьера
     const handleCourierSelect = () => {
         setDeliveryOptionEnum(DeliveryOption.Courier);
-        // Сбрасываем ID метода, чтобы useMemo вернул undefined и не искал в списках
+        // Сбрасываем ID метода
         setSelectedMethodId("courier");
     };
 
@@ -237,8 +233,16 @@ const CheckoutPage = () => {
         };
 
         try {
+            // ИЗМЕНЕНИЕ: Выбор эндпоинта в зависимости от метода оплаты
             const endpoint = paymentMethod === OrderPaymentOption.Card ? "/api/orders/with-payment" : "/api/orders";
-            await api.post(endpoint, orderDto);
+
+            // Делаем запрос
+            const response = await api.post(endpoint, orderDto);
+
+            // Если оплата картой, сервер может вернуть clientSecret или URL.
+            // Пока просто уведомляем и редиректим, как для обычного заказа.
+            // В будущем здесь можно добавить редирект на платежный шлюз.
+
             showNotification("Замовлення успішно оформлено!", "success");
             await fetchCart();
             router.push("/profile/orders");
@@ -317,7 +321,6 @@ const CheckoutPage = () => {
                                             type="radio"
                                             className="custom-radio"
                                             name="delivery"
-                                            // Проверяем строго ID метода, если он выбран
                                             checked={selectedMethodId === method.id}
                                             onChange={() => handleMethodChange(method.id, method.name)}
                                         />
@@ -391,16 +394,29 @@ const CheckoutPage = () => {
                     <div className="checkout-section">
                         <h2 className="section-title">Спосіб оплати</h2>
                         <div className="radio-group">
+                            {/* Оплата при получении */}
                             <label className="radio-label">
                                 <div className="radio-content">
-                                    <input type="radio" className="custom-radio" checked={paymentMethod === OrderPaymentOption.Cash} onChange={() => setPaymentMethod(OrderPaymentOption.Cash)} />
+                                    <input
+                                        type="radio"
+                                        className="custom-radio"
+                                        checked={paymentMethod === OrderPaymentOption.Cash}
+                                        onChange={() => setPaymentMethod(OrderPaymentOption.Cash)}
+                                    />
                                     <span className="radio-text">Оплата під час отримання</span>
                                 </div>
                             </label>
-                            <label className="radio-label" style={{opacity: 0.5}}>
+
+                            {/* Оплата картой (АКТИВИРОВАНО) */}
+                            <label className="radio-label">
                                 <div className="radio-content">
-                                    <input type="radio" className="custom-radio" disabled />
-                                    <span className="radio-text">Оплатити карткою (Скоро)</span>
+                                    <input
+                                        type="radio"
+                                        className="custom-radio"
+                                        checked={paymentMethod === OrderPaymentOption.Card}
+                                        onChange={() => setPaymentMethod(OrderPaymentOption.Card)}
+                                    />
+                                    <span className="radio-text">Оплатити карткою</span>
                                 </div>
                             </label>
                         </div>
