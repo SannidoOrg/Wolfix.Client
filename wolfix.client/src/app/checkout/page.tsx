@@ -222,8 +222,8 @@ const CheckoutPage = () => {
                 price: grandTotal
             },
             orderItems: (cart?.items || []).map(item => ({
-                cartItemId: item.id,       // <--- FIX: Передаем ID элемента корзины
-                productId: item.productId, // <--- FIX: Передаем ID продукта
+                cartItemId: item.id,
+                productId: item.productId,
                 quantity: 1,
                 price: item.price,
                 title: item.title,
@@ -233,11 +233,24 @@ const CheckoutPage = () => {
 
         try {
             const endpoint = paymentMethod === OrderPaymentOption.Card ? "/api/orders/with-payment" : "/api/orders";
-            await api.post(endpoint, orderDto);
 
-            showNotification("Замовлення успішно оформлено!", "success");
-            await fetchCart();
-            router.push("/profile/orders");
+            const response = await api.post(endpoint, orderDto);
+
+            if (paymentMethod === OrderPaymentOption.Card) {
+                // Получаем ClientSecret и делаем редирект на страницу оплаты
+                const secret = response.data;
+                if (secret && typeof secret === 'string') {
+                    // Кодируем secret, так как он содержит спецсимволы
+                    router.push(`/payment?clientSecret=${encodeURIComponent(secret)}`);
+                } else {
+                    showNotification("Помилка отримання даних для оплати", "error");
+                }
+            } else {
+                showNotification("Замовлення успішно оформлено!", "success");
+                await fetchCart();
+                router.push("/profile/orders");
+            }
+
         } catch (error: any) {
             console.error("Order error:", error);
             showNotification("Помилка оформлення", "error");
@@ -386,7 +399,6 @@ const CheckoutPage = () => {
                     <div className="checkout-section">
                         <h2 className="section-title">Спосіб оплати</h2>
                         <div className="radio-group">
-                            {/* Оплата при получении */}
                             <label className="radio-label">
                                 <div className="radio-content">
                                     <input
@@ -399,7 +411,6 @@ const CheckoutPage = () => {
                                 </div>
                             </label>
 
-                            {/* Оплата картой */}
                             <label className="radio-label">
                                 <div className="radio-content">
                                     <input
@@ -408,7 +419,7 @@ const CheckoutPage = () => {
                                         checked={paymentMethod === OrderPaymentOption.Card}
                                         onChange={() => setPaymentMethod(OrderPaymentOption.Card)}
                                     />
-                                    <span className="radio-text">Оплатити карткою</span>
+                                    <span className="radio-text">Оплата карткою</span>
                                 </div>
                             </label>
                         </div>

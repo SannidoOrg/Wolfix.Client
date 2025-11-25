@@ -1,0 +1,93 @@
+.payment-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f9f9f9;
+}
+
+.payment-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.payment-card {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    text-align: center;
+}
+
+.payment-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #111;
+}
+
+.payment-subtitle {
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+.payment-form {
+    text-align: left;
+}
+
+.payment-error-message {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.pay-now-btn {
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: background-color 0.2s ease, transform 0.1s;
+}
+
+.pay-now-btn:hover {
+    background-color: #333;
+}
+
+.pay-now-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.loading-payment {
+    padding: 40px;
+    color: #888;
+    font-style: italic;
+}
+
+/* Адаптив */
+@media (max-width: 600px) {
+    .payment-card {
+        padding: 20px;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    .payment-title {
+        font-size: 1.5rem;
+    }
+}
