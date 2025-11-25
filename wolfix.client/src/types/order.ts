@@ -27,6 +27,7 @@ export interface DeliveryInfo {
 
 export interface CustomerOrderDto {
     id: string;
+    number?: string; // Новое поле из Swagger
     paymentOption: OrderPaymentOption;
     paymentStatus: OrderPaymentStatus;
     deliveryInfo: DeliveryInfo;
@@ -74,7 +75,6 @@ export interface PlaceOrderDto {
     orderItems: CreateOrderItemDto[];
 }
 
-// Новый интерфейс ответа
 export interface OrderPlacedWithPaymentDto {
     clientSecret?: string;
     orderId?: string;
