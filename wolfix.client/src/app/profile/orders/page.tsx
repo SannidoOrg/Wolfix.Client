@@ -134,7 +134,7 @@ export default function OrdersPage() {
                                     <div className="order-price">
                                         {order.price.toLocaleString()} ₴
                                     </div>
-                                    <Link href={`/profile/orders/${order.id}`} className="order-details-btn">
+                                    <Link href={`/wip`} className="order-details-btn">
                                         Деталі замовлення
                                     </Link>
                                 </div>
