@@ -67,8 +67,12 @@ const CheckoutPage = () => {
                     const firstMethod = res.data[0];
                     setSelectedMethodId(firstMethod.id);
                     const lowerName = firstMethod.name.toLowerCase();
-                    if (lowerName.includes("нова")) setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
-                    else if (lowerName.includes("укр")) setDeliveryOptionEnum(DeliveryOption.UkrPoshta);
+                    if (lowerName.includes("укр") || lowerName.includes("ukr")) {
+                        setDeliveryOptionEnum(DeliveryOption.UkrPoshta);
+                    } else {
+                        // По умолчанию считаем Новой Почтой или просто отделением
+                        setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
+                    }
                 }
             } catch (e) {
                 console.error("Failed to fetch delivery methods", e);
@@ -132,10 +136,15 @@ const CheckoutPage = () => {
         setSelectedDeptId("");
 
         const lowerName = methodName.toLowerCase();
-        if (lowerName.includes("нова") || lowerName.includes("nova")) {
-            setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
-        } else if (lowerName.includes("укр") || lowerName.includes("ukr")) {
+
+        // Логика переключения Enum.
+        // ВАЖНО: Если это не Укрпочта, мы принудительно ставим NovaPoshta,
+        // чтобы гарантированно выйти из режима Courier.
+        if (lowerName.includes("укр") || lowerName.includes("ukr")) {
             setDeliveryOptionEnum(DeliveryOption.UkrPoshta);
+        } else {
+            // Для Новой почты и всех остальных методов API (кроме курьера, который отдельной кнопкой)
+            setDeliveryOptionEnum(DeliveryOption.NovaPoshta);
         }
     };
 
