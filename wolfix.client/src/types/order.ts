@@ -6,20 +6,23 @@ export enum DeliveryOption {
     Courier = 2
 }
 
+// Updated: WhileReceiving = 0, Card = 1
 export enum OrderPaymentOption {
-    Cash = 0,
+    WhileReceiving = 0,
     Card = 1
 }
 
+// Updated: Unpaid = 0, Pending = 1, Paid = 2
 export enum OrderPaymentStatus {
-    Pending = 0,
-    Paid = 1,
-    Failed = 2
+    Unpaid = 0,
+    Pending = 1,
+    Paid = 2
 }
 
+// Updated: Preparing = 0, OnTheWay = 1
 export enum OrderDeliveryStatus {
     Preparing = 0,
-    Sent = 1
+    OnTheWay = 1
 }
 
 export interface DeliveryInfo {
@@ -43,8 +46,6 @@ export interface CustomerOrderDto {
     productsNames: string[];
 }
 
-// --- Новые типы для деталей заказа ---
-
 export interface OrderItemDetailsDto {
     id: string;
     photoUrl?: string;
@@ -62,10 +63,10 @@ export interface OrderDetailsDto {
     recipientMiddleName?: string;
     recipientPhoneNumber?: string;
 
-    // В Swagger эти поля пришли как string, но для UI удобнее мапить их или отображать как есть
-    deliveryStatus?: string;
-    paymentOption?: string;
-    paymentStatus?: string;
+    // Теперь строго типизированные enum, а не string
+    deliveryStatus: OrderDeliveryStatus;
+    paymentOption: OrderPaymentOption;
+    paymentStatus: OrderPaymentStatus;
 
     deliveryNumber?: number;
     deliveryCity?: string;
@@ -76,8 +77,6 @@ export interface OrderDetailsDto {
     price: number;
     orderItems: OrderItemDetailsDto[];
 }
-
-// --- DTO для создания заказа (без изменений) ---
 
 export interface CreateOrderItemDto {
     cartItemId?: string;

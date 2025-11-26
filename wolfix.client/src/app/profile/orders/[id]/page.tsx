@@ -1,16 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
-import { OrderDetailsDto } from "@/types/order";
+import {
+    OrderDetailsDto,
+    OrderPaymentStatus,
+    OrderDeliveryStatus,
+    OrderPaymentOption
+} from "@/types/order";
 import "../../../../styles/OrderDetailsPage.css";
 
 export default function OrderDetailsPage() {
     const params = useParams();
-    const router = useRouter();
-    const { id } = params; // Получаем ID заказа из URL
+    const { id } = params;
 
     const [order, setOrder] = useState<OrderDetailsDto | null>(null);
     const [loading, setLoading] = useState(true);
@@ -22,7 +26,6 @@ export default function OrderDetailsPage() {
 
             try {
                 setLoading(true);
-                // Запрос к новому эндпоинту: /api/orders/{orderId}/details
                 const response = await api.get<OrderDetailsDto>(`/api/orders/${id}/details`);
                 setOrder(response.data);
             } catch (err) {
@@ -51,7 +54,8 @@ export default function OrderDetailsPage() {
         );
     }
 
-    // Формирование адреса доставки
+    // --- Хелперы для отображения ---
+
     const getDeliveryAddress = () => {
         const parts = [];
         if (order.deliveryCity) parts.push(order.deliveryCity);
@@ -62,9 +66,35 @@ export default function OrderDetailsPage() {
         return parts.join(", ") || "Адреса не вказана";
     };
 
+    const getDeliveryStatusLabel = (status: OrderDeliveryStatus) => {
+        switch (status) {
+            case OrderDeliveryStatus.Preparing: return "Готується до відправки";
+            case OrderDeliveryStatus.OnTheWay: return "В дорозі";
+            default: return "В обробці";
+        }
+    };
+
+    const getPaymentOptionLabel = (option: OrderPaymentOption) => {
+        switch (option) {
+            case OrderPaymentOption.WhileReceiving: return "При отриманні";
+            case OrderPaymentOption.Card: return "Картою онлайн";
+            default: return "Невідомо";
+        }
+    };
+
+    const getPaymentStatusLabel = (status: OrderPaymentStatus) => {
+        switch (status) {
+            case OrderPaymentStatus.Paid: return { text: "Оплачено", color: "#22c55e" };
+            case OrderPaymentStatus.Pending: return { text: "В обробці", color: "#f59e0b" }; // Yellow/Orange
+            case OrderPaymentStatus.Unpaid: return { text: "Не оплачено", color: "#ef4444" }; // Red
+            default: return { text: "Невідомо", color: "#000" };
+        }
+    };
+
+    const paymentStatusInfo = getPaymentStatusLabel(order.paymentStatus);
+
     return (
         <div className="details-container">
-            {/* Header Section */}
             <div className="details-header">
                 <Link href="/profile/orders" className="back-link">
                     ← До списку замовлень
@@ -74,13 +104,13 @@ export default function OrderDetailsPage() {
                         Замовлення №{order.number || order.id.slice(0, 8)}
                     </h1>
                     <span className="details-status-badge">
-                        {order.deliveryStatus || "Статус невідомий"}
+                        {getDeliveryStatusLabel(order.deliveryStatus)}
                     </span>
                 </div>
             </div>
 
             <div className="details-grid">
-                {/* Left Column: Products */}
+                {/* Список товаров */}
                 <div className="items-card">
                     <h2 className="items-title">Товари ({order.orderItems?.length || 0})</h2>
 
@@ -111,7 +141,7 @@ export default function OrderDetailsPage() {
                     )}
                 </div>
 
-                {/* Right Column: Info Summary */}
+                {/* Информация справа */}
                 <div className="info-card">
                     <div className="info-section">
                         <div className="info-label">Отримувач</div>
@@ -124,7 +154,7 @@ export default function OrderDetailsPage() {
                     <div className="info-section">
                         <div className="info-label">Доставка</div>
                         <div className="info-value">
-                            <strong>{order.deliveryMethodName || "Самовивіз"}</strong><br/>
+                            <strong>{order.deliveryMethodName || "Доставка"}</strong><br/>
                             {getDeliveryAddress()}
                         </div>
                     </div>
@@ -132,12 +162,9 @@ export default function OrderDetailsPage() {
                     <div className="info-section">
                         <div className="info-label">Оплата</div>
                         <div className="info-value">
-                            {order.paymentOption || "Готівка"}<br/>
-                            <span style={{
-                                color: order.paymentStatus === 'Paid' ? '#22c55e' : '#f59e0b',
-                                fontWeight: 500
-                            }}>
-                                {order.paymentStatus === 'Paid' ? "Оплачено" : order.paymentStatus || "Очікує оплати"}
+                            {getPaymentOptionLabel(order.paymentOption)}<br/>
+                            <span style={{ color: paymentStatusInfo.color, fontWeight: 600 }}>
+                                {paymentStatusInfo.text}
                             </span>
                         </div>
                     </div>

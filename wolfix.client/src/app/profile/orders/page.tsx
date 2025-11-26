@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser } from "@/contexts/UserContext";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/api";
 import { CustomerOrderDto, OrderPaymentStatus, OrderDeliveryStatus } from "@/types/order";
@@ -20,7 +19,6 @@ export default function OrdersPage() {
             try {
                 setLoading(true);
                 const response = await api.get<CustomerOrderDto[]>(`/api/orders/${user.customerId}`);
-                // Сортируем от новых к старым
                 const sortedOrders = response.data.sort((a, b) =>
                     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                 );
@@ -46,31 +44,32 @@ export default function OrdersPage() {
         }).format(date);
     };
 
+    // Обновлено под новые статусы: Unpaid, Pending, Paid
     const getPaymentStatusInfo = (status: OrderPaymentStatus) => {
         switch (status) {
             case OrderPaymentStatus.Paid:
                 return { label: "Оплачено", className: "status-paid" };
             case OrderPaymentStatus.Pending:
-                return { label: "Очікує оплати", className: "status-pending" };
-            case OrderPaymentStatus.Failed:
-                return { label: "Скасовано", className: "status-failed" };
+                return { label: "В обробці", className: "status-pending" };
+            case OrderPaymentStatus.Unpaid:
+                return { label: "Не оплачено", className: "status-failed" };
             default:
                 return { label: "Невідомо", className: "" };
         }
     };
 
+    // Обновлено под новые статусы: Preparing, OnTheWay
     const getDeliveryStatusInfo = (status: OrderDeliveryStatus) => {
         switch (status) {
             case OrderDeliveryStatus.Preparing:
-                return { label: "Готується до відправлення", color: "#eab308" };
-            case OrderDeliveryStatus.Sent:
-                return { label: "Відправлено", color: "#22c55e" };
+                return { label: "Готується до відправки", color: "#eab308" };
+            case OrderDeliveryStatus.OnTheWay:
+                return { label: "В дорозі", color: "#22c55e" };
             default:
-                return { label: "В обробці", color: "#6b7280" };
+                return { label: "Обробка", color: "#6b7280" };
         }
     };
 
-    // Функция для форматирования списка товаров (iPhone 15, Case...)
     const formatProductNames = (names: string[]) => {
         if (!names || names.length === 0) return "Товари не вказано";
         return names.join(", ");
@@ -109,13 +108,9 @@ export default function OrdersPage() {
                                         <span className="order-number">
                                             № {order.number || order.id.slice(0, 8)}
                                         </span>
-
-                                        {/* Статус оплаты */}
                                         <span className={`order-status ${paymentStatusInfo.className}`}>
                                             {paymentStatusInfo.label}
                                         </span>
-
-                                        {/* Статус доставки */}
                                         <span
                                             className="order-delivery-status"
                                             style={{ color: deliveryStatusInfo.color }}
@@ -124,7 +119,6 @@ export default function OrdersPage() {
                                         </span>
                                     </div>
 
-                                    {/* НОВЫЙ БЛОК: Названия товаров */}
                                     <div className="order-products-preview">
                                         {formatProductNames(order.productsNames)}
                                     </div>
