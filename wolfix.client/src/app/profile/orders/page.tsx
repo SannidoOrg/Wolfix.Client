@@ -35,7 +35,6 @@ export default function OrdersPage() {
         fetchOrders();
     }, [user?.customerId]);
 
-    // Форматирование даты
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         return new Intl.DateTimeFormat('uk-UA', {
@@ -47,7 +46,6 @@ export default function OrdersPage() {
         }).format(date);
     };
 
-    // Получение статуса оплаты и класса стилей
     const getPaymentStatusInfo = (status: OrderPaymentStatus) => {
         switch (status) {
             case OrderPaymentStatus.Paid:
@@ -55,22 +53,27 @@ export default function OrdersPage() {
             case OrderPaymentStatus.Pending:
                 return { label: "Очікує оплати", className: "status-pending" };
             case OrderPaymentStatus.Failed:
-                return { label: "Скасовано / Помилка", className: "status-failed" };
+                return { label: "Скасовано", className: "status-failed" };
             default:
                 return { label: "Невідомо", className: "" };
         }
     };
 
-    // Получение статуса доставки
     const getDeliveryStatusInfo = (status: OrderDeliveryStatus) => {
         switch (status) {
             case OrderDeliveryStatus.Preparing:
-                return { label: "Готується до відправлення", color: "#eab308" }; // Желтый/Оранжевый
+                return { label: "Готується до відправлення", color: "#eab308" };
             case OrderDeliveryStatus.Sent:
-                return { label: "В дорозі до вас", color: "#22c55e" }; // Зеленый
+                return { label: "Відправлено", color: "#22c55e" };
             default:
-                return { label: "В обробці", color: "#6b7280" }; // Серый
+                return { label: "В обробці", color: "#6b7280" };
         }
+    };
+
+    // Функция для форматирования списка товаров (iPhone 15, Case...)
+    const formatProductNames = (names: string[]) => {
+        if (!names || names.length === 0) return "Товари не вказано";
+        return names.join(", ");
     };
 
     if (loading) {
@@ -106,27 +109,29 @@ export default function OrdersPage() {
                                         <span className="order-number">
                                             № {order.number || order.id.slice(0, 8)}
                                         </span>
+
                                         {/* Статус оплаты */}
                                         <span className={`order-status ${paymentStatusInfo.className}`}>
                                             {paymentStatusInfo.label}
                                         </span>
-                                        {/* Статус доставки (новый) */}
+
+                                        {/* Статус доставки */}
                                         <span
-                                            className="order-status"
-                                            style={{
-                                                color: deliveryStatusInfo.color,
-                                                marginLeft: '8px',
-                                                fontWeight: 500
-                                            }}
+                                            className="order-delivery-status"
+                                            style={{ color: deliveryStatusInfo.color }}
                                         >
                                             | {deliveryStatusInfo.label}
                                         </span>
                                     </div>
-                                    <div className="order-date">
-                                        {formatDate(order.createdAt)}
+
+                                    {/* НОВЫЙ БЛОК: Названия товаров */}
+                                    <div className="order-products-preview">
+                                        {formatProductNames(order.productsNames)}
                                     </div>
-                                    <div className="order-method">
-                                        {order.deliveryMethodName || "Доставка"}
+
+                                    <div className="order-meta">
+                                        <span className="order-date">{formatDate(order.createdAt)}</span>
+                                        <span className="order-method">{order.deliveryMethodName || "Доставка"}</span>
                                     </div>
                                 </div>
 
@@ -134,7 +139,7 @@ export default function OrdersPage() {
                                     <div className="order-price">
                                         {order.price.toLocaleString()} ₴
                                     </div>
-                                    <Link href={`/wip`} className="order-details-btn">
+                                    <Link href={`/profile/orders/${order.id}`} className="order-details-btn">
                                         Деталі замовлення
                                     </Link>
                                 </div>

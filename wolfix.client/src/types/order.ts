@@ -17,7 +17,7 @@ export enum OrderPaymentStatus {
     Failed = 2
 }
 
-// Новый enum согласно изменениям на бэкенде (0 - Preparing, 1 - Sent/Delivered)
+// Статус доставки
 export enum OrderDeliveryStatus {
     Preparing = 0,
     Sent = 1
@@ -36,12 +36,13 @@ export interface CustomerOrderDto {
     number?: string;
     paymentOption: OrderPaymentOption;
     paymentStatus: OrderPaymentStatus;
-    // Добавлено поле статуса доставки
     deliveryStatus: OrderDeliveryStatus;
     deliveryInfo: DeliveryInfo;
     deliveryMethodName?: string;
     price: number;
     createdAt: string; // date-time
+    // НОВОЕ ПОЛЕ: Список названий товаров
+    productsNames: string[];
 }
 
 export interface CreateOrderItemDto {

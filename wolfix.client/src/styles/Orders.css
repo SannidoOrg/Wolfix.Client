@@ -1,3 +1,5 @@
+/* src/styles/Orders.css */
+
 .orders-container {
     width: 100%;
     max-width: 900px;
@@ -57,7 +59,7 @@
     padding: 24px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start; /* Выравнивание по верху, чтобы список товаров не ломал верстку */
     transition: box-shadow 0.2s ease;
 }
 
@@ -68,32 +70,42 @@
 .order-left {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
+    flex: 1; /* Занимаем всё доступное место слева */
+    margin-right: 20px;
 }
 
 .order-number-row {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap; /* Чтобы статусы переносились на моб */
 }
 
 .order-number {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
     color: #111;
 }
 
 /* Статусы */
 .order-status {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     padding: 4px 10px;
     border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.order-delivery-status {
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .status-paid {
-    background-color: #e6f4ea;
-    color: #1e7e34;
+    background-color: #FFF4E5; /* Светло-оранжевый */
+    color: #FF6B00;
 }
 
 .status-pending {
@@ -106,15 +118,34 @@
     color: #dc3545;
 }
 
+/* НОВЫЕ СТИЛИ ДЛЯ СПИСКА ТОВАРОВ */
+.order-products-preview {
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    line-height: 1.4;
+
+    /* Ограничение в 2 строки с троеточием */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.order-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .order-date {
-    font-size: 14px;
-    color: #666;
+    font-size: 13px;
+    color: #888;
 }
 
 .order-method {
-    font-size: 14px;
-    color: #333;
-    margin-top: 4px;
+    font-size: 13px;
+    color: #666;
 }
 
 .order-right {
@@ -122,10 +153,11 @@
     flex-direction: column;
     align-items: flex-end;
     gap: 16px;
+    flex-shrink: 0; /* Правая колонка не сжимается */
 }
 
 .order-price {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: #111;
 }
@@ -159,8 +191,12 @@
 @media (max-width: 768px) {
     .order-card {
         flex-direction: column;
-        align-items: flex-start;
         gap: 20px;
+    }
+
+    .order-left {
+        margin-right: 0;
+        width: 100%;
     }
 
     .order-right {
