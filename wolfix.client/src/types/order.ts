@@ -17,7 +17,6 @@ export enum OrderPaymentStatus {
     Failed = 2
 }
 
-// Статус доставки
 export enum OrderDeliveryStatus {
     Preparing = 0,
     Sent = 1
@@ -40,10 +39,45 @@ export interface CustomerOrderDto {
     deliveryInfo: DeliveryInfo;
     deliveryMethodName?: string;
     price: number;
-    createdAt: string; // date-time
-    // НОВОЕ ПОЛЕ: Список названий товаров
+    createdAt: string;
     productsNames: string[];
 }
+
+// --- Новые типы для деталей заказа ---
+
+export interface OrderItemDetailsDto {
+    id: string;
+    photoUrl?: string;
+    title?: string;
+    quantity: number;
+    price: number;
+    productId: string;
+}
+
+export interface OrderDetailsDto {
+    id: string;
+    number?: string;
+    recipientFirstName?: string;
+    recipientLastName?: string;
+    recipientMiddleName?: string;
+    recipientPhoneNumber?: string;
+
+    // В Swagger эти поля пришли как string, но для UI удобнее мапить их или отображать как есть
+    deliveryStatus?: string;
+    paymentOption?: string;
+    paymentStatus?: string;
+
+    deliveryNumber?: number;
+    deliveryCity?: string;
+    deliveryStreet?: string;
+    deliveryHouseNumber?: number;
+    deliveryMethodName?: string;
+
+    price: number;
+    orderItems: OrderItemDetailsDto[];
+}
+
+// --- DTO для создания заказа (без изменений) ---
 
 export interface CreateOrderItemDto {
     cartItemId?: string;
