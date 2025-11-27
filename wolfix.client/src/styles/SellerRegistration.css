@@ -1,219 +1,216 @@
-body {
-    margin: 0;
-    background-color: #f4f5f5;
+.seller-registration-wrapper {
+    width: 100%;
+    max-width: 900px; /* Оптимальная ширина для чтения, но можно убрать, если нужно на всю панель */
+    margin: 0 auto;
+    padding: 20px 0;
 }
 
-.seller-page-layout {
+.registration-header {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.reg-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 8px;
+}
+
+.reg-subtitle {
+    color: #666;
+    font-size: 16px;
+}
+
+/* Секции формы */
+.form-section {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.section-title::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 18px;
+    background: #FF7E00; /* Wolfix Orange */
+    margin-right: 10px;
+    border-radius: 2px;
+}
+
+/* Сетка полей */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (min-width: 640px) {
+    .form-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Поля */
+.form-group {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    background-color: #f4f5f5;
+    gap: 6px;
 }
 
-.seller-header {
-    background-color: #0C3C3E;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 0 40px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.seller-header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    height: 100%;
-}
-
-.seller-logo-link {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    gap: 8px;
-}
-
-.marketplace-text {
-    font-size: 24px;
-    font-weight: normal;
-    color: #fff;
-    margin-left: 0;
-    margin-top: 15px;
-}
-
-.return-link {
-    color: #fff;
-    text-decoration: none;
+.form-group label {
+    font-size: 14px;
     font-weight: 500;
+    color: #4b5563;
 }
 
-.return-link:hover {
-    text-decoration: underline;
+.req {
+    color: #ef4444;
 }
 
-.seller-main-content {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    padding-top: 40px;
-    padding-bottom: 40px;
-    box-sizing: border-box;
-}
-
-.seller-form-wrapper {
+input, select {
     width: 100%;
-    max-width: 600px;
-}
-
-.form-step {
-    display: block;
-    margin-bottom: 8px;
-    color: #555;
-    font-size: 14px;
-}
-
-.seller-form-container {
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
     border-radius: 8px;
-    padding: 32px 40px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    font-size: 15px;
+    transition: all 0.2s;
+    background-color: #fff;
 }
 
-.form-title {
-    text-align: center;
-    font-size: 24px;
-    margin-bottom: 24px;
-    font-weight: 600;
-    position: relative;
-    padding-bottom: 12px;
-    color: #222;
+input:focus, select:focus {
+    outline: none;
+    border-color: #FF7E00;
+    box-shadow: 0 0 0 3px rgba(255, 126, 0, 0.1);
 }
 
-.form-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 3px;
-    background-color: #ff6600;
+input.error, select.error {
+    border-color: #ef4444;
 }
 
-.form-fieldset {
-    border: none;
-    padding: 0;
-    margin: 0;
+.error-msg {
+    color: #ef4444;
+    font-size: 12px;
 }
 
-.fieldset-legend {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: #333;
-    padding-left: 0;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 14px;
-    color: #333;
-}
-
-.form-input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-
-.form-input:disabled {
-    background-color: #e9ecef;
+.readonly-input {
+    background-color: #f3f4f6;
+    color: #9ca3af;
     cursor: not-allowed;
 }
 
-.input-with-prefix {
+/* Input group (https://) */
+.input-group {
     display: flex;
+    align-items: center;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.input-prefix {
+.input-group:focus-within {
+    border-color: #FF7E00;
+    box-shadow: 0 0 0 3px rgba(255, 126, 0, 0.1);
+}
+
+.input-group .prefix {
+    background: #f9fafb;
     padding: 10px 12px;
-    background-color: #e9ecef;
-    border: 1px solid #ccc;
-    border-right: none;
-    border-radius: 4px 0 0 4px;
-    color: #555;
+    color: #6b7280;
+    border-right: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.input-group input {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Checkbox */
+.checkbox-group {
     display: flex;
     align-items: center;
-    font-size: 16px;
+    gap: 10px;
+    margin-top: -10px;
 }
 
-.input-with-prefix .form-input {
-    flex-grow: 1;
-    border-radius: 0 4px 4px 0;
-}
-
-.form-group-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.form-group-checkbox input[type="checkbox"] {
+.checkbox-group input {
     width: 18px;
     height: 18px;
-    accent-color: #ff6600;
+    accent-color: #FF7E00;
 }
 
-.checkbox-label {
-    font-size: 14px;
-    color: #555;
-    cursor: pointer;
-}
-
-.form-footnote {
-    font-size: 12px;
-    color: #777;
-    margin-top: 24px;
-    line-height: 1.4;
-}
-
-.form-actions {
+/* File Upload */
+.file-upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 30px;
     text-align: center;
-    margin-top: 32px;
+    background: #f9fafb;
+    transition: border-color 0.2s;
 }
 
-.submit-button {
-    background-color: #ff6600;
+.file-upload-area:hover {
+    border-color: #FF7E00;
+    background: #fff;
+}
+
+.file-input {
+    margin-top: 10px;
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+
+.upload-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.upload-hint {
+    font-size: 12px;
+    color: #888;
+    margin-top: 8px;
+}
+
+/* Кнопка */
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: #FF7E00;
     color: white;
     border: none;
-    padding: 12px 40px;
-    border-radius: 6px;
-    cursor: pointer;
+    border-radius: 8px;
     font-size: 16px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.submit-button:hover {
-    background-color: #e65c00;
+.submit-btn:hover {
+    background: #e66a00;
 }
 
-.seller-footer {
-    background-color: #0C3C3E;
-    height: 64px;
-    width: 100%;
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }

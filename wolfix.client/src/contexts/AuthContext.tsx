@@ -19,7 +19,7 @@ interface AuthContextType {
     loginWithRole: (credentials: TokenRequestDto) => Promise<boolean>;
     register: (details: RegisterDto) => Promise<boolean>;
     logout: () => void;
-    assignRole: (data: any) => Promise<boolean>; // Добавил заглушку для assignRole, так как она используется в ProfilePage
+    assignRole: (data: any) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,16 +39,16 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             const raw: any = jwtDecode(token);
             console.log("🔐 Raw Token Claims:", raw);
 
-            // 1. ID Аккаунта (Identity)
+            // 1. ID Аккаунта (Identity) - поле 'sub'
             const accountId =
                 raw.sub ||
                 raw.id ||
                 raw.accountId ||
                 raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
 
-            // 2. ВАЖНО: ID Профиля (Покупателя/Продавца) из токена
-            // На твоем скриншоте поле называется "profile_id"
-            const customerId = raw.profile_id || raw.customerId;
+            // 2. ID Профиля (Покупателя) - поле 'profileId'
+            // Добавил проверку raw.profileId (camelCase), о которой вы сказали
+            const customerId = raw.profileId || raw.profile_id || raw.customerId;
 
             // Роль
             const rawRole =
@@ -65,10 +65,10 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
             const normalizedUser = {
                 userId: accountId,      // Alias
                 accountId: accountId,
-                customerId: customerId, // Здесь теперь точно будет значение из profile_id
+                customerId: customerId, // Теперь здесь будет правильный profileId
                 email: userEmail,
                 role: userRole,
-                ...raw
+                ...raw // Сохраняем все сырые поля на всякий случай
             };
 
             console.log("✅ Normalized User:", normalizedUser);
@@ -118,7 +118,6 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
 
             if (token) {
                 handleAuthSuccess(token);
-                // showNotification("Вхід успішний!", "success"); // Можно раскомментировать
                 return true;
             }
             return false;
@@ -154,8 +153,6 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
-    // Заглушка, так как endpoint для смены роли не был описан в последнем swagger,
-    // но он используется в ProfilePage.client.tsx
     const assignRole = async (data: any) => {
         console.log("Assign role logic placeholder", data);
         return true;
