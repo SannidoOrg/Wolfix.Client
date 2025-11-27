@@ -25,7 +25,7 @@ interface SellerApplicationFormValues {
     houseNumber: number;
     apartmentNumber?: number;
 
-    categoryId: string;
+    categoryId: string; // ID конечной подкатегории
     document: FileList;
 
     // Поля только для UI
@@ -35,24 +35,30 @@ interface SellerApplicationFormValues {
 const SellerRegistrationForm = () => {
     const { user } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [categories, setCategories] = useState<CategorySimpleDto[]>([]);
+
+    // Стейты для категорий
+    const [parentCategories, setParentCategories] = useState<CategorySimpleDto[]>([]);
+    const [childCategories, setChildCategories] = useState<CategorySimpleDto[]>([]);
+    const [selectedParentId, setSelectedParentId] = useState<string>("");
+    const [isLoadingChildren, setIsLoadingChildren] = useState(false);
 
     const {
         register,
         handleSubmit,
         reset,
+        setValue, // Нужно для сброса значения подкатегории
         formState: { errors }
     } = useForm<SellerApplicationFormValues>();
 
-    // Инициализация данных
+    // 1. Инициализация данных (Родительские категории + Профиль)
     useEffect(() => {
         const initData = async () => {
             try {
-                // 1. Загружаем категории
+                // Загружаем РОДИТЕЛЬСКИЕ категории
                 const catRes = await api.get<CategorySimpleDto[]>('/api/categories/parent');
-                if (catRes.data) setCategories(catRes.data);
+                if (catRes.data) setParentCategories(catRes.data);
 
-                // 2. Подставляем данные пользователя
+                // Подставляем данные пользователя
                 if (user) {
                     const targetId = user.customerId || user.profileId || user.accountId;
                     let profileData: any = {};
@@ -66,7 +72,6 @@ const SellerRegistrationForm = () => {
                         }
                     }
 
-                    // Форматируем дату
                     let formattedDate = "";
                     if (profileData.birthDate) {
                         formattedDate = new Date(profileData.birthDate).toISOString().split('T')[0];
@@ -81,9 +86,9 @@ const SellerRegistrationForm = () => {
                         birthDate: formattedDate,
                         city: profileData.address?.city || "",
                         street: profileData.address?.street || "",
-                        categoryId: "", // Категорию пользователь должен выбрать сам
                         houseNumber: profileData.address?.houseNumber,
-                        apartmentNumber: profileData.address?.apartmentNumber
+                        apartmentNumber: profileData.address?.apartmentNumber,
+                        categoryId: ""
                     });
                 }
             } catch (error) {
@@ -94,13 +99,44 @@ const SellerRegistrationForm = () => {
         initData();
     }, [user, reset]);
 
+    // 2. Эффект для загрузки ДОЧЕРНИХ категорий при выборе родителя
+    useEffect(() => {
+        const fetchChildCategories = async () => {
+            if (!selectedParentId) {
+                setChildCategories([]);
+                return;
+            }
+
+            setIsLoadingChildren(true);
+            try {
+                const res = await api.get<CategorySimpleDto[]>(`/api/categories/child/${selectedParentId}`);
+                setChildCategories(res.data || []);
+            } catch (error) {
+                console.error("Ошибка загрузки подкатегорий:", error);
+                setChildCategories([]);
+            } finally {
+                setIsLoadingChildren(false);
+            }
+        };
+
+        fetchChildCategories();
+    }, [selectedParentId]);
+
+    // Обработчик выбора родительской категории
+    const handleParentCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newParentId = e.target.value;
+        setSelectedParentId(newParentId);
+
+        // Сбрасываем выбранную подкатегорию, так как список изменится
+        setValue("categoryId", "");
+    };
+
     const onSubmit: SubmitHandler<SellerApplicationFormValues> = async (data) => {
         setIsSubmitting(true);
 
         try {
             const formData = new FormData();
 
-            // === Обязательные поля ===
             formData.append('firstName', data.firstName);
             formData.append('lastName', data.lastName);
             if (data.middleName) formData.append('middleName', data.middleName);
@@ -112,20 +148,15 @@ const SellerRegistrationForm = () => {
             formData.append('houseNumber', data.houseNumber.toString());
             if (data.apartmentNumber) formData.append('apartmentNumber', data.apartmentNumber.toString());
 
-            // === Логика Категории ===
-            // Отправляем ID
+            // Отправляем ID выбранной ПОДКАТЕГОРИИ
             formData.append('categoryId', data.categoryId);
 
-            // Находим и отправляем Название категории (сервер ожидает categoryName)
-            const selectedCategory = categories.find(c => c.id === data.categoryId);
+            // Находим название подкатегории для categoryName
+            const selectedCategory = childCategories.find(c => c.id === data.categoryId);
             if (selectedCategory) {
                 formData.append('categoryName', selectedCategory.name);
-            } else {
-                // На всякий случай, если что-то пошло не так
-                console.warn("Category name not found for ID:", data.categoryId);
             }
 
-            // === Документ ===
             if (data.document && data.document[0]) {
                 formData.append('document', data.document[0]);
             } else {
@@ -134,7 +165,6 @@ const SellerRegistrationForm = () => {
                 return;
             }
 
-            // Отправка
             const endpoint = user?.accountId
                 ? `/api/seller-applications/${user.accountId}`
                 : '/api/seller-applications';
@@ -144,7 +174,6 @@ const SellerRegistrationForm = () => {
             });
 
             alert("Заявка успішно відправлена!");
-            // Можно добавить сброс формы или редирект
         } catch (error: any) {
             console.error("Error submitting form:", error);
             const msg = error.response?.data?.message || error.response?.data || "Помилка при відправці заявки.";
@@ -163,7 +192,7 @@ const SellerRegistrationForm = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="registration-form">
 
-                {/* Секция 1: Личные данные */}
+                {/* --- 1. Особисті дані --- */}
                 <div className="form-section">
                     <h3 className="section-title">Особисті дані</h3>
                     <div className="form-grid">
@@ -219,7 +248,7 @@ const SellerRegistrationForm = () => {
                     </div>
                 </div>
 
-                {/* Секция 2: Адрес */}
+                {/* --- 2. Адреса --- */}
                 <div className="form-section">
                     <h3 className="section-title">Адреса проживання</h3>
                     <div className="form-grid">
@@ -258,27 +287,48 @@ const SellerRegistrationForm = () => {
                     </div>
                 </div>
 
-                {/* Секция 3: Магазин */}
+                {/* --- 3. Магазин (Категории) --- */}
                 <div className="form-section">
                     <h3 className="section-title">Інформація про магазин</h3>
                     <div className="form-grid">
-                        <div className="form-group full-width">
-                            <label>Категорія товарів <span className="req">*</span></label>
+
+                        {/* Выбор Родительской Категории */}
+                        <div className="form-group">
+                            <label>Оберіть категорію <span className="req">*</span></label>
                             <select
-                                {...register("categoryId", { required: "Оберіть категорію" })}
-                                className={errors.categoryId ? "error" : ""}
+                                value={selectedParentId}
+                                onChange={handleParentCategoryChange}
+                                className={!selectedParentId ? "" : "border-orange-500"} // Пример стилизации
                             >
-                                <option value="">Оберіть категорію...</option>
-                                {categories.map(c => (
+                                <option value="">-- Категорія --</option>
+                                {parentCategories.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Выбор Подкатегории (основное поле формы) */}
+                        <div className="form-group">
+                            <label>Оберіть підкатегорію <span className="req">*</span></label>
+                            <select
+                                {...register("categoryId", { required: "Оберіть підкатегорію" })}
+                                className={errors.categoryId ? "error" : ""}
+                                disabled={!selectedParentId || isLoadingChildren}
+                            >
+                                <option value="">
+                                    {isLoadingChildren ? "Завантаження..." : "-- Підкатегорія --"}
+                                </option>
+                                {childCategories.map(c => (
                                     <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}
                             </select>
                             {errors.categoryId && <span className="error-msg">{errors.categoryId.message}</span>}
                         </div>
+
                     </div>
                 </div>
 
-                {/* Секция 4: Документы */}
+                {/* --- 4. Документы --- */}
                 <div className="form-section">
                     <h3 className="section-title">Документи</h3>
                     <div className="file-upload-area">
