@@ -1,58 +1,59 @@
 .seller-registration-wrapper {
     width: 100%;
-    max-width: 900px; /* Оптимальная ширина для чтения, но можно убрать, если нужно на всю панель */
     margin: 0 auto;
     padding: 20px 0;
 }
 
 .registration-header {
-    margin-bottom: 30px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #E5E7EB;
+    padding-bottom: 15px;
 }
 
 .reg-title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
-    color: #111;
-    margin-bottom: 8px;
+    color: #111827;
+    margin-bottom: 6px;
 }
 
 .reg-subtitle {
-    color: #666;
-    font-size: 16px;
+    color: #6B7280;
+    font-size: 15px;
 }
 
 /* Секции формы */
 .form-section {
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    border: 1px solid #E5E7EB;
     border-radius: 12px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    /* Легкая тень для объема */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .section-title {
     font-size: 18px;
     font-weight: 600;
-    color: #333;
+    color: #1F2937;
     margin-bottom: 20px;
     display: flex;
     align-items: center;
 }
 
+/* Оранжевый акцент слева от заголовка */
 .section-title::before {
     content: '';
     display: block;
     width: 4px;
     height: 18px;
-    background: #FF7E00; /* Wolfix Orange */
-    margin-right: 10px;
+    background: #FF7E00;
+    margin-right: 12px;
     border-radius: 2px;
 }
 
-/* Сетка полей */
+/* Сетка полей (Grid) */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -69,7 +70,7 @@
     grid-column: 1 / -1;
 }
 
-/* Поля */
+/* Группа поля */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -79,94 +80,55 @@
 .form-group label {
     font-size: 14px;
     font-weight: 500;
-    color: #4b5563;
+    color: #374151;
 }
 
 .req {
-    color: #ef4444;
+    color: #EF4444;
 }
 
+/* Стилизация инпутов и селектов */
 input, select {
     width: 100%;
     padding: 10px 14px;
-    border: 1px solid #d1d5db;
+    border: 1px solid #D1D5DB;
     border-radius: 8px;
     font-size: 15px;
-    transition: all 0.2s;
     background-color: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
 }
 
 input:focus, select:focus {
-    outline: none;
     border-color: #FF7E00;
     box-shadow: 0 0 0 3px rgba(255, 126, 0, 0.1);
 }
 
 input.error, select.error {
-    border-color: #ef4444;
+    border-color: #EF4444;
 }
 
 .error-msg {
-    color: #ef4444;
+    color: #EF4444;
     font-size: 12px;
+    margin-top: 4px;
 }
 
 .readonly-input {
-    background-color: #f3f4f6;
-    color: #9ca3af;
+    background-color: #F3F4F6;
+    color: #9CA3AF;
     cursor: not-allowed;
 }
 
-/* Input group (https://) */
-.input-group {
-    display: flex;
-    align-items: center;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.input-group:focus-within {
-    border-color: #FF7E00;
-    box-shadow: 0 0 0 3px rgba(255, 126, 0, 0.1);
-}
-
-.input-group .prefix {
-    background: #f9fafb;
-    padding: 10px 12px;
-    color: #6b7280;
-    border-right: 1px solid #d1d5db;
-    font-size: 14px;
-}
-
-.input-group input {
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-}
-
-/* Checkbox */
-.checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: -10px;
-}
-
-.checkbox-group input {
-    width: 18px;
-    height: 18px;
-    accent-color: #FF7E00;
-}
-
-/* File Upload */
+/* Загрузка файла */
 .file-upload-area {
-    border: 2px dashed #d1d5db;
+    border: 2px dashed #D1D5DB;
     border-radius: 12px;
-    padding: 30px;
+    padding: 24px;
     text-align: center;
-    background: #f9fafb;
+    background: #F9FAFB;
     transition: border-color 0.2s;
+    cursor: pointer;
 }
 
 .file-upload-area:hover {
@@ -175,24 +137,23 @@ input.error, select.error {
 }
 
 .file-input {
-    margin-top: 10px;
-    border: none;
-    background: transparent;
-    padding: 0;
+    margin-top: 12px;
+    width: auto;
+    font-size: 14px;
 }
 
 .upload-label {
     font-weight: 500;
-    color: #333;
+    color: #1F2937;
 }
 
 .upload-hint {
     font-size: 12px;
-    color: #888;
+    color: #9CA3AF;
     margin-top: 8px;
 }
 
-/* Кнопка */
+/* Кнопка отправки */
 .submit-btn {
     width: 100%;
     padding: 14px;
@@ -203,14 +164,15 @@ input.error, select.error {
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background-color 0.2s;
 }
 
 .submit-btn:hover {
-    background: #e66a00;
+    background: #E66A00;
 }
 
 .submit-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+    background: #FDBA74;
 }

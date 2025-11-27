@@ -13,7 +13,7 @@ interface CategorySimpleDto {
 }
 
 interface SellerApplicationFormValues {
-    // --- Поля, требуемые API (CreateSellerApplicationDto) ---
+    // Данные формы
     firstName: string;
     lastName: string;
     middleName: string;
@@ -28,11 +28,8 @@ interface SellerApplicationFormValues {
     categoryId: string;
     document: FileList;
 
-    // --- Поля для UI (могут не уходить на бэк, если DTO строгий) ---
-    email: string; // Только для отображения
-    companyName: string;
-    siteUrl: string;
-    hasNoSite: boolean;
+    // Поля только для UI
+    email: string;
 }
 
 const SellerRegistrationForm = () => {
@@ -43,17 +40,9 @@ const SellerRegistrationForm = () => {
     const {
         register,
         handleSubmit,
-        watch,
-        setValue,
         reset,
         formState: { errors }
-    } = useForm<SellerApplicationFormValues>({
-        defaultValues: {
-            hasNoSite: false
-        }
-    });
-
-    const hasNoSiteValue = watch("hasNoSite");
+    } = useForm<SellerApplicationFormValues>();
 
     // Инициализация данных
     useEffect(() => {
@@ -66,7 +55,6 @@ const SellerRegistrationForm = () => {
                 // 2. Подставляем данные пользователя
                 if (user) {
                     const targetId = user.customerId || user.profileId || user.accountId;
-                    // Если есть ID профиля, пробуем достать детали
                     let profileData: any = {};
 
                     if (targetId) {
@@ -93,11 +81,9 @@ const SellerRegistrationForm = () => {
                         birthDate: formattedDate,
                         city: profileData.address?.city || "",
                         street: profileData.address?.street || "",
-                        // Остальное сбрасываем
-                        categoryId: "",
-                        companyName: "",
-                        siteUrl: "",
-                        hasNoSite: false
+                        categoryId: "", // Категорию пользователь должен выбрать сам
+                        houseNumber: profileData.address?.houseNumber,
+                        apartmentNumber: profileData.address?.apartmentNumber
                     });
                 }
             } catch (error) {
@@ -108,18 +94,13 @@ const SellerRegistrationForm = () => {
         initData();
     }, [user, reset]);
 
-    // Блокировка сайта при чекбоксе
-    useEffect(() => {
-        if (hasNoSiteValue) setValue("siteUrl", "");
-    }, [hasNoSiteValue, setValue]);
-
     const onSubmit: SubmitHandler<SellerApplicationFormValues> = async (data) => {
         setIsSubmitting(true);
 
         try {
             const formData = new FormData();
 
-            // === 1. Обязательные поля для DTO ===
+            // === Обязательные поля ===
             formData.append('firstName', data.firstName);
             formData.append('lastName', data.lastName);
             if (data.middleName) formData.append('middleName', data.middleName);
@@ -131,8 +112,20 @@ const SellerRegistrationForm = () => {
             formData.append('houseNumber', data.houseNumber.toString());
             if (data.apartmentNumber) formData.append('apartmentNumber', data.apartmentNumber.toString());
 
+            // === Логика Категории ===
+            // Отправляем ID
             formData.append('categoryId', data.categoryId);
 
+            // Находим и отправляем Название категории (сервер ожидает categoryName)
+            const selectedCategory = categories.find(c => c.id === data.categoryId);
+            if (selectedCategory) {
+                formData.append('categoryName', selectedCategory.name);
+            } else {
+                // На всякий случай, если что-то пошло не так
+                console.warn("Category name not found for ID:", data.categoryId);
+            }
+
+            // === Документ ===
             if (data.document && data.document[0]) {
                 formData.append('document', data.document[0]);
             } else {
@@ -141,20 +134,21 @@ const SellerRegistrationForm = () => {
                 return;
             }
 
-            // === 2. Дополнительные поля (отправляем, если бэкенд позволяет) ===
-            formData.append('companyName', data.companyName);
-            if (!data.hasNoSite && data.siteUrl) formData.append('siteUrl', data.siteUrl);
-
             // Отправка
-            await api.post('/api/seller-applications', formData, {
+            const endpoint = user?.accountId
+                ? `/api/seller-applications/${user.accountId}`
+                : '/api/seller-applications';
+
+            await api.post(endpoint, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
             alert("Заявка успішно відправлена!");
-            // Можно добавить редирект на главную или страницу успеха
+            // Можно добавить сброс формы или редирект
         } catch (error: any) {
             console.error("Error submitting form:", error);
-            alert(error.response?.data?.message || "Помилка при відправці заявки.");
+            const msg = error.response?.data?.message || error.response?.data || "Помилка при відправці заявки.";
+            alert(typeof msg === 'string' ? msg : "Сталася помилка");
         } finally {
             setIsSubmitting(false);
         }
@@ -279,31 +273,7 @@ const SellerRegistrationForm = () => {
                                     <option key={c.id} value={c.id}>{c.name}</option>
                                 ))}
                             </select>
-                        </div>
-
-                        <div className="form-group full-width">
-                            <label>Назва магазину (Компанії) <span className="req">*</span></label>
-                            <input
-                                {...register("companyName", { required: "Введіть назву" })}
-                                className={errors.companyName ? "error" : ""}
-                            />
-                        </div>
-
-                        <div className="form-group full-width">
-                            <label>Посилання на сайт</label>
-                            <div className="input-group">
-                                <span className="prefix">https://</span>
-                                <input
-                                    {...register("siteUrl", { required: !hasNoSiteValue })}
-                                    disabled={hasNoSiteValue}
-                                    className={hasNoSiteValue ? "disabled" : ""}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="checkbox-group full-width">
-                            <input type="checkbox" id="noSite" {...register("hasNoSite")} />
-                            <label htmlFor="noSite">У мене немає веб-сайту</label>
+                            {errors.categoryId && <span className="error-msg">{errors.categoryId.message}</span>}
                         </div>
                     </div>
                 </div>
