@@ -6,9 +6,9 @@ import Link from "next/link";
 import ProfileModal from "../ProfileModal/ProfileModal.client";
 import Search from "./Search.client";
 import CatalogModal from "../CatalogModal/CatalogModal.client";
-import CartModal from "./CartModal.client"; // Импорт модалки корзины
+import CartModal from "./CartModal.client";
 import { useAuth } from "../../../contexts/AuthContext";
-import { useUser } from "../../../contexts/UserContext"; // Для отображения кол-ва товаров (бейджик)
+import { useUser } from "../../../contexts/UserContext";
 import "../../../styles/Header.css";
 
 interface IHeaderClientProps {
@@ -20,18 +20,26 @@ interface IHeaderClientProps {
 const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchChange }) => {
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [isCatalogOpen, setIsCatalogOpen] = useState<boolean>(false);
-    const [isCartOpen, setIsCartOpen] = useState<boolean>(false); // Состояние корзины
+    const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
     const profileButtonRef = useRef<HTMLButtonElement | null>(null);
-    const cartButtonRef = useRef<HTMLAnchorElement | null>(null); // Реф для кнопки корзины
+    const cartButtonRef = useRef<HTMLAnchorElement | null>(null);
 
     const router = useRouter();
-    const { isAuthenticated } = useAuth();
-    const { cart } = useUser(); // Получаем корзину для бейджика
+    // Достаем user, чтобы проверить роль
+    const { isAuthenticated, user } = useAuth();
+    const { cart } = useUser();
 
     const handleProfileClick = () => {
         if (isAuthenticated) {
-            router.push('/profile');
+            // Проверяем роль пользователя
+            if (user?.role === 'Seller') {
+                // Путь к дашборду продавца.
+                // Убедитесь, что вы создали страницу src/app/seller/dashboard/page.tsx
+                router.push('/seller/dashboard');
+            } else {
+                router.push('/profile');
+            }
         } else {
             setIsModalOpen(true);
             document.body.style.overflow = 'hidden';
@@ -69,7 +77,7 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
             <div className="top-bar">
                 <nav className="top-nav">
                     <Link href="/wip" className="nav-link">Про нас</Link>
-                    <Link href="/wip" className="nav-link">Продавати на Wolfix</Link>
+                    <Link href="/profile/become-seller" className="nav-link">Продавати на Wolfix</Link>
                     <Link href="/wip" className="nav-link">Акції</Link>
                 </nav>
                 <div className="top-banner"><img src="/banners/banner.png" alt="Promo Banner" /></div>
