@@ -25,10 +25,9 @@ interface SellerDto {
     birthDate?: string;
 }
 
-// DTO категории продавца из Swagger
 interface SellerCategoryDto {
-    id: string;         // ID записи (связи) - используем для key
-    categoryId: string; // ID самой категории - используем для запросов товаров!
+    id: string;         // ID записи
+    categoryId: string; // Реальный ID категории
     name: string;
 }
 
@@ -39,6 +38,20 @@ interface ProductShortDto {
     finalPrice: number;
     averageRating: number;
     mainPhoto?: string;
+}
+
+interface OrderDto {
+    id: string;
+    orderNumber?: string; // Если есть читаемый номер
+    createdAt: string;
+    totalAmount: number;
+    status: string;
+    // Поля клиента могут приходить по-разному в зависимости от реализации DTO
+    customerName?: string;
+    customer?: {
+        firstName?: string;
+        lastName?: string;
+    };
 }
 
 interface PaginationResponse {
@@ -62,19 +75,15 @@ const SellerProfile = () => {
 
     // --- State for Products Tab ---
     const [sellerCategories, setSellerCategories] = useState<SellerCategoryDto[]>([]);
-    // В этом стейте мы храним именно categoryId (не id записи)
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [products, setProducts] = useState<ProductShortDto[]>([]);
 
-    // Пагинация
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
-    // Модалка
     const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
 
     // --- State for Orders Tab ---
-    const [orders, setOrders] = useState<any[]>([]);
+    const [orders, setOrders] = useState<OrderDto[]>([]);
 
     // --- Forms hooks ---
     const nameForm = useForm<FullNameForm>();
@@ -125,20 +134,17 @@ const SellerProfile = () => {
         fetchProfile();
     }, [sellerId, nameForm, phoneForm, addressForm, birthForm]);
 
-    // === 2. ЗАГРУЗКА КАТЕГОРИЙ ===
+    // === 2. ЗАГРУЗКА КАТЕГОРИЙ (Вкладка Products) ===
     useEffect(() => {
         if (!sellerId || activeTab !== 'products') return;
 
         const loadCategories = async () => {
             try {
-                // Получаем список категорий
                 const catRes = await api.get<SellerCategoryDto[]>(`/api/sellers/${sellerId}/categories`);
                 const cats = catRes.data || [];
                 setSellerCategories(cats);
 
-                // Если категории есть, но не выбрана - выбираем первую
                 if (cats.length > 0 && !selectedCategoryId) {
-                    // !!! БЕРЕМ categoryId, А НЕ id
                     setSelectedCategoryId(cats[0].categoryId);
                 }
             } catch (error) {
@@ -155,10 +161,7 @@ const SellerProfile = () => {
             const fetchProducts = async () => {
                 setIsLoading(true);
                 try {
-                    // Используем selectedCategoryId (это ID реальной категории)
                     const url = `/api/products/seller/${sellerId}/category/${selectedCategoryId}/page/${currentPage}`;
-                    console.log(`📡 Loading products from: ${url}`);
-
                     const res = await api.get<PaginationResponse>(url);
 
                     setProducts(res.data.items || []);
@@ -177,15 +180,26 @@ const SellerProfile = () => {
         }
     }, [selectedCategoryId, currentPage, activeTab, sellerId, sellerCategories.length]);
 
-    // === 4. ЗАГРУЗКА ЗАКАЗОВ (Mock) ===
+    // === 4. ЗАГРУЗКА ЗАКАЗОВ (Вкладка Orders) ===
     useEffect(() => {
-        if (activeTab === 'orders') {
-            setOrders([
-                { id: "ORD-001", createdAt: "2023-11-20", totalAmount: 1200, status: "Новий", customerName: "Олена П." },
-                { id: "ORD-002", createdAt: "2023-11-22", totalAmount: 450, status: "Виконано", customerName: "Іван Б." },
-            ]);
-        }
-    }, [activeTab]);
+        if (!sellerId || activeTab !== 'orders') return;
+
+        const fetchOrders = async () => {
+            setIsLoading(true);
+            try {
+                // Используем эндпоинт, указанный в задании
+                const res = await api.get<OrderDto[]>(`/api/orders/sellers/${sellerId}`);
+                setOrders(res.data || []);
+            } catch (error) {
+                console.error("Error loading orders:", error);
+                setOrders([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, [activeTab, sellerId]);
 
 
     // === HANDLERS ===
@@ -209,7 +223,7 @@ const SellerProfile = () => {
     const handleDeleteProduct = async (id: string) => {
         if (!confirm("Видалити товар?")) return;
         try {
-            await api.delete(`/api/products/${id}`);
+            await api.delete(`/api/products/product/${id}`);
             setProducts(prev => prev.filter(p => p.id !== id));
         } catch (error) {
             alert("Помилка видалення");
@@ -218,6 +232,7 @@ const SellerProfile = () => {
 
     const closeAddModal = () => {
         setIsAddProductModalOpen(false);
+        // Опционально: перезагрузить товары/категории
     };
 
     if (!user) return <div className="p-10 text-center">Будь ласка, увійдіть.</div>;
@@ -277,17 +292,14 @@ const SellerProfile = () => {
                                 </button>
                             </div>
 
-                            {/* Category Filter Tabs */}
                             <div className="category-tabs-container mb-6">
                                 {sellerCategories.length > 0 ? (
                                     <div className="category-tabs">
                                         {sellerCategories.map(cat => (
                                             <button
-                                                key={cat.id} // key = ID записи в БД
-                                                // Проверяем активность по ID категории товара
+                                                key={cat.id}
                                                 className={`category-tab ${selectedCategoryId === cat.categoryId ? 'active' : ''}`}
                                                 onClick={() => {
-                                                    // Сохраняем именно categoryId для запроса
                                                     setSelectedCategoryId(cat.categoryId);
                                                     setCurrentPage(1);
                                                 }}
@@ -301,7 +313,6 @@ const SellerProfile = () => {
                                 )}
                             </div>
 
-                            {/* Products Table */}
                             {isLoading ? (
                                 <div className="loading-state">Завантаження...</div>
                             ) : products.length > 0 ? (
@@ -353,7 +364,6 @@ const SellerProfile = () => {
                                         </table>
                                     </div>
 
-                                    {/* Pagination Controls */}
                                     <div className="pagination-controls mt-6 flex justify-center gap-2">
                                         <button
                                             disabled={currentPage === 1}
@@ -382,39 +392,61 @@ const SellerProfile = () => {
                         </div>
                     )}
 
-                    {/* ... (Orders & Settings Tabs остаются без изменений) ... */}
+                    {/* === TAB: ORDERS === */}
                     {activeTab === 'orders' && (
                         <div>
                             <div className="content-header">
                                 <h1 className="content-title">Замовлення</h1>
                             </div>
-                            <div className="data-table-wrapper">
-                                <table className="data-table">
-                                    <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Дата</th>
-                                        <th>Клієнт</th>
-                                        <th>Сума</th>
-                                        <th>Статус</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {orders.map(order => (
-                                        <tr key={order.id}>
-                                            <td className="font-medium">#{order.id}</td>
-                                            <td>{order.createdAt}</td>
-                                            <td>{order.customerName}</td>
-                                            <td>{order.totalAmount} ₴</td>
-                                            <td><span className="status-badge status-new">{order.status}</span></td>
+
+                            {isLoading ? (
+                                <div className="loading-state">Завантаження замовлень...</div>
+                            ) : orders.length > 0 ? (
+                                <div className="data-table-wrapper">
+                                    <table className="data-table">
+                                        <thead>
+                                        <tr>
+                                            <th>Номер</th>
+                                            <th>Дата</th>
+                                            <th>Клієнт</th>
+                                            <th>Сума</th>
+                                            <th>Статус</th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody>
+                                        {orders.map(order => (
+                                            <tr key={order.id}>
+                                                <td className="font-medium">
+                                                    #{order.orderNumber || order.id.substring(0, 8)}
+                                                </td>
+                                                <td>
+                                                    {new Date(order.createdAt).toLocaleDateString()}
+                                                </td>
+                                                <td>
+                                                    {order.customerName
+                                                        || (order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}` : 'Гість')
+                                                    }
+                                                </td>
+                                                <td>{order.totalAmount} ₴</td>
+                                                <td>
+                                                        <span className={`status-badge ${order.status === 'Completed' ? 'status-completed' : 'status-new'}`}>
+                                                            {order.status}
+                                                        </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="empty-state">
+                                    <p>У вас поки немає замовлень.</p>
+                                </div>
+                            )}
                         </div>
                     )}
 
+                    {/* === TAB: SETTINGS === */}
                     {activeTab === 'settings' && (
                         <div className="space-y-8">
                             <h1 className="content-title border-b pb-4">Налаштування профілю</h1>
