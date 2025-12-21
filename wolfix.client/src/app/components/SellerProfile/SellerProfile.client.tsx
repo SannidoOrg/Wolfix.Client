@@ -25,8 +25,10 @@ interface SellerDto {
     birthDate?: string;
 }
 
+// DTO категории продавца из Swagger
 interface SellerCategoryDto {
-    id: string;
+    id: string;         // ID записи (связи) - используем для key
+    categoryId: string; // ID самой категории - используем для запросов товаров!
     name: string;
 }
 
@@ -60,6 +62,7 @@ const SellerProfile = () => {
 
     // --- State for Products Tab ---
     const [sellerCategories, setSellerCategories] = useState<SellerCategoryDto[]>([]);
+    // В этом стейте мы храним именно categoryId (не id записи)
     const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
     const [products, setProducts] = useState<ProductShortDto[]>([]);
 
@@ -79,14 +82,11 @@ const SellerProfile = () => {
     const addressForm = useForm<AddressForm>();
     const birthForm = useForm<BirthDateForm>();
 
-    // !!! ВАЖНО: Берем строго ID профиля (продавца).
-    // Если в AuthContext поле называется customerId (для любого профиля), используем его.
-    // НЕ используем user.userId или user.accountId, так как это ID аккаунта авторизации.
     const sellerId = user?.profileId || user?.customerId;
 
     useEffect(() => {
         if (user && !sellerId) {
-            console.error("⛔ [SellerProfile] Seller ID не найден в токене! Проверьте AuthContext и содержимое токена (поле profileId).", user);
+            console.warn("⚠️ SellerProfile: ID продавца не найден.");
         }
     }, [user, sellerId]);
 
@@ -96,7 +96,6 @@ const SellerProfile = () => {
 
         const fetchProfile = async () => {
             try {
-                // GET /api/sellers/{sellerId}
                 const profileRes = await api.get<SellerDto>(`/api/sellers/${sellerId}`);
                 setSellerData(profileRes.data);
 
@@ -119,27 +118,28 @@ const SellerProfile = () => {
                     }
                 }
             } catch (e) {
-                console.error("Failed to load seller profile", e);
+                console.error("Failed to load profile", e);
             }
         };
 
         fetchProfile();
     }, [sellerId, nameForm, phoneForm, addressForm, birthForm]);
 
-    // === 2. ЗАГРУЗКА КАТЕГОРИЙ (при входе на вкладку товаров) ===
+    // === 2. ЗАГРУЗКА КАТЕГОРИЙ ===
     useEffect(() => {
         if (!sellerId || activeTab !== 'products') return;
 
         const loadCategories = async () => {
             try {
-                // GET /api/sellers/{sellerId}/categories
+                // Получаем список категорий
                 const catRes = await api.get<SellerCategoryDto[]>(`/api/sellers/${sellerId}/categories`);
                 const cats = catRes.data || [];
                 setSellerCategories(cats);
 
-                // Если категории есть, выбираем первую по умолчанию, если не выбрана
+                // Если категории есть, но не выбрана - выбираем первую
                 if (cats.length > 0 && !selectedCategoryId) {
-                    setSelectedCategoryId(cats[0].id);
+                    // !!! БЕРЕМ categoryId, А НЕ id
+                    setSelectedCategoryId(cats[0].categoryId);
                 }
             } catch (error) {
                 console.error("Error loading categories:", error);
@@ -149,19 +149,17 @@ const SellerProfile = () => {
         loadCategories();
     }, [activeTab, sellerId, selectedCategoryId]);
 
-    // === 3. ЗАГРУЗКА ТОВАРОВ ПО КАТЕГОРИИ ===
+    // === 3. ЗАГРУЗКА ТОВАРОВ ===
     useEffect(() => {
-        // Загружаем только если есть sellerId и выбрана категория
         if (activeTab === 'products' && selectedCategoryId && sellerId) {
             const fetchProducts = async () => {
                 setIsLoading(true);
                 try {
-                    console.log(`📡 Loading products for Seller: ${sellerId}, Category: ${selectedCategoryId}, Page: ${currentPage}`);
+                    // Используем selectedCategoryId (это ID реальной категории)
+                    const url = `/api/products/seller/${sellerId}/category/${selectedCategoryId}/page/${currentPage}`;
+                    console.log(`📡 Loading products from: ${url}`);
 
-                    // GET /api/sellers/{sellerId}/category/{categoryId}/page/{page}
-                    const res = await api.get<PaginationResponse>(
-                        `/api/products/seller/${sellerId}/category/${selectedCategoryId}/page/${currentPage}`
-                    );
+                    const res = await api.get<PaginationResponse>(url);
 
                     setProducts(res.data.items || []);
                     setTotalPages(res.data.totalPages || 1);
@@ -174,16 +172,14 @@ const SellerProfile = () => {
             };
             fetchProducts();
         } else if (activeTab === 'products' && sellerCategories.length === 0) {
-            // Если категорий нет совсем
             setProducts([]);
             setIsLoading(false);
         }
     }, [selectedCategoryId, currentPage, activeTab, sellerId, sellerCategories.length]);
 
-    // === 4. ЗАГРУЗКА ЗАКАЗОВ ===
+    // === 4. ЗАГРУЗКА ЗАКАЗОВ (Mock) ===
     useEffect(() => {
         if (activeTab === 'orders') {
-            // Mock data
             setOrders([
                 { id: "ORD-001", createdAt: "2023-11-20", totalAmount: 1200, status: "Новий", customerName: "Олена П." },
                 { id: "ORD-002", createdAt: "2023-11-22", totalAmount: 450, status: "Виконано", customerName: "Іван Б." },
@@ -192,22 +188,21 @@ const SellerProfile = () => {
     }, [activeTab]);
 
 
-    // === ОБРАБОТЧИКИ (HANDLERS) ===
-
+    // === HANDLERS ===
     const onUpdateName: SubmitHandler<FullNameForm> = async (data) => {
-        if (!sellerId) return;
+        if(!sellerId) return;
         try { await api.patch(`/api/sellers/${sellerId}/full-name`, data); alert("ПІБ оновлено!"); } catch(e) { alert("Помилка"); }
     };
     const onUpdatePhone: SubmitHandler<PhoneForm> = async (data) => {
-        if (!sellerId) return;
+        if(!sellerId) return;
         try { await api.patch(`/api/sellers/${sellerId}/phone-number`, data); alert("Телефон оновлено!"); } catch(e) { alert("Помилка"); }
     };
     const onUpdateAddress: SubmitHandler<AddressForm> = async (data) => {
-        if (!sellerId) return;
+        if(!sellerId) return;
         try { await api.patch(`/api/sellers/${sellerId}/address`, data); alert("Адресу оновлено!"); } catch(e) { alert("Помилка"); }
     };
     const onUpdateBirthDate: SubmitHandler<BirthDateForm> = async (data) => {
-        if (!sellerId) return;
+        if(!sellerId) return;
         try { await api.patch(`/api/sellers/${sellerId}/birth-date`, data); alert("Дату оновлено!"); } catch(e) { alert("Помилка"); }
     };
 
@@ -223,7 +218,6 @@ const SellerProfile = () => {
 
     const closeAddModal = () => {
         setIsAddProductModalOpen(false);
-        // Можно добавить рефетч категорий и товаров
     };
 
     if (!user) return <div className="p-10 text-center">Будь ласка, увійдіть.</div>;
@@ -289,10 +283,12 @@ const SellerProfile = () => {
                                     <div className="category-tabs">
                                         {sellerCategories.map(cat => (
                                             <button
-                                                key={cat.id}
-                                                className={`category-tab ${selectedCategoryId === cat.id ? 'active' : ''}`}
+                                                key={cat.id} // key = ID записи в БД
+                                                // Проверяем активность по ID категории товара
+                                                className={`category-tab ${selectedCategoryId === cat.categoryId ? 'active' : ''}`}
                                                 onClick={() => {
-                                                    setSelectedCategoryId(cat.id);
+                                                    // Сохраняем именно categoryId для запроса
+                                                    setSelectedCategoryId(cat.categoryId);
                                                     setCurrentPage(1);
                                                 }}
                                             >
@@ -386,7 +382,7 @@ const SellerProfile = () => {
                         </div>
                     )}
 
-                    {/* === TAB: ORDERS === */}
+                    {/* ... (Orders & Settings Tabs остаются без изменений) ... */}
                     {activeTab === 'orders' && (
                         <div>
                             <div className="content-header">
@@ -419,7 +415,6 @@ const SellerProfile = () => {
                         </div>
                     )}
 
-                    {/* === TAB: SETTINGS === */}
                     {activeTab === 'settings' && (
                         <div className="space-y-8">
                             <h1 className="content-title border-b pb-4">Налаштування профілю</h1>
@@ -490,7 +485,6 @@ const SellerProfile = () => {
                 </main>
             </div>
 
-            {/* === ADD PRODUCT MODAL === */}
             {isAddProductModalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-content-large">
