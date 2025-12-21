@@ -209,7 +209,7 @@ const SellerProfile = () => {
     const handleDeleteProduct = async (id: string) => {
         if (!confirm("Видалити товар?")) return;
         try {
-            await api.delete(`/api/products/product/${id}`);
+            await api.delete(`/api/products/${id}`);
             setProducts(prev => prev.filter(p => p.id !== id));
         } catch (error) {
             alert("Помилка видалення");

@@ -1,0 +1,126 @@
+.create-product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 10px;
+}
+
+.form-section {
+    background: #fff;
+    /* Убрал границы, если форма внутри модалки, чтобы не было "рамки в рамке" */
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.req {
+    color: #EF4444;
+}
+
+.form-input, .form-input-sm {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.form-input:focus, .form-input-sm:focus {
+    border-color: #FF7E00;
+    box-shadow: 0 0 0 2px rgba(255, 126, 0, 0.1);
+}
+
+.textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-input-sm {
+    padding: 8px 10px;
+    font-size: 13px;
+}
+
+.error-text {
+    font-size: 12px;
+    color: #EF4444;
+    margin-top: 4px;
+}
+
+/* Медиа область */
+.media-upload-area {
+    border: 2px dashed #D1D5DB;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    background: #F9FAFB;
+    min-height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-placeholder {
+    width: 100%;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+.upload-btn-label {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+}
+
+.upload-btn-label:hover span {
+    color: #e66a00;
+}
+
+/* Кнопка отправки */
+.submit-product-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #FF7E00;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submit-product-btn:hover {
+    background-color: #e66a00;
+}
+
+.submit-product-btn:disabled {
+    background-color: #fdba74;
+    cursor: not-allowed;
+}
