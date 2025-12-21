@@ -4,11 +4,11 @@
     flex-direction: column;
     min-height: 80vh;
     background-color: #F9FAFB;
-    gap: 20px;
-    padding: 20px 0;
+    gap: 24px;
+    padding: 24px 0;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
     .seller-profile-container {
         flex-direction: row;
         align-items: flex-start;
@@ -20,14 +20,15 @@
     width: 100%;
     background: #fff;
     border-radius: 12px;
-    padding: 20px;
+    padding: 24px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     border: 1px solid #E5E7EB;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
     .seller-sidebar {
         width: 280px;
+        flex-shrink: 0;
         position: sticky;
         top: 100px;
     }
@@ -58,6 +59,7 @@
     font-size: 18px;
     font-weight: 700;
     color: #111;
+    margin-bottom: 4px;
 }
 
 .seller-role {
@@ -103,7 +105,7 @@
     flex: 1;
     background: #fff;
     border-radius: 12px;
-    padding: 24px;
+    padding: 32px;
     border: 1px solid #E5E7EB;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     min-height: 500px;
@@ -122,7 +124,7 @@
     color: #111;
 }
 
-/* Кнопки действий */
+/* Кнопки */
 .action-btn {
     padding: 10px 20px;
     background-color: #FF7E00;
@@ -130,14 +132,62 @@
     border-radius: 8px;
     font-weight: 600;
     text-decoration: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
     transition: background 0.2s;
 }
 
 .action-btn:hover {
     background-color: #E66A00;
+}
+
+.save-btn {
+    padding: 8px 16px;
+    background-color: #fff;
+    color: #FF7E00;
+    border: 1px solid #FF7E00;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.save-btn:hover {
+    background-color: #FF7E00;
+    color: white;
+}
+
+/* Секции настроек */
+.settings-section {
+    background-color: #FAFAFA;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-input {
+    padding: 10px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #fff;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: #FF7E00;
+    box-shadow: 0 0 0 2px rgba(255, 126, 0, 0.1);
 }
 
 /* Таблицы */
@@ -154,26 +204,19 @@
 .data-table th {
     text-align: left;
     padding: 12px 16px;
-    font-size: 14px;
+    font-size: 13px;
+    text-transform: uppercase;
     color: #6B7280;
     font-weight: 600;
     border-bottom: 2px solid #F3F4F6;
+    background-color: #F9FAFB;
 }
 
 .data-table td {
     padding: 16px;
-    vertical-align: middle;
     border-bottom: 1px solid #F3F4F6;
     color: #1F2937;
     font-size: 14px;
-}
-
-.product-row-img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #eee;
 }
 
 .status-badge {
@@ -183,9 +226,7 @@
     font-weight: 600;
 }
 
-.status-new { background-color: #E0F2FE; color: #0284C7; } /* Blue */
-.status-completed { background-color: #DCFCE7; color: #16A34A; } /* Green */
-.status-cancelled { background-color: #FEE2E2; color: #DC2626; } /* Red */
+.status-new { background-color: #E0F2FE; color: #0284C7; }
 
 .delete-btn {
     color: #EF4444;
@@ -199,16 +240,8 @@
     text-decoration: underline;
 }
 
-/* Формы */
-.settings-form {
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
 .loading-state, .empty-state {
     text-align: center;
     padding: 40px;
-    color: #6B7280;
+    color: #9CA3AF;
 }
