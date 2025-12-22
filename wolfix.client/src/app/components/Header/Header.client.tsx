@@ -41,6 +41,12 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
             else if (user?.role === 'Support') {
                 router.push('/support/dashboard');
             }
+            else if (user?.role === 'Admin') {
+                router.push('/admin/dashboard');
+            }
+            else if (user?.role === 'SuperAdmin') {
+                router.push('/super-admin/dashboard');
+            }
             else {
                 router.push('/profile');
             }

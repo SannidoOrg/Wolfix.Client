@@ -1,0 +1,131 @@
+/* src/styles/AdminDashboard.css */
+.admin-dashboard-container {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    min-height: 80vh;
+}
+
+.admin-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.applications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.application-card {
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 16px;
+}
+
+.applicant-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.category-badge {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.app-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.detail-row strong {
+    color: #333;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.document-link {
+    display: inline-block;
+    margin-top: 8px;
+    color: #2563eb;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.app-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 0.9rem;
+}
+
+.btn-approve {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-approve:hover {
+    background-color: #059669;
+}
+
+.btn-reject {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-reject:hover {
+    background-color: #dc2626;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-size: 1.1rem;
+    background: #f9f9f9;
+    border-radius: 12px;
+}
+
+.loading-state, .error-state {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.2rem;
+}
+
+.error-state {
+    color: #ef4444;
+}
