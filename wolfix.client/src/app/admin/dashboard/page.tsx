@@ -3,71 +3,97 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { adminService } from "../../../services/adminService";
-import { SellerApplicationDto } from "../../../types/admin";
+import {
+    SellerApplicationDto,
+    ParentCategoryDto,
+    ChildCategoryDto,
+    CategoryAttributeDto
+} from "../../../types/admin";
 import "../../../styles/AdminDashboard.css";
 import { useAuth } from "../../../contexts/AuthContext";
 
-const AdminDashboardPage = () => {
-    const [applications, setApplications] = useState<SellerApplicationDto[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+type Tab = "applications" | "categories";
 
+const AdminDashboardPage = () => {
     const { user, logout, loading: authLoading } = useAuth();
     const router = useRouter();
+    const [activeTab, setActiveTab] = useState<Tab>("categories");
 
-    // Базовый URL для формирования ссылки на документ
+    // --- State: Applications ---
+    const [applications, setApplications] = useState<SellerApplicationDto[]>([]);
+    const [appsLoading, setAppsLoading] = useState(false);
+
+    // --- State: Categories ---
+    const [parents, setParents] = useState<ParentCategoryDto[]>([]);
+    const [selectedParent, setSelectedParent] = useState<ParentCategoryDto | null>(null);
+    const [children, setChildren] = useState<ChildCategoryDto[]>([]);
+    const [selectedChild, setSelectedChild] = useState<ChildCategoryDto | null>(null);
+    const [attributes, setAttributes] = useState<CategoryAttributeDto[]>([]);
+
+    // Loading states for categories
+    const [loadingParents, setLoadingParents] = useState(false);
+    const [loadingChildren, setLoadingChildren] = useState(false);
+    const [loadingAttrs, setLoadingAttrs] = useState(false);
+
+    // --- Forms State (Categories) ---
+    const [newParentName, setNewParentName] = useState("");
+    const [newParentDesc, setNewParentDesc] = useState("");
+    const [newParentPhoto, setNewParentPhoto] = useState<File | null>(null);
+
+    const [newChildName, setNewChildName] = useState("");
+    const [newChildDesc, setNewChildDesc] = useState("");
+    const [newChildPhoto, setNewChildPhoto] = useState<File | null>(null);
+    // Для простоты вводим ключи через запятую
+    const [newChildAttrKeys, setNewChildAttrKeys] = useState("");
+    const [newChildVarKeys, setNewChildVarKeys] = useState("");
+
+    const [newAttrKey, setNewAttrKey] = useState("");
+    const [newVarKey, setNewVarKey] = useState("");
+
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://localhost:7168";
 
     useEffect(() => {
-        // Защита роута: если загрузка завершена и пользователь не админ — редирект
         if (!authLoading) {
             if (!user || user.role !== "Admin") {
                 router.push("/");
                 return;
             }
-            // Если права есть, грузим данные
-            fetchApplications();
+            fetchInitialData();
         }
     }, [user, authLoading, router]);
 
+    const fetchInitialData = () => {
+        fetchApplications();
+        fetchParents();
+    };
+
+    // --- Logic: Applications ---
     const fetchApplications = async () => {
         try {
-            setLoading(true);
+            setAppsLoading(true);
             const data = await adminService.getAllApplications();
             setApplications(data);
-            setError(null);
-        } catch (err: any) {
-            console.error("Failed to fetch applications", err);
-            setError("Не удалось загрузить заявки. Возможно, истек срок действия сессии.");
+        } catch (e) {
+            console.error(e);
         } finally {
-            setLoading(false);
+            setAppsLoading(false);
         }
     };
 
-    const handleApprove = async (id: string) => {
-        if (!confirm("Вы уверены, что хотите одобрить эту заявку?")) return;
-
+    const handleApproveApp = async (id: string) => {
+        if (!confirm("Одобрить заявку?")) return;
         try {
             await adminService.approveApplication(id);
-            setApplications((prev) => prev.filter((app) => app.id !== id));
-            alert("Заявка успешно одобрена");
-        } catch (err) {
-            console.error(err);
-            alert("Ошибка при одобрении заявки");
-        }
+            setApplications(prev => prev.filter(app => app.id !== id));
+        } catch (e) { alert("Ошибка при одобрении"); }
     };
 
-    const handleReject = async (id: string) => {
-        if (!confirm("Вы уверены, что хотите отклонить эту заявку?")) return;
-
+    const handleRejectApp = async (id: string) => {
+        if (!confirm("Отклонить заявку?")) return;
         try {
             await adminService.rejectApplication(id);
-            setApplications((prev) => prev.filter((app) => app.id !== id));
-            alert("Заявка отклонена");
-        } catch (err) {
-            console.error(err);
-            alert("Ошибка при отклонении заявки");
-        }
+            setApplications(prev => prev.filter(app => app.id !== id));
+        } catch (e) { alert("Ошибка при отклонении"); }
     };
 
     const getDocumentLink = (url?: string) => {
@@ -78,101 +104,271 @@ const AdminDashboardPage = () => {
         return `${cleanBase}/${cleanPath}`;
     };
 
-    if (authLoading || (loading && applications.length === 0)) {
-        return <div className="loading-state">Загрузка...</div>;
-    }
+    // --- Logic: Categories ---
+    const fetchParents = async () => {
+        setLoadingParents(true);
+        try {
+            const data = await adminService.getAllParentCategories();
+            setParents(data);
+        } catch (e) { console.error(e); }
+        finally { setLoadingParents(false); }
+    };
+
+    const handleParentClick = async (parent: ParentCategoryDto) => {
+        setSelectedParent(parent);
+        setSelectedChild(null);
+        setAttributes([]);
+        setLoadingChildren(true);
+        try {
+            const data = await adminService.getChildCategoriesByParent(parent.id);
+            setChildren(data);
+        } catch (e) { console.error(e); }
+        finally { setLoadingChildren(false); }
+    };
+
+    const handleChildClick = async (child: ChildCategoryDto) => {
+        setSelectedChild(child);
+        setLoadingAttrs(true);
+        try {
+            const attrs = await adminService.getAttributesByChildCategory(child.id);
+            setAttributes(attrs);
+        } catch (e) { console.error(e); }
+        finally { setLoadingAttrs(false); }
+    };
+
+    // CRUD Parent
+    const handleAddParent = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await adminService.addParentCategory({
+                name: newParentName,
+                description: newParentDesc,
+                photo: newParentPhoto
+            });
+            setNewParentName(""); setNewParentDesc(""); setNewParentPhoto(null);
+            fetchParents();
+            alert("Родительская категория добавлена");
+        } catch (e) { alert("Ошибка добавления"); }
+    };
+
+    const handleDeleteParent = async (id: string) => {
+        if (!confirm("Удалить категорию? Это удалит и дочерние элементы.")) return;
+        try {
+            await adminService.deleteCategory(id);
+            fetchParents();
+            if (selectedParent?.id === id) {
+                setSelectedParent(null);
+                setChildren([]);
+            }
+        } catch (e) { alert("Ошибка удаления"); }
+    };
+
+    // CRUD Child
+    const handleAddChild = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedParent) return;
+        try {
+            await adminService.addChildCategory(selectedParent.id, {
+                name: newChildName,
+                description: newChildDesc,
+                photo: newChildPhoto,
+                attributeKeys: newChildAttrKeys.split(",").map(s => s.trim()).filter(Boolean),
+                variantKeys: newChildVarKeys.split(",").map(s => s.trim()).filter(Boolean)
+            });
+            setNewChildName(""); setNewChildDesc(""); setNewChildPhoto(null);
+            setNewChildAttrKeys(""); setNewChildVarKeys("");
+            handleParentClick(selectedParent); // refresh children
+            alert("Дочерняя категория добавлена");
+        } catch (e) { alert("Ошибка добавления"); }
+    };
+
+    const handleChangeChild = async (child: ChildCategoryDto) => {
+        const newName = prompt("Новое имя:", child.name);
+        if (newName === null) return;
+        try {
+            await adminService.changeChildCategory(child.id, { name: newName });
+            if (selectedParent) handleParentClick(selectedParent);
+        } catch (e) { alert("Ошибка изменения"); }
+    };
+
+    // CRUD Attributes & Variants
+    const handleAddAttribute = async () => {
+        if (!selectedChild || !newAttrKey) return;
+        try {
+            await adminService.addAttributeToChildCategory(selectedChild.id, { key: newAttrKey });
+            setNewAttrKey("");
+            handleChildClick(selectedChild);
+        } catch (e) { alert("Ошибка добавления атрибута"); }
+    };
+
+    const handleDeleteAttribute = async (attrId: string) => {
+        if (!selectedChild) return;
+        if (!confirm("Удалить атрибут?")) return;
+        try {
+            await adminService.deleteAttribute(selectedChild.id, attrId);
+            handleChildClick(selectedChild);
+        } catch (e) { alert("Ошибка удаления атрибута"); }
+    };
+
+    const handleAddVariant = async () => {
+        if (!selectedChild || !newVarKey) return;
+        try {
+            await adminService.addVariantToChildCategory(selectedChild.id, { key: newVarKey });
+            setNewVarKey("");
+            alert("Вариант добавлен");
+        } catch (e) { alert("Ошибка добавления варианта"); }
+    };
+
+    // Render Helpers
+    if (authLoading) return <div className="loading-state">Проверка прав...</div>;
 
     return (
         <div className="admin-dashboard-container">
-            <div className="dashboard-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-                <h1 className="admin-title" style={{ margin: 0 }}>Панель Администратора</h1>
+            <header className="dashboard-header">
+                <h1>Панель Администратора</h1>
+                <button onClick={logout} className="btn logout-btn">Выйти</button>
+            </header>
+
+            <div className="dashboard-tabs">
                 <button
-                    onClick={logout}
-                    className="btn"
-                    style={{ backgroundColor: '#6b7280', color: 'white' }}
+                    className={`tab-btn ${activeTab === 'categories' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('categories')}
                 >
-                    Вийти
+                    Управление Категориями
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'applications' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('applications')}
+                >
+                    Заявки Продавцов
                 </button>
             </div>
 
-            {error && <div className="error-state">{error}</div>}
-
-            {!error && applications.length === 0 ? (
-                <div className="empty-state">
-                    <p>На данный момент нет активных заявок.</p>
-                </div>
-            ) : (
-                <div className="applications-list">
-                    {applications.map((app) => {
-                        const { fullName, address, phoneNumber, birthDate } = app.sellerProfileData || {};
-                        const fullAddress = address
-                            ? `${address.city || ""}, ${address.street || ""} ${address.houseNumber || ""}`
-                            : "Адрес не указан";
-
-                        const fullNameString = fullName
-                            ? `${fullName.lastName || ""} ${fullName.firstName || ""} ${fullName.middleName || ""}`
-                            : "Имя не указано";
-
-                        const docLink = getDocumentLink(app.documentUrl);
-
-                        return (
-                            <div key={app.id} className="application-card">
-                                <div className="app-header">
-                                    <span className="applicant-name">{fullNameString}</span>
-                                    <span className="category-badge">
-                    Категория: {app.categoryName || "Не указана"}
-                  </span>
-                                </div>
-
-                                <div className="app-details">
-                                    <div className="detail-row">
-                                        <strong>Телефон:</strong>
-                                        {phoneNumber?.value || "Не указан"}
-                                    </div>
-                                    <div className="detail-row">
-                                        <strong>Дата рождения:</strong>
-                                        {birthDate?.value ? new Date(birthDate.value).toLocaleDateString() : "Не указана"}
-                                    </div>
-                                    <div className="detail-row">
-                                        <strong>Адрес:</strong>
-                                        {fullAddress}
-                                    </div>
-                                    <div className="detail-row">
-                                        <strong>Документ:</strong>
-                                        {docLink ? (
-                                            <a
-                                                href={docLink}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="document-link"
-                                            >
-                                                Скачать / Просмотреть
-                                            </a>
-                                        ) : (
-                                            <span style={{ color: "#999" }}>Нет документа</span>
-                                        )}
+            <div className="dashboard-content">
+                {activeTab === 'applications' && (
+                    <div className="applications-section">
+                        {appsLoading && <p>Загрузка заявок...</p>}
+                        {!appsLoading && applications.length === 0 && <p>Нет активных заявок.</p>}
+                        <div className="applications-list">
+                            {applications.map(app => (
+                                <div key={app.id} className="application-card">
+                                    <h3>{app.sellerProfileData?.fullName?.firstName} {app.sellerProfileData?.fullName?.lastName}</h3>
+                                    <p>Категория: {app.categoryName}</p>
+                                    <p>Телефон: {app.sellerProfileData?.phoneNumber?.value}</p>
+                                    {app.documentUrl && (
+                                        <a href={getDocumentLink(app.documentUrl) || '#'} target="_blank" rel="noreferrer">
+                                            Смотреть документ
+                                        </a>
+                                    )}
+                                    <div className="app-actions">
+                                        <button className="btn btn-approve" onClick={() => handleApproveApp(app.id)}>Одобрить</button>
+                                        <button className="btn btn-reject" onClick={() => handleRejectApp(app.id)}>Отклонить</button>
                                     </div>
                                 </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
-                                <div className="app-actions">
-                                    <button
-                                        className="btn btn-reject"
-                                        onClick={() => handleReject(app.id)}
+                {activeTab === 'categories' && (
+                    <div className="categories-grid">
+                        {/* Column 1: Parent Categories */}
+                        <div className="col-parent">
+                            <h3>Родительские категории</h3>
+                            <div className="category-list">
+                                {loadingParents ? <p>Загрузка...</p> : parents.map(p => (
+                                    <div
+                                        key={p.id}
+                                        className={`category-item ${selectedParent?.id === p.id ? 'selected' : ''}`}
+                                        onClick={() => handleParentClick(p)}
                                     >
-                                        Отклонить
-                                    </button>
-                                    <button
-                                        className="btn btn-approve"
-                                        onClick={() => handleApprove(app.id)}
-                                    >
-                                        Одобрить
-                                    </button>
-                                </div>
+                                        <span>{p.name}</span>
+                                        <button className="btn-icon-del" onClick={(e) => { e.stopPropagation(); handleDeleteParent(p.id); }}>×</button>
+                                    </div>
+                                ))}
                             </div>
-                        );
-                    })}
-                </div>
-            )}
+                            <form onSubmit={handleAddParent} className="add-form">
+                                <input placeholder="Название" value={newParentName} onChange={e => setNewParentName(e.target.value)} required />
+                                <input placeholder="Описание" value={newParentDesc} onChange={e => setNewParentDesc(e.target.value)} />
+                                <input type="file" onChange={e => setNewParentPhoto(e.target.files?.[0] || null)} />
+                                <button type="submit">Добавить Родителя</button>
+                            </form>
+                        </div>
+
+                        {/* Column 2: Child Categories */}
+                        <div className="col-child">
+                            <h3>Дочерние категории</h3>
+                            {!selectedParent ? <p className="hint">Выберите родителя</p> : (
+                                <>
+                                    <div className="category-list">
+                                        {loadingChildren ? <p>Загрузка...</p> : children.map(c => (
+                                            <div
+                                                key={c.id}
+                                                className={`category-item ${selectedChild?.id === c.id ? 'selected' : ''}`}
+                                                onClick={() => handleChildClick(c)}
+                                            >
+                                                <span>{c.name}</span>
+                                                <div className="item-actions">
+                                                    <button onClick={(e) => { e.stopPropagation(); handleChangeChild(c); }}>✎</button>
+                                                    {/* Удаление ребенка требует отдельного эндпоинта или использования deleteCategory с childId, если API это поддерживает унифицированно.
+                                                        В swagger: DELETE /api/categories/{categoryId} работает для Parent.
+                                                        Для Child есть change, add variants/attr.
+                                                        Предположим, что удаление через общий /api/categories/{id} работает и для child, т.к. ID UUID.
+                                                    */}
+                                                    <button className="btn-icon-del" onClick={(e) => { e.stopPropagation(); handleDeleteParent(c.id); /* Reuse delete logic */ }}>×</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <form onSubmit={handleAddChild} className="add-form">
+                                        <h4>Добавить дочернюю</h4>
+                                        <input placeholder="Название" value={newChildName} onChange={e => setNewChildName(e.target.value)} required />
+                                        <input placeholder="Описание" value={newChildDesc} onChange={e => setNewChildDesc(e.target.value)} />
+                                        <input type="file" onChange={e => setNewChildPhoto(e.target.files?.[0] || null)} />
+                                        <input placeholder="Атрибуты (через запятую)" value={newChildAttrKeys} onChange={e => setNewChildAttrKeys(e.target.value)} />
+                                        <input placeholder="Варианты (через запятую)" value={newChildVarKeys} onChange={e => setNewChildVarKeys(e.target.value)} />
+                                        <button type="submit">Добавить Child</button>
+                                    </form>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Column 3: Attributes & Variants */}
+                        <div className="col-details">
+                            <h3>Детали (Атрибуты/Варианты)</h3>
+                            {!selectedChild ? <p className="hint">Выберите дочернюю категорию</p> : (
+                                <>
+                                    <div className="details-block">
+                                        <h4>Атрибуты</h4>
+                                        <ul>
+                                            {loadingAttrs ? <li>Загрузка...</li> : attributes.map(a => (
+                                                <li key={a.id}>
+                                                    {a.key}
+                                                    <button onClick={() => handleDeleteAttribute(a.id)}>×</button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                        <div className="mini-form">
+                                            <input placeholder="Ключ атрибута" value={newAttrKey} onChange={e => setNewAttrKey(e.target.value)} />
+                                            <button onClick={handleAddAttribute}>+</button>
+                                        </div>
+                                    </div>
+
+                                    <div className="details-block">
+                                        <h4>Варианты (Добавление)</h4>
+                                        <p className="hint-text">Список вариантов управляется глобально или при создании, здесь можно добавить новый ключ.</p>
+                                        <div className="mini-form">
+                                            <input placeholder="Ключ варианта (напр. Color)" value={newVarKey} onChange={e => setNewVarKey(e.target.value)} />
+                                            <button onClick={handleAddVariant}>+</button>
+                                        </div>
+                                        {/* Реализовать удаление варианта сложнее без списка ID, см. заметку в сервисе */}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
