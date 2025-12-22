@@ -37,7 +37,11 @@ const HeaderClient: FC<IHeaderClientProps> = ({ logoAlt, searchQuery, onSearchCh
                 // Путь к дашборду продавца.
                 // Убедитесь, что вы создали страницу src/app/seller/dashboard/page.tsx
                 router.push('/seller/dashboard');
-            } else {
+            }
+            else if (user?.role === 'Support') {
+                router.push('/support/dashboard');
+            }
+            else {
                 router.push('/profile');
             }
         } else {
