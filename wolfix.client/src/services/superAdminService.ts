@@ -22,6 +22,10 @@ export const superAdminService = {
         return response.data;
     },
 
+    deleteAdmin: async (id: string): Promise<void> => {
+        await api.delete(`/api/admins/${id}`);
+    },
+
     // --- Support ---
     createSupport: async (data: CreateSupportDto): Promise<void> => {
         await api.post("/api/supports", data);

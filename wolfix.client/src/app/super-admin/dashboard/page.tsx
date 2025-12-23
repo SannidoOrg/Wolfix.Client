@@ -104,6 +104,14 @@ const SuperAdminDashboardPage = () => {
     };
 
     // --- Handlers: Delete ---
+    const handleDeleteAdmin = async (id: string) => {
+        if (!confirm("Удалить этого администратора?")) return;
+        try {
+            await superAdminService.deleteAdmin(id);
+            fetchAdmins(adminsPage);
+        } catch (e) { alert("Ошибка при удалении администратора"); }
+    };
+
     const handleDeleteSupport = async (id: string) => {
         if (!confirm("Удалить сотрудника поддержки?")) return;
         try {
@@ -181,9 +189,18 @@ const SuperAdminDashboardPage = () => {
                             {isLoadingList && <p>Загрузка...</p>}
                             <ul className="item-list" style={{ listStyle: 'none', padding: 0 }}>
                                 {adminsData?.items?.map(admin => (
-                                    <li key={admin.id} style={{ borderBottom: '1px solid #eee', padding: '10px' }}>
-                                        <strong>{getFullName(admin.firstName, admin.lastName, admin.middleName)}</strong>
-                                        <div style={{ fontSize: '0.9em', color: '#666' }}>{admin.phoneNumber || "Нет телефона"}</div>
+                                    <li key={admin.id} style={{ borderBottom: '1px solid #eee', padding: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div>
+                                            <strong>{getFullName(admin.firstName, admin.lastName, admin.middleName)}</strong>
+                                            <div style={{ fontSize: '0.9em', color: '#666' }}>{admin.phoneNumber || "Нет телефона"}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteAdmin(admin.id)}
+                                            className="btn btn-reject"
+                                            style={{ padding: '5px 10px', fontSize: '0.8rem' }}
+                                        >
+                                            Удалить
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
