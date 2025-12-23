@@ -22,7 +22,7 @@ export interface BirthDateDto {
     value?: string;
 }
 
-// --- Типы для заявок продавцов ---
+// --- Типы для заявок продавцов (Admin) ---
 export interface SellerProfileDataDto {
     fullName?: FullNameDto;
     phoneNumber?: PhoneNumberDto;
@@ -37,7 +37,7 @@ export interface SellerApplicationDto {
     sellerProfileData?: SellerProfileDataDto;
 }
 
-// --- Типы для Супер-Админа (Создание пользователей) ---
+// --- Типы для Супер-Админа (Создание) ---
 export interface CreateAdminDto {
     email?: string;
     password?: string;
@@ -55,9 +55,45 @@ export interface CreateSupportDto {
     middleName?: string;
 }
 
-// --- Типы для Категорий ---
+// --- Типы для Списков с Пагинацией (Super Admin) ---
 
-// Parent Category
+// Общий интерфейс пагинации
+export interface PaginationResult<T> {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    items: T[];
+}
+
+// Admin List Item
+export interface BasicAdminDto {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    middleName?: string;
+    phoneNumber?: string;
+}
+
+// Support List Item
+export interface SupportForAdminDto {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    middleName?: string;
+}
+
+// Seller List Item
+export interface SellerForAdminDto {
+    id: string;
+    photoUrl?: string;
+    fullName?: FullNameDto;
+    phoneNumber?: string;
+    address?: AddressDto;
+    birthDate?: string; // format: date
+    categories?: string[];
+}
+
+// --- Типы для Категорий (оставляем без изменений) ---
 export interface ParentCategoryDto {
     id: string;
     name: string;
@@ -76,7 +112,6 @@ export interface ChangeParentCategoryDto {
     description?: string;
 }
 
-// Child Category
 export interface ChildCategoryDto {
     id: string;
     name: string;
@@ -97,7 +132,6 @@ export interface ChangeChildCategoryDto {
     description?: string;
 }
 
-// Attributes & Variants
 export interface CategoryAttributeDto {
     id: string;
     key: string;
@@ -108,12 +142,7 @@ export interface AddCategoryAttributeDto {
 }
 
 export interface CategoryVariantDto {
-    id?: string; // В сваггере может не быть ID при get, но он нужен для удаления. Проверим использование.
-    // Примечание: В swagger get variants возвращает список строк или объектов?
-    // Swagger: /api/categories/child/{childId}/attributes -> CategoryAttributeDto (id, key)
-    // А вот variants эндпоинт на GET отсутствует в явном виде списка, но есть POST и DELETE.
-    // Предположим, что мы получаем их вместе с child категорией или отдельным запросом, если он появится.
-    // В данном случае реализуем добавление/удаление.
+    id?: string;
     key: string;
 }
 
