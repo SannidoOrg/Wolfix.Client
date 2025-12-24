@@ -9,7 +9,7 @@ import "../../../styles/CreateProductForm.css";
 // --- Типы данных ---
 
 interface SellerCategoryDto {
-    id: string;         // ID записи
+    id: string;         // ID записи связи
     categoryId: string; // Реальный ID категории
     name: string;
 }
@@ -19,16 +19,16 @@ interface AttributeDto {
     key: string;
 }
 
+// Статусы товара (Enum в модели)
+type ProductStatus = "InStock" | "NotAvailable";
+
 interface CreateProductFormValues {
     title: string;
     description: string;
     price: number;
-    status: string; // <-- Новое поле статуса
-
+    status: ProductStatus;
     categoryId: string;
-
     media: FileList;
-
     attributes: Record<string, string>;
 }
 
@@ -62,6 +62,7 @@ const CreateProductForm = () => {
     const selectedCategoryId = watch("categoryId");
     const selectedFiles = watch("media");
 
+    // Получаем ID продавца из профиля
     const sellerId = user?.profileId || user?.customerId;
 
     // 1. Загрузка категорий ПРОДАВЦА
@@ -111,17 +112,21 @@ const CreateProductForm = () => {
         try {
             const formData = new FormData();
 
+            // Основные поля DTO
             formData.append("title", data.title);
             formData.append("description", data.description);
             formData.append("price", data.price.toString());
 
-            // Передаем выбранный статус
+            // Передаем статус (Enum строкой)
             formData.append("status", data.status);
 
             formData.append("categoryId", data.categoryId);
             formData.append("sellerId", sellerId);
-            formData.append("contentType", "Photo")
 
+            // Статическое значение ContentType
+            formData.append("contentType", "Photo");
+
+            // Обработка медиа
             if (data.media && data.media[0]) {
                 formData.append("media", data.media[0]);
             } else {
@@ -130,9 +135,10 @@ const CreateProductForm = () => {
                 return;
             }
 
-            // Атрибуты
+            // Формирование JSON для атрибутов
+            // Swagger AddProductDto требует поле "attributesJson"
             const attributesArray = categoryAttributes.map(attr => ({
-                id: attr.id,
+                id: attr.id, // ID атрибута (из справочника)
                 value: data.attributes?.[attr.id] || ""
             })).filter(a => a.value.trim() !== "");
 

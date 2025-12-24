@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../../../contexts/AuthContext";
 import { sellerService } from "../../../services/sellerService";
 import { ProductShortDto, SellerCategoryDto, SellerOrderDto } from "../../../types/seller";
-import "../../../styles/Dashboard.css"; // Используем общий стиль
+import CreateProductForm from "../../components/CreateProductForm/CreateProductForm.client"; // Импортируем компонент формы
+import "../../../styles/Dashboard.css";
 
 type SellerTab = "products" | "orders" | "profile";
 
@@ -21,10 +22,7 @@ const SellerDashboardPage = () => {
     const [orders, setOrders] = useState<SellerOrderDto[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Form State (New Product)
-    const [newProduct, setNewProduct] = useState({
-        title: "", description: "", price: 0, categoryId: "", media: null as File | null
-    });
+    // Удалены локальные стейты для формы (newProduct), так как теперь за это отвечает компонент CreateProductForm
 
     useEffect(() => {
         if (!authLoading) {
@@ -38,10 +36,16 @@ const SellerDashboardPage = () => {
         }
     }, [user, authLoading, router, activeTab]);
 
+    const getSellerId = () => {
+        // Используем profileId (если есть) как ID продавца, или fallback на id пользователя
+        return user?.profileId || user?.id;
+    };
+
     const loadCategories = async () => {
-        if (!user) return;
+        const id = getSellerId();
+        if (!id) return;
         try {
-            const cats = await sellerService.getCategories(user.id);
+            const cats = await sellerService.getCategories(id);
             setCategories(cats);
             if (cats.length > 0 && !selectedCategory) {
                 setSelectedCategory(cats[0].categoryId);
@@ -51,36 +55,25 @@ const SellerDashboardPage = () => {
     };
 
     const loadProducts = async (catId: string) => {
-        if (!user) return;
+        const id = getSellerId();
+        if (!id) return;
         setIsLoading(true);
         try {
-            const res = await sellerService.getProductsByCategory(user.id, catId);
+            const res = await sellerService.getProductsByCategory(id, catId);
             setProducts(res.items || []);
         } catch (e) { console.error(e); }
         finally { setIsLoading(false); }
     };
 
     const loadOrders = async () => {
-        if (!user) return;
+        const id = getSellerId();
+        if (!id) return;
         setIsLoading(true);
         try {
-            const data = await sellerService.getOrders(user.id);
+            const data = await sellerService.getOrders(id);
             setOrders(data);
         } catch (e) { console.error(e); }
         finally { setIsLoading(false); }
-    };
-
-    const handleCreateProduct = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            await sellerService.createProduct({
-                ...newProduct,
-                categoryId: newProduct.categoryId || selectedCategory
-            });
-            alert("Товар добавлен!");
-            setNewProduct({ title: "", description: "", price: 0, categoryId: "", media: null });
-            if (selectedCategory) loadProducts(selectedCategory);
-        } catch (e) { alert("Ошибка при добавлении товара"); }
     };
 
     const handleDeleteProduct = async (id: string) => {
@@ -145,25 +138,10 @@ const SellerDashboardPage = () => {
                             )}
                         </div>
 
-                        {/* Форма добавления */}
+                        {/* Форма добавления заменена на компонент */}
                         <div className="form-column">
                             <h3>Добавить Товар</h3>
-                            <form onSubmit={handleCreateProduct} className="super-admin-form">
-                                <input placeholder="Название" value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} required />
-                                <input placeholder="Описание" value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} />
-                                <input placeholder="Цена" type="number" value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: Number(e.target.value)})} required />
-                                <select
-                                    style={{width:'100%', padding:'12px', borderRadius:'8px', border:'1px solid #e5e7eb', marginBottom:'15px'}}
-                                    value={newProduct.categoryId}
-                                    onChange={e => setNewProduct({...newProduct, categoryId: e.target.value})}
-                                    required
-                                >
-                                    <option value="">Выберите категорию</option>
-                                    {categories.map(c => <option key={c.categoryId} value={c.categoryId}>{c.name}</option>)}
-                                </select>
-                                <input type="file" onChange={e => setNewProduct({...newProduct, media: e.target.files?.[0] || null})} />
-                                <button type="submit" className="btn btn-primary" style={{width:'100%'}}>Создать Товар</button>
-                            </form>
+                            <CreateProductForm />
                         </div>
                     </div>
                 )}
