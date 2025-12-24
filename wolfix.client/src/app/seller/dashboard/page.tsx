@@ -28,10 +28,17 @@ const SellerDashboardPage = () => {
     const [products, setProducts] = useState<ProductShortDto[]>([]);
     const [orders, setOrders] = useState<SellerOrderDto[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    // Helpers to get IDs
-    const getSellerId = () => user?.profileId || (user as any)?.customerId; // ID профиля продавца
-    const getAccountId = () => user?.id; // ID аккаунта (для смены пароля/email)
+    // --- ВАЖНО: Восстановлен fallback на user.id ---
+    const getSellerId = () => {
+        const id = user?.profileId || (user as any)?.customerId || user?.id;
+        // Для отладки (посмотрите в консоль браузера F12)
+        console.log("Resolved Seller ID:", id, "User object:", user);
+        return id;
+    };
+
+    const getAccountId = () => user?.id;
 
     useEffect(() => {
         if (!authLoading) {
@@ -40,6 +47,8 @@ const SellerDashboardPage = () => {
                 return;
             }
             if (user) {
+                // Сбрасываем ошибку при смене вкладки
+                setErrorMsg(null);
                 if (activeTab === "products") loadCategories();
                 if (activeTab === "orders") loadOrders();
             }
@@ -71,18 +80,23 @@ const SellerDashboardPage = () => {
     };
 
     const loadOrders = async () => {
-        const id = getSellerId(); // Здесь должен быть ID продавца, а не UserID
+        const id = getSellerId();
         if (!id) {
-            console.error("Seller ID not found in user context");
+            setErrorMsg("Не вдалося визначити ID продавця. Перевірте консоль.");
             return;
         }
         setIsLoading(true);
+        setErrorMsg(null);
         try {
-            // Запрос идет на /api/orders/sellers/{sellerId}
+            console.log("Fetching orders for Seller ID:", id);
             const data = await sellerService.getOrders(id);
-            setOrders(data);
-        } catch (e) {
+            console.log("Orders received:", data);
+
+            // Проверка на случай если придет null
+            setOrders(data || []);
+        } catch (e: any) {
             console.error("Error loading orders:", e);
+            setErrorMsg("Помилка завантаження замовлень: " + (e.response?.status === 404 ? "Не знайдено" : e.message));
         } finally { setIsLoading(false); }
     };
 
@@ -113,6 +127,8 @@ const SellerDashboardPage = () => {
             </div>
 
             <div className="dashboard-content">
+                {errorMsg && <div className="p-4 mb-4 text-red-700 bg-red-100 rounded">{errorMsg}</div>}
+
                 {activeTab === 'products' && (
                     <div className="two-col-layout">
                         <div className="list-column">
@@ -161,10 +177,15 @@ const SellerDashboardPage = () => {
                         <h3>Мої Продажі</h3>
                         {isLoading ? <p>Завантаження...</p> : (
                             <div className="item-list">
-                                {orders.map(o => (
+                                {orders.length > 0 ? orders.map(o => (
                                     <div key={o.id} style={{padding:'15px', borderBottom:'1px solid #eee', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                                         <div style={{display:'flex', alignItems:'center', gap:'15px'}}>
-                                            {o.photoUrl && <img src={o.photoUrl} alt="" style={{width:50, height:50, borderRadius:4}}/>}
+                                            {/* Проверка на наличие фото */}
+                                            {o.photoUrl ? (
+                                                <img src={o.photoUrl} alt="" style={{width:50, height:50, borderRadius:4}}/>
+                                            ) : (
+                                                <div style={{width:50, height:50, background:'#eee', borderRadius:4}} />
+                                            )}
                                             <div>
                                                 <strong>{o.title}</strong>
                                                 <div>{o.quantity} шт. x {o.price} ₴</div>
@@ -174,8 +195,7 @@ const SellerDashboardPage = () => {
                                             +{o.price * o.quantity} ₴
                                         </div>
                                     </div>
-                                ))}
-                                {orders.length === 0 && <p>Замовлень поки немає.</p>}
+                                )) : <p>Замовлень поки немає.</p>}
                             </div>
                         )}
                     </div>
@@ -186,7 +206,10 @@ const SellerDashboardPage = () => {
                         {getSellerId() && getAccountId() ? (
                             <SellerProfileSettings sellerId={getSellerId()!} accountId={getAccountId()!} />
                         ) : (
-                            <p className="text-center text-red-500">Помилка: Неможливо визначити ID продавця або акаунта.</p>
+                            <div className="text-center text-red-500 py-10">
+                                <p>Помилка: Неможливо визначити ID продавця.</p>
+                                <p className="text-sm text-gray-500 mt-2">ID користувача: {user?.id || 'немає'}</p>
+                            </div>
                         )}
                     </div>
                 )}

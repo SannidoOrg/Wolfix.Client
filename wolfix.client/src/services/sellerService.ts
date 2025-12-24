@@ -1,4 +1,3 @@
-// src/services/sellerService.ts
 import api from "../lib/api";
 import {
     SellerProfileDto,
@@ -13,30 +12,27 @@ import {
 } from "../types/seller";
 
 export const sellerService = {
-    // Получение профиля
+    // Получение профиля (используем точный URL из Swagger)
     getSeller: async (sellerId: string): Promise<SellerProfileDto> => {
         const response = await api.get<SellerProfileDto>(`/api/sellers/${sellerId}`);
         return response.data;
     },
 
-    // Категории
     getCategories: async (sellerId: string): Promise<SellerCategoryDto[]> => {
         const response = await api.get<SellerCategoryDto[]>(`/api/sellers/${sellerId}/categories`);
         return response.data;
     },
 
-    // Товары
     getProductsByCategory: async (sellerId: string, categoryId: string, page: number = 1) => {
         const response = await api.get(`/api/products/seller/${sellerId}/category/${categoryId}/page/${page}`);
         return response.data;
     },
 
-    // Удаление товара
     deleteProduct: async (productId: string): Promise<void> => {
         await api.delete(`/api/products/${productId}`);
     },
 
-    // Заказы (исправлен URL согласно Swagger: /api/orders/sellers/{sellerId})
+    // Заказы (исправлен URL /api/orders/sellers/{sellerId})
     getOrders: async (sellerId: string): Promise<SellerOrderDto[]> => {
         const response = await api.get<SellerOrderDto[]>(`/api/orders/sellers/${sellerId}`);
         return response.data;

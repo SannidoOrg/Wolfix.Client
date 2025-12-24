@@ -8,21 +8,26 @@ import "../../../styles/SellerProfile.css";
 
 interface SellerProfileSettingsProps {
     sellerId: string;
-    accountId: string; // Нужен для смены email/password
+    accountId: string;
 }
 
 const SellerProfileSettings: React.FC<SellerProfileSettingsProps> = ({ sellerId, accountId }) => {
     const [profile, setProfile] = useState<SellerProfileDto | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    // Подгрузка данных
     const loadProfile = async () => {
+        if (!sellerId) return;
         setIsLoading(true);
+        setError(null);
         try {
+            console.log("Loading profile for:", sellerId);
             const data = await sellerService.getSeller(sellerId);
+            console.log("Profile data loaded:", data);
             setProfile(data);
-        } catch (e) {
+        } catch (e: any) {
             console.error("Failed to load profile", e);
+            setError("Не вдалося завантажити профіль. " + (e.response?.status === 404 ? "Профіль не знайдено." : e.message));
         } finally {
             setIsLoading(false);
         }
@@ -32,17 +37,16 @@ const SellerProfileSettings: React.FC<SellerProfileSettingsProps> = ({ sellerId,
         if (sellerId) loadProfile();
     }, [sellerId]);
 
-    if (isLoading && !profile) return <div>Завантаження профілю...</div>;
-    if (!profile) return <div>Профіль не знайдено</div>;
+    if (isLoading && !profile) return <div className="p-4 text-center">Завантаження профілю...</div>;
+    if (error) return <div className="p-4 text-center text-red-500">{error} <button onClick={loadProfile} className="underline ml-2">Спробувати ще раз</button></div>;
+    if (!profile) return <div className="p-4 text-center">Профіль не знайдено</div>;
 
     return (
         <div className="profile-settings-container max-w-3xl mx-auto space-y-8 pb-10">
             <h2 className="text-2xl font-bold mb-6">Налаштування профілю</h2>
 
-            {/* 1. ФОРМА ПІБ */}
             <FullNameForm sellerId={sellerId} initialData={profile.fullName} onUpdate={loadProfile} />
 
-            {/* 2. ФОРМА КОНТАКТІВ (Телефон + Дата народження) */}
             <ContactInfoForm
                 sellerId={sellerId}
                 phone={profile.phoneNumber}
@@ -50,16 +54,14 @@ const SellerProfileSettings: React.FC<SellerProfileSettingsProps> = ({ sellerId,
                 onUpdate={loadProfile}
             />
 
-            {/* 3. ФОРМА АДРЕСИ */}
             <AddressForm sellerId={sellerId} initialData={profile.address} onUpdate={loadProfile} />
 
-            {/* 4. ФОРМА БЕЗПЕКИ (Email + Пароль) */}
             <SecurityForm accountId={accountId} onUpdate={loadProfile} />
         </div>
     );
 };
 
-// --- Sub-components ---
+// ... Sub-components ...
 
 const FullNameForm = ({ sellerId, initialData, onUpdate }: any) => {
     const { register, handleSubmit } = useForm<ChangeFullNameDto>({
@@ -102,14 +104,24 @@ const FullNameForm = ({ sellerId, initialData, onUpdate }: any) => {
 
 const ContactInfoForm = ({ sellerId, phone, birthDate, onUpdate }: any) => {
     const { register: regPhone, handleSubmit: subPhone } = useForm<{ phoneNumber: string }>({ defaultValues: { phoneNumber: phone } });
+
+    // Безопасное преобразование даты
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return "";
+        try {
+            return new Date(dateString).toISOString().split('T')[0];
+        } catch (e) { return ""; }
+    };
+
     const { register: regDate, handleSubmit: subDate } = useForm<{ birthDate: string }>({
-        defaultValues: { birthDate: birthDate ? new Date(birthDate).toISOString().split('T')[0] : "" }
+        defaultValues: { birthDate: formatDate(birthDate) }
     });
 
     const savePhone = async (data: { phoneNumber: string }) => {
         try {
             await sellerService.updatePhoneNumber(sellerId, data);
             alert("Телефон оновлено");
+            onUpdate();
         } catch (e) { alert("Помилка оновлення телефону"); }
     };
 
@@ -117,6 +129,7 @@ const ContactInfoForm = ({ sellerId, phone, birthDate, onUpdate }: any) => {
         try {
             await sellerService.updateBirthDate(sellerId, data);
             alert("Дата народження оновлена");
+            onUpdate();
         } catch (e) { alert("Помилка оновлення дати"); }
     };
 
