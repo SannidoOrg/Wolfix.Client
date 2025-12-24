@@ -4,11 +4,18 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../../contexts/AuthContext";
 import { sellerService } from "../../../services/sellerService";
-import { ProductShortDto, SellerCategoryDto, SellerOrderDto } from "../../../types/seller";
-import CreateProductForm from "../../components/CreateProductForm/CreateProductForm.client"; // Импортируем компонент формы
+import { ProductShortDto, SellerOrderDto } from "../../../types/seller";
+import CreateProductForm from "../../components/CreateProductForm/CreateProductForm.client";
 import "../../../styles/Dashboard.css";
 
 type SellerTab = "products" | "orders" | "profile";
+
+// Определяем интерфейс локально, чтобы гарантировать наличие categoryId
+interface SellerCategoryDto {
+    id: string;         // ID связи
+    categoryId: string; // Реальный ID категории (важен для запроса товаров)
+    name: string;
+}
 
 const SellerDashboardPage = () => {
     const { user, logout, loading: authLoading } = useAuth();
@@ -22,52 +29,70 @@ const SellerDashboardPage = () => {
     const [orders, setOrders] = useState<SellerOrderDto[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Удалены локальные стейты для формы (newProduct), так как теперь за это отвечает компонент CreateProductForm
-
     useEffect(() => {
         if (!authLoading) {
-            if (!user || user.role !== "Seller") {
+            // Если пользователь не продавец, редиректим (можно ослабить проверку если роль еще грузится)
+            if (user && user.role !== "Seller") {
                 router.push("/");
                 return;
             }
+
             // Load initial data
-            if (activeTab === "products") loadCategories();
-            if (activeTab === "orders") loadOrders();
+            if (user) {
+                if (activeTab === "products") loadCategories();
+                if (activeTab === "orders") loadOrders();
+            }
         }
     }, [user, authLoading, router, activeTab]);
 
+    // Получаем корректный ID продавца (как в форме создания товара)
     const getSellerId = () => {
-        // Используем profileId (если есть) как ID продавца, или fallback на id пользователя
-        return user?.profileId || user?.id;
+        return user?.profileId || (user as any)?.customerId || user?.id;
     };
 
     const loadCategories = async () => {
         const id = getSellerId();
         if (!id) return;
+
         try {
-            const cats = await sellerService.getCategories(id);
+            // Приводим тип ответа к нашему локальному интерфейсу
+            const cats = (await sellerService.getCategories(id)) as unknown as SellerCategoryDto[];
             setCategories(cats);
+
+            // Если категории есть, а выбранной нет - выбираем первую и грузим товары
             if (cats.length > 0 && !selectedCategory) {
-                setSelectedCategory(cats[0].categoryId);
-                loadProducts(cats[0].categoryId);
+                const firstCatId = cats[0].categoryId;
+                setSelectedCategory(firstCatId);
+                loadProducts(firstCatId);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error("Ошибка загрузки категорий:", e);
+        }
     };
 
     const loadProducts = async (catId: string) => {
         const id = getSellerId();
-        if (!id) return;
+        if (!id || !catId) {
+            console.warn("Missing sellerId or categoryId for loading products", { id, catId });
+            return;
+        }
+
         setIsLoading(true);
         try {
             const res = await sellerService.getProductsByCategory(id, catId);
+            // Учитываем структуру пагинации (res.items)
             setProducts(res.items || []);
-        } catch (e) { console.error(e); }
-        finally { setIsLoading(false); }
+        } catch (e) {
+            console.error("Ошибка загрузки товаров:", e);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const loadOrders = async () => {
         const id = getSellerId();
         if (!id) return;
+
         setIsLoading(true);
         try {
             const data = await sellerService.getOrders(id);
@@ -77,29 +102,40 @@ const SellerDashboardPage = () => {
     };
 
     const handleDeleteProduct = async (id: string) => {
-        if (!confirm("Удалить товар?")) return;
+        if (!confirm("Видалити товар?")) return;
         try {
             await sellerService.deleteProduct(id);
             if (selectedCategory) loadProducts(selectedCategory);
         } catch (e) { alert("Ошибка удаления"); }
     };
 
-    if (authLoading) return <div className="loading-state">Загрузка...</div>;
+    // Обработчик смены категории
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newCatId = e.target.value;
+        setSelectedCategory(newCatId);
+        if (newCatId) {
+            loadProducts(newCatId);
+        } else {
+            setProducts([]);
+        }
+    };
+
+    if (authLoading) return <div className="loading-state">Завантаження...</div>;
 
     return (
         <div className="dashboard-container">
             <header className="dashboard-header">
-                <h1>Кабинет Продавца</h1>
+                <h1>Кабінет Продавця</h1>
                 <div style={{display:'flex', alignItems:'center', gap: '15px'}}>
                     <span>{user?.email}</span>
-                    <button onClick={logout} className="btn logout-btn">Выйти</button>
+                    <button onClick={logout} className="btn logout-btn">Вийти</button>
                 </div>
             </header>
 
             <div className="dashboard-tabs">
-                <button className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>Мои Товары</button>
-                <button className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Заказы</button>
-                <button className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>Профиль</button>
+                <button className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`} onClick={() => setActiveTab('products')}>Мої Товари</button>
+                <button className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>Замовлення</button>
+                <button className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>Профіль</button>
             </div>
 
             <div className="dashboard-content">
@@ -108,18 +144,23 @@ const SellerDashboardPage = () => {
                         {/* Список товаров */}
                         <div className="list-column">
                             <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px'}}>
-                                <h3>Список товаров</h3>
+                                <h3>Список товарів</h3>
                                 <select
                                     className="btn"
-                                    style={{background:'white', border:'1px solid #ddd'}}
+                                    style={{background:'white', border:'1px solid #ddd', minWidth: '200px'}}
                                     value={selectedCategory}
-                                    onChange={(e) => { setSelectedCategory(e.target.value); loadProducts(e.target.value); }}
+                                    onChange={handleCategoryChange}
                                 >
-                                    {categories.map(c => <option key={c.categoryId} value={c.categoryId}>{c.name}</option>)}
+                                    {categories.length === 0 && <option value="">Немає категорій</option>}
+                                    {categories.map(c => (
+                                        <option key={c.id} value={c.categoryId}>
+                                            {c.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
-                            {isLoading ? <p>Загрузка...</p> : (
+                            {isLoading ? <p>Завантаження...</p> : (
                                 <ul className="item-list">
                                     {products.map(p => (
                                         <li key={p.id}>
@@ -130,17 +171,23 @@ const SellerDashboardPage = () => {
                                                     <div style={{fontSize:'0.85em', color:'#666'}}>{p.price} ₴</div>
                                                 </div>
                                             </div>
-                                            <button className="btn btn-reject" style={{padding:'5px 10px'}} onClick={() => handleDeleteProduct(p.id)}>Удалить</button>
+                                            <button className="btn btn-reject" style={{padding:'5px 10px'}} onClick={() => handleDeleteProduct(p.id)}>Видалити</button>
                                         </li>
                                     ))}
-                                    {products.length === 0 && <p>В этой категории нет товаров.</p>}
+                                    {!isLoading && products.length === 0 && (
+                                        <p style={{color: '#888', fontStyle: 'italic'}}>
+                                            {categories.length === 0
+                                                ? "У вас ще немає категорій. Створіть товар, щоб категорія з'явилась."
+                                                : "У цій категорії немає товарів."}
+                                        </p>
+                                    )}
                                 </ul>
                             )}
                         </div>
 
-                        {/* Форма добавления заменена на компонент */}
+                        {/* Форма добавления (компонент) */}
                         <div className="form-column">
-                            <h3>Добавить Товар</h3>
+                            <h3>Додати Товар</h3>
                             <CreateProductForm />
                         </div>
                     </div>
@@ -148,8 +195,8 @@ const SellerDashboardPage = () => {
 
                 {activeTab === 'orders' && (
                     <div className="full-width-list">
-                        <h3>Мои Продажи</h3>
-                        {isLoading ? <p>Загрузка...</p> : (
+                        <h3>Мої Продажі</h3>
+                        {isLoading ? <p>Завантаження...</p> : (
                             <div className="item-list">
                                 {orders.map(o => (
                                     <div key={o.id} style={{padding:'15px', borderBottom:'1px solid #eee', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
@@ -165,7 +212,7 @@ const SellerDashboardPage = () => {
                                         </div>
                                     </div>
                                 ))}
-                                {orders.length === 0 && <p>Заказов пока нет.</p>}
+                                {orders.length === 0 && <p>Замовлень поки немає.</p>}
                             </div>
                         )}
                     </div>
@@ -173,10 +220,10 @@ const SellerDashboardPage = () => {
 
                 {activeTab === 'profile' && (
                     <div className="form-card" style={{maxWidth:'600px', margin:'0 auto', textAlign:'center'}}>
-                        <h3>Профиль</h3>
+                        <h3>Профіль</h3>
                         <p>ID: {user?.id}</p>
                         <p>Email: {user?.email}</p>
-                        <p style={{color:'#666', marginTop:'10px'}}>Редактирование профиля доступно в настройках аккаунта.</p>
+                        <p style={{color:'#666', marginTop:'10px'}}>Редагування профілю доступне в налаштуваннях акаунту.</p>
                     </div>
                 )}
             </div>
