@@ -139,12 +139,6 @@ const CartPageClient: FC = () => {
                     </div>
                 )}
             </div>
-
-            {/* Ранее просмотренные */}
-            <div className="recommended-section">
-                <h3 style={{textAlign:'center', marginBottom:'20px', fontSize:'20px'}}>Ви переглядали раніше</h3>
-                <StandaloneCarousel products={recommendedProducts} />
-            </div>
         </div>
     );
 };

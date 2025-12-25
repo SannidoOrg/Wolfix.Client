@@ -115,7 +115,6 @@ const ProductDetailClient: FC<Props> = ({ product }) => {
 
                         <div className="actions-row">
                             <button className="buy-btn" onClick={handleAddToCart}>Купити</button>
-                            <button className="credit-btn">Купити в кредит</button>
                         </div>
                     </div>
 
