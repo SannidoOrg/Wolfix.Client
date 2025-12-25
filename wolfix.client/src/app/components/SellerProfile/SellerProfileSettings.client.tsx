@@ -1,114 +1,187 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { getSellerProfile, updateSellerProfile } from "@/services/sellerService";
-import { Seller } from "@/types/seller";
+import {
+    getSellerProfile,
+    changeSellerFullName,
+    changeSellerPhoneNumber,
+    changeSellerAddress,
+    changeSellerBirthDate,
+    SellerProfileDto,
+} from "@/services/userProfileService"; // Убедитесь, что путь к файлу верный
 import "@/styles/SellerProfile.css";
+
+// Helper type to track initial state for comparison
+type ProfileState = {
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    phoneNumber: string;
+    birthDate: string;
+    city: string;
+    street: string;
+    houseNumber: string;
+    apartmentNumber: string;
+};
 
 const SellerProfileSettings = () => {
     const { user } = useAuth();
-    const [sellerData, setSellerData] = useState<Seller | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
 
-    // Form States
-    const [shopName, setShopName] = useState("");
-    const [description, setDescription] = useState("");
-    const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
+    // --- Form State ---
+    // Full Name
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [middleName, setMiddleName] = useState("");
 
-    // Socials
-    const [instagram, setInstagram] = useState("");
-    const [tiktok, setTiktok] = useState("");
-    const [telegram, setTelegram] = useState("");
+    // Contacts
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [birthDate, setBirthDate] = useState("");
 
-    // Files & Previews
-    const [logoFile, setLogoFile] = useState<File | null>(null);
-    const [bannerFile, setBannerFile] = useState<File | null>(null);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
-    const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+    // Address
+    const [city, setCity] = useState("");
+    const [street, setStreet] = useState("");
+    const [houseNumber, setHouseNumber] = useState("");
+    const [apartmentNumber, setApartmentNumber] = useState("");
 
-    // Refs for file inputs
-    const logoInputRef = useRef<HTMLInputElement>(null);
-    const bannerInputRef = useRef<HTMLInputElement>(null);
+    // Initial state to check dirty fields
+    const [initialState, setInitialState] = useState<ProfileState | null>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
-            if (user) {
-                try {
-                    const data = await getSellerProfile();
-                    setSellerData(data);
+            if (!user?.customerId) return;
 
-                    // Pre-fill form
-                    setShopName(data.shopName || "");
-                    setDescription(data.description || "");
-                    setEmail(data.email || "");
-                    setPhone(data.phoneNumber || "");
-                    setInstagram(data.instagramLink || "");
-                    setTiktok(data.tiktokLink || "");
-                    setTelegram(data.telegramLink || "");
+            try {
+                const data: SellerProfileDto = await getSellerProfile(user.customerId);
 
-                    // Set existing images as previews
-                    if (data.logoUrl) setLogoPreview(data.logoUrl);
-                    if (data.bannerUrl) setBannerPreview(data.bannerUrl);
-
-                } catch (error) {
-                    console.error("Failed to fetch seller profile", error);
-                } finally {
-                    setIsLoading(false);
+                // Parse dates safely
+                let formattedDate = "";
+                if (data.birthDate) {
+                    const d = new Date(data.birthDate);
+                    if (!isNaN(d.getTime())) {
+                        formattedDate = d.toISOString().split("T")[0];
+                    }
                 }
+
+                const state: ProfileState = {
+                    firstName: data.fullName?.firstName || "",
+                    lastName: data.fullName?.lastName || "",
+                    middleName: data.fullName?.middleName || "",
+                    phoneNumber: data.phoneNumber || "",
+                    birthDate: formattedDate,
+                    city: data.address?.city || "",
+                    street: data.address?.street || "",
+                    houseNumber: data.address?.houseNumber?.toString() || "",
+                    apartmentNumber: data.address?.apartmentNumber?.toString() || "",
+                };
+
+                // Set inputs
+                setFirstName(state.firstName);
+                setLastName(state.lastName);
+                setMiddleName(state.middleName);
+                setPhoneNumber(state.phoneNumber);
+                setBirthDate(state.birthDate);
+                setCity(state.city);
+                setStreet(state.street);
+                setHouseNumber(state.houseNumber);
+                setApartmentNumber(state.apartmentNumber);
+
+                setInitialState(state);
+            } catch (error) {
+                console.error("Failed to load seller profile:", error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchProfile();
     }, [user]);
 
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setLogoFile(file);
-            setLogoPreview(URL.createObjectURL(file));
-        }
-    };
-
-    const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            setBannerFile(file);
-            setBannerPreview(URL.createObjectURL(file));
-        }
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user?.id || !initialState) return;
+
         setIsSaving(true);
+        const promises = [];
 
         try {
-            const formData = new FormData();
-            formData.append("ShopName", shopName);
-            formData.append("Description", description);
-            formData.append("Email", email);
-            formData.append("PhoneNumber", phone);
-
-            // Socials
-            formData.append("InstagramLink", instagram);
-            formData.append("TikTokLink", tiktok);
-            formData.append("TelegramLink", telegram);
-
-            // Files (only append if new file selected)
-            if (logoFile) {
-                formData.append("Logo", logoFile);
-            }
-            if (bannerFile) {
-                formData.append("Banner", bannerFile);
+            // 1. Check Full Name changes
+            if (
+                firstName !== initialState.firstName ||
+                lastName !== initialState.lastName ||
+                middleName !== initialState.middleName
+            ) {
+                promises.push(
+                    changeSellerFullName(user.id, {
+                        firstName,
+                        lastName,
+                        middleName,
+                    })
+                );
             }
 
-            await updateSellerProfile(formData);
-            alert("Profile updated successfully!");
+            // 2. Check Phone Number
+            if (phoneNumber !== initialState.phoneNumber) {
+                promises.push(changeSellerPhoneNumber(user.id, phoneNumber));
+            }
+
+            // 3. Check Address changes
+            if (
+                city !== initialState.city ||
+                street !== initialState.street ||
+                houseNumber !== initialState.houseNumber ||
+                apartmentNumber !== initialState.apartmentNumber
+            ) {
+                // Convert numbers
+                const hNum = parseInt(houseNumber, 10);
+                const aptNum = apartmentNumber ? parseInt(apartmentNumber, 10) : null;
+
+                if (!isNaN(hNum)) {
+                    promises.push(
+                        changeSellerAddress(user.id, {
+                            city,
+                            street,
+                            houseNumber: hNum,
+                            apartmentNumber: aptNum,
+                        })
+                    );
+                } else {
+                    console.warn("House number is invalid, skipping address update");
+                }
+            }
+
+            // 4. Check Birth Date
+            if (birthDate !== initialState.birthDate) {
+                promises.push(changeSellerBirthDate(user.id, birthDate));
+            }
+
+            if (promises.length === 0) {
+                alert("Немає змін для збереження.");
+                setIsSaving(false);
+                return;
+            }
+
+            await Promise.all(promises);
+
+            // Update initial state
+            setInitialState({
+                firstName,
+                lastName,
+                middleName,
+                phoneNumber,
+                birthDate,
+                city,
+                street,
+                houseNumber,
+                apartmentNumber,
+            });
+
+            alert("Профіль успішно оновлено!");
         } catch (error) {
             console.error("Error updating profile:", error);
-            alert("Failed to update profile.");
+            alert("Сталася помилка при збереженні. Перевірте консоль.");
         } finally {
             setIsSaving(false);
         }
@@ -119,145 +192,118 @@ const SellerProfileSettings = () => {
     return (
         <div className="profile-settings-wrapper">
             <div className="profile-header">
-                <h2>Налаштування магазину</h2>
-                <p>Керуйте інформацією про ваш магазин, брендингом та контактами</p>
+                <h2>Особистий профіль</h2>
+                <p>Керуйте своїми особистими даними та адресою</p>
             </div>
 
             <form onSubmit={handleSubmit}>
-                {/* Media Section */}
-                <div className="media-section">
-                    {/* Banner Upload */}
-                    <div
-                        className="banner-upload-container"
-                        onClick={() => bannerInputRef.current?.click()}
-                        title="Натисніть, щоб змінити банер"
-                    >
-                        {bannerPreview ? (
-                            <img src={bannerPreview} alt="Shop Banner" className="banner-preview" />
-                        ) : (
-                            <div className="upload-placeholder">
-                                <span className="upload-icon">🖼️</span>
-                                <span>Завантажити банер магазину</span>
-                            </div>
-                        )}
-                        <input
-                            type="file"
-                            ref={bannerInputRef}
-                            onChange={handleBannerChange}
-                            accept="image/*"
-                            className="file-input-hidden"
-                        />
-                    </div>
 
-                    {/* Logo Upload */}
-                    <div className="logo-upload-section">
-                        <div
-                            className="logo-upload-container"
-                            onClick={() => logoInputRef.current?.click()}
-                            title="Натисніть, щоб змінити логотип"
-                        >
-                            {logoPreview ? (
-                                <img src={logoPreview} alt="Shop Logo" className="logo-preview" />
-                            ) : (
-                                <div className="logo-placeholder">Логотип</div>
-                            )}
+                {/* Block: Personal Info */}
+                <div className="form-section">
+                    <h3 className="section-title">Основна інформація</h3>
+                    <div className="form-grid three-cols">
+                        <div className="input-group">
+                            <label>Прізвище</label>
                             <input
-                                type="file"
-                                ref={logoInputRef}
-                                onChange={handleLogoChange}
-                                accept="image/*"
-                                className="file-input-hidden"
+                                type="text"
+                                className="wolfix-input"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                placeholder="Шевченко"
                             />
                         </div>
-                        <div className="logo-upload-hint">
-                            <div
-                                className="btn-upload-trigger"
-                                onClick={() => logoInputRef.current?.click()}
-                            >
-                                Змінити логотип
-                            </div>
+                        <div className="input-group">
+                            <label>Ім'я</label>
+                            <input
+                                type="text"
+                                className="wolfix-input"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                placeholder="Тарас"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>По батькові</label>
+                            <input
+                                type="text"
+                                className="wolfix-input"
+                                value={middleName}
+                                onChange={(e) => setMiddleName(e.target.value)}
+                                placeholder="Григорович"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="form-grid two-cols mt-4">
+                        <div className="input-group">
+                            <label>Дата народження</label>
+                            <input
+                                type="date"
+                                className="wolfix-input"
+                                value={birthDate}
+                                onChange={(e) => setBirthDate(e.target.value)}
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>Телефон</label>
+                            <input
+                                type="tel"
+                                className="wolfix-input"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                placeholder="+380..."
+                            />
                         </div>
                     </div>
                 </div>
 
-                {/* Main Info Grid */}
-                <div className="form-grid">
-                    <div className="input-group">
-                        <label>Назва магазину</label>
-                        <input
-                            type="text"
-                            className="wolfix-input"
-                            value={shopName}
-                            onChange={(e) => setShopName(e.target.value)}
-                            placeholder="Наприклад: Wolfix Store"
-                        />
-                    </div>
+                <hr className="divider" />
 
-                    <div className="input-group">
-                        <label>Телефон для зв'язку</label>
-                        <input
-                            type="tel"
-                            className="wolfix-input"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="+380..."
-                        />
-                    </div>
-
-                    <div className="input-group full-width">
-                        <label>Опис магазину</label>
-                        <textarea
-                            className="wolfix-input wolfix-textarea"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Розкажіть покупцям про ваш магазин..."
-                        />
-                    </div>
-
-                    <div className="input-group full-width">
-                        <label>Email (публічний)</label>
-                        <input
-                            type="email"
-                            className="wolfix-input"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="contact@example.com"
-                        />
-                    </div>
-                </div>
-
-                {/* Social Media Section */}
-                <div className="socials-section">
-                    <h3 className="socials-title">Соціальні мережі</h3>
-                    <div className="form-grid">
+                {/* Block: Address */}
+                <div className="form-section">
+                    <h3 className="section-title">Адреса</h3>
+                    <div className="form-grid two-cols">
                         <div className="input-group">
-                            <label>Instagram</label>
+                            <label>Місто</label>
                             <input
                                 type="text"
                                 className="wolfix-input"
-                                value={instagram}
-                                onChange={(e) => setInstagram(e.target.value)}
-                                placeholder="https://instagram.com/..."
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                placeholder="Київ"
                             />
                         </div>
                         <div className="input-group">
-                            <label>TikTok</label>
+                            <label>Вулиця</label>
                             <input
                                 type="text"
                                 className="wolfix-input"
-                                value={tiktok}
-                                onChange={(e) => setTiktok(e.target.value)}
-                                placeholder="https://tiktok.com/..."
+                                value={street}
+                                onChange={(e) => setStreet(e.target.value)}
+                                placeholder="Хрещатик"
                             />
                         </div>
-                        <div className="input-group full-width">
-                            <label>Telegram</label>
+                    </div>
+
+                    <div className="form-grid two-cols mt-4 small-grid">
+                        <div className="input-group">
+                            <label>Номер будинку</label>
                             <input
-                                type="text"
+                                type="number"
                                 className="wolfix-input"
-                                value={telegram}
-                                onChange={(e) => setTelegram(e.target.value)}
-                                placeholder="https://t.me/..."
+                                value={houseNumber}
+                                onChange={(e) => setHouseNumber(e.target.value)}
+                                placeholder="10"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>Номер квартири</label>
+                            <input
+                                type="number"
+                                className="wolfix-input"
+                                value={apartmentNumber}
+                                onChange={(e) => setApartmentNumber(e.target.value)}
+                                placeholder="25"
                             />
                         </div>
                     </div>
