@@ -1,6 +1,7 @@
 export interface CartItemDto {
     id: string;
-    productId: string; // Новое поле
+    productId: string;
+    sellerId: string; // Добавлено новое поле согласно изменениям на бэкенде
     photoUrl: string;
     title: string;
     price: number;

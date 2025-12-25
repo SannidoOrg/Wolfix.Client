@@ -6,20 +6,17 @@ export enum DeliveryOption {
     Courier = 2
 }
 
-// Updated: WhileReceiving = 0, Card = 1
 export enum OrderPaymentOption {
     WhileReceiving = 0,
     Card = 1
 }
 
-// Updated: Unpaid = 0, Pending = 1, Paid = 2
 export enum OrderPaymentStatus {
     Unpaid = 0,
     Pending = 1,
     Paid = 2
 }
 
-// Updated: Preparing = 0, OnTheWay = 1
 export enum OrderDeliveryStatus {
     Preparing = 0,
     OnTheWay = 1
@@ -63,7 +60,6 @@ export interface OrderDetailsDto {
     recipientMiddleName?: string;
     recipientPhoneNumber?: string;
 
-    // Теперь строго типизированные enum, а не string
     deliveryStatus: OrderDeliveryStatus;
     paymentOption: OrderPaymentOption;
     paymentStatus: OrderPaymentStatus;
@@ -81,6 +77,7 @@ export interface OrderDetailsDto {
 export interface CreateOrderItemDto {
     cartItemId?: string;
     productId: string;
+    sellerId: string; // Добавлено обязательное поле для создания заказа
     photoUrl?: string;
     title?: string;
     quantity: number;

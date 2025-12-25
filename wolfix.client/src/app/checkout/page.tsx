@@ -50,7 +50,8 @@ const CheckoutPage = () => {
     const [house, setHouse] = useState("");
 
     // --- Оплата ---
-    const [paymentMethod, setPaymentMethod] = useState<OrderPaymentOption>(OrderPaymentOption.Cash);
+    // Используем WhileReceiving (0) по умолчанию
+    const [paymentMethod, setPaymentMethod] = useState<OrderPaymentOption>(OrderPaymentOption.WhileReceiving);
 
     // --- Бонусы ---
     const [bonusesToUse, setBonusesToUse] = useState(0);
@@ -186,7 +187,6 @@ const CheckoutPage = () => {
 
             finalCity = currentCity.name;
             finalDeptNumber = dept.number;
-            // ИСПРАВЛЕНИЕ ЗДЕСЬ: Заполняем улицу и дом из выбранного отделения
             finalStreet = dept.street || undefined;
             finalHouse = dept.houseNumber || undefined;
             methodNameString = currentApiMethod?.name || "Доставка";
@@ -227,6 +227,7 @@ const CheckoutPage = () => {
             orderItems: (cart?.items || []).map(item => ({
                 cartItemId: item.id,
                 productId: item.productId,
+                sellerId: item.sellerId,
                 quantity: 1,
                 price: item.price,
                 title: item.title,
@@ -255,7 +256,8 @@ const CheckoutPage = () => {
 
         } catch (error: any) {
             console.error("Order error:", error);
-            showNotification("Помилка оформлення", "error");
+            const msg = error.response?.data?.message || "Помилка оформлення";
+            showNotification(msg, "error");
         } finally {
             setLoading(false);
         }
@@ -407,8 +409,8 @@ const CheckoutPage = () => {
                                     <input
                                         type="radio"
                                         className="custom-radio"
-                                        checked={paymentMethod === OrderPaymentOption.Cash}
-                                        onChange={() => setPaymentMethod(OrderPaymentOption.Cash)}
+                                        checked={paymentMethod === OrderPaymentOption.WhileReceiving}
+                                        onChange={() => setPaymentMethod(OrderPaymentOption.WhileReceiving)}
                                     />
                                     <span className="radio-text">Оплата під час отримання</span>
                                 </div>
