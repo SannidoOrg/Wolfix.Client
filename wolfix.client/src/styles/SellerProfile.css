@@ -1,247 +1,250 @@
-/* Основной контейнер */
-.seller-profile-container {
+/* src/styles/SellerProfile.css */
+
+.profile-settings-wrapper {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-header {
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.profile-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.profile-header p {
+    color: #666;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Media Section (Banner & Logo) */
+.media-section {
+    margin-bottom: 40px;
     display: flex;
     flex-direction: column;
-    min-height: 80vh;
-    background-color: #F9FAFB;
-    gap: 24px;
-    padding: 24px 0;
+    gap: 20px;
 }
 
-@media (min-width: 992px) {
-    .seller-profile-container {
-        flex-direction: row;
-        align-items: flex-start;
-    }
-}
-
-/* Сайдбар */
-.seller-sidebar {
+.banner-upload-container {
     width: 100%;
-    background: #fff;
+    height: 200px;
+    background-color: #f8f9fa;
+    border: 2px dashed #e0e0e0;
     border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    border: 1px solid #E5E7EB;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
-@media (min-width: 992px) {
-    .seller-sidebar {
-        width: 280px;
-        flex-shrink: 0;
-        position: sticky;
-        top: 100px;
-    }
+.banner-upload-container:hover {
+    border-color: #8a2be2; /* Wolfix Primary Color */
+    background-color: #f3e5f5;
 }
 
-.seller-info {
-    text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid #eee;
+.banner-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.seller-avatar {
-    width: 80px;
-    height: 80px;
-    background-color: #FF7E00;
-    color: white;
-    font-size: 32px;
-    font-weight: bold;
-    border-radius: 50%;
+.upload-placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     display: flex;
+    flex-direction: column;
     align-items: center;
+    color: #888;
+    pointer-events: none;
+}
+
+.upload-icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.logo-upload-section {
+    display: flex;
+    align-items: flex-end;
+    padding: 0 20px;
+    margin-top: -60px; /* Overlap banner */
+    position: relative;
+    z-index: 10;
+}
+
+.logo-upload-container {
+    width: 120px;
+    height: 120px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
     justify-content: center;
-    margin: 0 auto 12px;
+    align-items: center;
 }
 
-.seller-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 4px;
+.logo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.seller-role {
+.logo-placeholder {
+    font-size: 12px;
+    text-align: center;
+    color: #888;
+    padding: 10px;
+}
+
+.logo-upload-hint {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.btn-upload-trigger {
     font-size: 14px;
-    color: #6B7280;
+    color: #666;
+    background: #f0f0f0;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
-/* Меню навигации */
-.seller-nav {
+.btn-upload-trigger:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+/* Hidden inputs */
+.file-input-hidden {
+    display: none;
+}
+
+/* Form Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.input-group {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.nav-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
+.input-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+}
+
+.wolfix-input {
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     font-size: 15px;
-    font-weight: 500;
-    color: #4B5563;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: none;
-    border: none;
-    width: 100%;
-    text-align: left;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff;
 }
 
-.nav-item:hover {
-    background-color: #FFF4E5;
-    color: #FF7E00;
+.wolfix-input:focus {
+    outline: none;
+    border-color: #8a2be2;
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.1);
 }
 
-.nav-item.active {
-    background-color: #FF7E00;
-    color: white;
+.wolfix-textarea {
+    min-height: 100px;
+    resize: vertical;
 }
 
-/* Основной контент */
-.seller-content {
-    flex: 1;
-    background: #fff;
-    border-radius: 12px;
-    padding: 32px;
-    border: 1px solid #E5E7EB;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    min-height: 500px;
+/* Socials Section */
+.socials-section {
+    background-color: #f8fafc;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 10px;
 }
 
-.content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-}
-
-.content-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: #111;
-}
-
-/* Кнопки */
-.action-btn {
-    padding: 10px 20px;
-    background-color: #FF7E00;
-    color: white;
-    border-radius: 8px;
+.socials-title {
+    font-size: 16px;
     font-weight: 600;
-    text-decoration: none;
-    transition: background 0.2s;
+    margin-bottom: 20px;
+    color: #333;
 }
 
-.action-btn:hover {
-    background-color: #E66A00;
+/* Actions */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    margin-top: 30px;
 }
 
 .save-btn {
-    padding: 8px 16px;
-    background-color: #fff;
-    color: #FF7E00;
-    border: 1px solid #FF7E00;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 14px;
+    background-color: #1a1a1a;
+    color: white;
+    padding: 12px 40px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 0.1s, background-color 0.2s;
 }
 
 .save-btn:hover {
-    background-color: #FF7E00;
-    color: white;
+    background-color: #333;
 }
 
-/* Секции настроек */
-.settings-section {
-    background-color: #FAFAFA;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    padding: 20px;
+.save-btn:active {
+    transform: scale(0.98);
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.save-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
-.form-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #374151;
-}
+/* Responsive */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 
-.form-input {
-    padding: 10px 12px;
-    border: 1px solid #D1D5DB;
-    border-radius: 6px;
-    font-size: 14px;
-    background-color: #fff;
-    outline: none;
-}
+    .logo-upload-section {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 15px;
+        gap: 15px;
+        padding: 0;
+    }
 
-.form-input:focus {
-    border-color: #FF7E00;
-    box-shadow: 0 0 0 2px rgba(255, 126, 0, 0.1);
-}
-
-/* Таблицы */
-.data-table-wrapper {
-    overflow-x: auto;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 600px;
-}
-
-.data-table th {
-    text-align: left;
-    padding: 12px 16px;
-    font-size: 13px;
-    text-transform: uppercase;
-    color: #6B7280;
-    font-weight: 600;
-    border-bottom: 2px solid #F3F4F6;
-    background-color: #F9FAFB;
-}
-
-.data-table td {
-    padding: 16px;
-    border-bottom: 1px solid #F3F4F6;
-    color: #1F2937;
-    font-size: 14px;
-}
-
-.status-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status-new { background-color: #E0F2FE; color: #0284C7; }
-
-.delete-btn {
-    color: #EF4444;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.delete-btn:hover {
-    text-decoration: underline;
-}
-
-.loading-state, .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #9CA3AF;
+    .logo-upload-hint {
+        margin-left: 0;
+    }
 }
