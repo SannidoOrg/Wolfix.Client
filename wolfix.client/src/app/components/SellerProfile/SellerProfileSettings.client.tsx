@@ -101,7 +101,7 @@ const SellerProfileSettings = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user?.id || !initialState) return;
+        if (!user?.customerId || !initialState) return;
 
         setIsSaving(true);
         const promises = [];
@@ -114,7 +114,7 @@ const SellerProfileSettings = () => {
                 middleName !== initialState.middleName
             ) {
                 promises.push(
-                    changeSellerFullName(user.id, {
+                    changeSellerFullName(user.customerId, {
                         firstName,
                         lastName,
                         middleName,
@@ -124,7 +124,7 @@ const SellerProfileSettings = () => {
 
             // 2. Check Phone Number
             if (phoneNumber !== initialState.phoneNumber) {
-                promises.push(changeSellerPhoneNumber(user.id, phoneNumber));
+                promises.push(changeSellerPhoneNumber(user.customerId, phoneNumber));
             }
 
             // 3. Check Address changes
@@ -140,7 +140,7 @@ const SellerProfileSettings = () => {
 
                 if (!isNaN(hNum)) {
                     promises.push(
-                        changeSellerAddress(user.id, {
+                        changeSellerAddress(user.customerId, {
                             city,
                             street,
                             houseNumber: hNum,
@@ -154,7 +154,7 @@ const SellerProfileSettings = () => {
 
             // 4. Check Birth Date
             if (birthDate !== initialState.birthDate) {
-                promises.push(changeSellerBirthDate(user.id, birthDate));
+                promises.push(changeSellerBirthDate(user.customerId, birthDate));
             }
 
             if (promises.length === 0) {
