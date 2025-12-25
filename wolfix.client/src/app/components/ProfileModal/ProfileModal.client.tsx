@@ -2,6 +2,7 @@
 
 import { FC, useRef, useEffect, useState, RefObject } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation'; // <--- 1. ДОБАВИЛИ ИМПОРТ
 import '../../../styles/ProfileModal.css';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useGlobalContext } from '../../../contexts/GlobalContext';
@@ -14,6 +15,7 @@ interface IProfileModalProps {
 
 const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) => {
     const modalRef = useRef<HTMLDivElement>(null);
+    const router = useRouter(); // <--- 2. ИНИЦИАЛИЗИРУЕМ РОУТЕР
 
     // Состояния формы
     const [view, setView] = useState<'login' | 'register' | 'selectRole'>('login');
@@ -22,18 +24,17 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
 
-    // Список ролей, полученный с сервера
+    // Список ролей
     const [availableRoles, setAvailableRoles] = useState<string[]>([]);
 
     const { fetchUserRoles, loginWithRole, register } = useAuth();
     const { loading } = useGlobalContext();
 
-    // Сброс формы при открытии/закрытии
+    // Сброс формы
     useEffect(() => {
         if (isOpen) {
             setView('login');
             setError('');
-            // Не сбрасываем email/pass для удобства, если пользователь случайно закрыл
         }
     }, [isOpen]);
 
@@ -59,7 +60,6 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
         e.preventDefault();
         setError('');
 
-        // 1. Запрашиваем роли
         const roles = await fetchUserRoles({ email, password });
 
         if (!roles || roles.length === 0) {
@@ -67,22 +67,31 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
             return;
         }
 
-        // 2. Если роль одна - входим сразу
         if (roles.length === 1) {
             await finalizeLogin(roles[0]);
         } else {
-            // 3. Если ролей много - показываем выбор
             setAvailableRoles(roles);
             setView('selectRole');
         }
     };
 
-    // ЛОГИКА ВХОДА (Этап 2 - получение токена)
+    // --- ВОТ ТУТ ГЛАВНЫЕ ИЗМЕНЕНИЯ ---
+    // ЛОГИКА ВХОДА (Этап 2 - получение токена и РЕДИРЕКТ)
     const finalizeLogin = async (role: string) => {
         const success = await loginWithRole({ email, password, role });
+
         if (success) {
+            // 3. СРАЗУ ПОСЛЕ ВХОДА КИДАЕМ КУДА НАДО
+            if (role === 'Support') {
+                router.push('/support/dashboard');
+            } else if (role === 'Seller') {
+                router.push('/seller/dashboard');
+            } else {
+                router.push('/profile'); // Обычных покупателей можно в профиль или оставить где были
+            }
+
             onClose();
-            // Очистка чувствительных данных
+            // Очистка
             setPassword('');
             setConfirmPassword('');
         }
@@ -100,6 +109,10 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
 
         const success = await register({ email, password });
         if (success) {
+            // При регистрации юзер становится Customer (по твоему коду в AuthContext)
+            // Можно тоже кинуть его в профиль для верности
+            router.push('/profile');
+
             onClose();
             setPassword('');
             setConfirmPassword('');
@@ -127,7 +140,7 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
                                     onClick={() => finalizeLogin(role)}
                                     className="continue-button"
                                     disabled={loading}
-                                    style={{ backgroundColor: '#0C3C3E' }} // Другой цвет для отличия
+                                    style={{ backgroundColor: '#0C3C3E' }}
                                 >
                                     {role === 'Customer' ? 'Покупець' : role === 'Seller' ? 'Продавець' : role === 'Admin' ? 'Адміністратор' : role}
                                 </button>

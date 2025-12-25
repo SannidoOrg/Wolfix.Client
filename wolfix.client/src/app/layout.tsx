@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { FC, ReactNode } from "react";
 import { Providers } from './providers';
 import Notification from './components/Notification/Notification.client';
+import SupportWidget from "./components/SupportWidget/SupportWidget.client";
 import '../styles/Header.css'
 import '../styles/Sidebar.css'
 import '../styles/Banner.css'
@@ -33,6 +34,7 @@ const RootLayout: FC<ILayoutProps> = ({ children }) => {
         <Providers>
           <Notification />
           {children}
+          <SupportWidget />
         </Providers>
       </body>
     </html>
