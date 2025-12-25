@@ -89,7 +89,7 @@ export default function SupportDashboardPage() {
         if (!confirm("Видалити це звернення?")) return;
 
         // Берем ID из user. Подставь правильное поле (accountId, userId или id)
-        const supportId = user?.accountId || user?.userId;
+        const supportId = user?.customerId  ;
 
         try {
             await api.patch(`/api/support-requests/${requestId}/supports/${supportId}/cancel`);

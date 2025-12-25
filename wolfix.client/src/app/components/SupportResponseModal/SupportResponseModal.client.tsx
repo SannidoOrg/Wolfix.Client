@@ -36,7 +36,7 @@ const SupportResponseModal: FC<SupportResponseModalProps> = ({ isOpen, onClose, 
         }
 
         // Пытаемся достать ID. Обычно это accountId или userId из токена.
-        const supportId = user?.accountId || user?.userId || user?.id;
+        const supportId = user?.customerId;
 
         if (!supportId) {
             showNotification("Помилка: Не знайдено ID адміністратора/сапорта.", "error");
