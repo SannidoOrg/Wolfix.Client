@@ -32,13 +32,13 @@ const SellerDashboardPage = () => {
 
     // --- ВАЖНО: Восстановлен fallback на user.id ---
     const getSellerId = () => {
-        const id = user?.profileId || (user as any)?.customerId || user?.id;
+        const id = user?.customerId;
         // Для отладки (посмотрите в консоль браузера F12)
         console.log("Resolved Seller ID:", id, "User object:", user);
         return id;
     };
 
-    const getAccountId = () => user?.id;
+    const getAccountId = () => user?.accountId;
 
     useEffect(() => {
         if (!authLoading) {
