@@ -22,7 +22,6 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
 }
 .product-name {
   font-size: 14px;
@@ -33,7 +32,7 @@
   text-overflow: ellipsis;
   white-space: normal;
   line-height: 1.5;
-  height: 60px;
+  height: 40px;
 }
 .product-details {
   margin-bottom: 30px;
