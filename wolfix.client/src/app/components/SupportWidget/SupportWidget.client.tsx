@@ -2,10 +2,16 @@
 
 import { useState } from "react";
 import SupportModal from "../SupportModal/SupportModal.client"; // Импорт твоей модалки
-import "../../../styles/SupportWidget.css"; // Стили для кнопки (см. ниже)
+import "../../../styles/SupportWidget.css";
+import {useAuth} from "@/contexts/AuthContext"; // Стили для кнопки (см. ниже)
 
 export default function SupportWidget() {
     const [isOpen, setIsOpen] = useState(false);
+    const { user } = useAuth(); // Достаем юзера
+
+    if (!user || user.role !== "Customer") {
+        return null;
+    }
 
     return (
         <>

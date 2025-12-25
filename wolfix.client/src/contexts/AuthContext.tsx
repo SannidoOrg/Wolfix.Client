@@ -20,6 +20,7 @@ interface AuthContextType {
     register: (details: RegisterDto) => Promise<boolean>;
     logout: () => void;
     assignRole: (data: any) => Promise<boolean>;
+    isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,6 +34,7 @@ export const useAuth = () => {
 export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const { setLoading, showNotification } = useGlobalContext();
+    const [isLoading, setIsLoading] = useState(true);
 
     const decodeAndNormalizeUser = (token: string): User | null => {
         try {
@@ -80,12 +82,21 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     useEffect(() => {
-        const token = sessionStorage.getItem("authToken");
-        if (token) {
-            const userData = decodeAndNormalizeUser(token);
-            if (userData) setUser(userData);
-            else sessionStorage.removeItem("authToken");
-        }
+        const initAuth = () => {
+            const token = sessionStorage.getItem("authToken");
+            if (token) {
+                const userData = decodeAndNormalizeUser(token);
+                if (userData) {
+                    setUser(userData);
+                } else {
+                    sessionStorage.removeItem("authToken");
+                }
+            }
+            // Главное: говорим, что проверка закончена, даже если юзера нет
+            setIsLoading(false);
+        };
+
+        initAuth();
     }, []);
 
     const handleAuthSuccess = (token: string) => {
@@ -164,7 +175,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         window.location.href = '/';
     };
 
-    const value = { user, isAuthenticated: !!user, fetchUserRoles, loginWithRole, register, logout, assignRole };
+    const value = { user, isAuthenticated: !!user, fetchUserRoles, loginWithRole, register, logout, assignRole, isLoading };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

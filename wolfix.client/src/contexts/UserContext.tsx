@@ -130,14 +130,14 @@ export const UserContextProvider: FC<{ children: ReactNode }> = ({ children }) =
     };
 
     useEffect(() => {
-        if (isAuthenticated && user?.customerId) {
+        if (isAuthenticated && user?.customerId && user?.role === "Customer") {
             fetchCart();
             fetchFavorites();
         } else {
             setCart(null);
             setFavorites([]);
         }
-    }, [isAuthenticated, user?.customerId]);
+    }, [isAuthenticated, user?.customerId, user?.role]);
 
     const value = {
         cart,

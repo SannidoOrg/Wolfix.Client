@@ -26,18 +26,21 @@ const HeaderClient: FC<IHeaderClientProps> = ({logoAlt, searchQuery, onSearchCha
     const cartButtonRef = useRef<HTMLAnchorElement | null>(null);
 
     const router = useRouter();
-    // Достаем user, чтобы проверить роль
-    const {isAuthenticated, user} = useAuth();
+    const {isAuthenticated, user, isLoading} = useAuth();
     const {cart} = useUser();
+
+    // Скрываем иконки магазина для персонала
+    const shouldHideShopIcons = isLoading || (user?.role === 'Seller' || user?.role === 'Support');
 
     const handleProfileClick = () => {
         if (isAuthenticated) {
-            // Проверяем роль пользователя
             if (user?.role === 'Seller') {
-                // Путь к дашборду продавца.
-                // Убедитесь, что вы создали страницу src/app/seller/dashboard/page.tsx
                 router.push('/seller/dashboard');
-            } else {
+            }
+            else if (user?.role === 'Support'){
+                router.push('/support/dashboard');
+            }
+            else {
                 router.push('/profile');
             }
         } else {
@@ -108,34 +111,42 @@ const HeaderClient: FC<IHeaderClientProps> = ({logoAlt, searchQuery, onSearchCha
                         <div className="icon-group">
                             <Link href="/wip" className="icon"><img src="/icons/notification.png"
                                                                     alt="Notification Icon"/></Link>
-                            <Link href="/profile/favorites" className="icon"><img src="/icons/selected.png"
-                                                                                  alt="Favorites"/></Link>
-                            <Link href="/wip" className="icon"><img src="/icons/comparison.png" alt="Comparison Icon"/></Link>
 
-                            {/* КОРЗИНА */}
-                            <div className="icon" style={{position: 'relative'}}>
-                                <a href="/profile/cart" onClick={handleCartClick} ref={cartButtonRef}>
-                                    <img src="/icons/cart.png" alt="Cart Icon"/>
-                                    {itemsCount > 0 && (
-                                        <span style={{
-                                            position: 'absolute',
-                                            top: '-5px',
-                                            right: '-5px',
-                                            backgroundColor: '#FF6B00',
-                                            color: 'white',
-                                            borderRadius: '50%',
-                                            width: '18px',
-                                            height: '18px',
-                                            fontSize: '11px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center'
-                                        }}>
-                                            {itemsCount}
-                                        </span>
-                                    )}
-                                </a>
-                            </div>
+                            {/* ИЗБРАННОЕ (скрыто для персонала) */}
+                            {!shouldHideShopIcons && (
+                                <Link href="/profile/favorites" className="icon">
+                                    <img src="/icons/selected.png" alt="Favorites"/>
+                                </Link>
+                            )}
+
+                            {/* Блок Comparison удален отсюда */}
+
+                            {/* КОРЗИНА (скрыта для персонала) */}
+                            {!shouldHideShopIcons && (
+                                <div className="icon" style={{position: 'relative'}}>
+                                    <a href="/profile/cart" onClick={handleCartClick} ref={cartButtonRef}>
+                                        <img src="/icons/cart.png" alt="Cart Icon"/>
+                                        {itemsCount > 0 && (
+                                            <span style={{
+                                                position: 'absolute',
+                                                top: '-5px',
+                                                right: '-5px',
+                                                backgroundColor: '#FF6B00',
+                                                color: 'white',
+                                                borderRadius: '50%',
+                                                width: '18px',
+                                                height: '18px',
+                                                fontSize: '11px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center'
+                                            }}>
+                                                {itemsCount}
+                                            </span>
+                                        )}
+                                    </a>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -147,8 +158,9 @@ const HeaderClient: FC<IHeaderClientProps> = ({logoAlt, searchQuery, onSearchCha
                 document.body.style.overflow = 'auto';
             }}/>
 
-            {/* Вставляем модалку корзины */}
-            <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} anchorRef={cartButtonRef}/>
+            {!shouldHideShopIcons && (
+                <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} anchorRef={cartButtonRef}/>
+            )}
         </div>
     );
 };
