@@ -25,7 +25,7 @@ export const GoogleLoginButton: FC<GoogleLoginButtonProps> = ({className}) => {
     };
 
     return (
-        <div className={className}>
+        <div className="w-full flex flex-col items-center gap-3">
             {/* GoogleLogin рендерит iframe.
         В Next.js важно убедиться, что родительский контейнер имеет ширину.
       */}
@@ -43,13 +43,13 @@ export const GoogleLoginButton: FC<GoogleLoginButtonProps> = ({className}) => {
 
             {isPending && (
                 <span className="text-xs text-blue-600 animate-pulse font-medium">
-          Проверка данных на сервере...
-        </span>
+                    Перевірка даних на сервері...
+                </span>
             )}
 
             {error && (
                 <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md w-full max-w-sm">
-                    Ошибка входа: {error.message}
+                    Помилка входу: {error.message}
                 </div>
             )}
         </div>
