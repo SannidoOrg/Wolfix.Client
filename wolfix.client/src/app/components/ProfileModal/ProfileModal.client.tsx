@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'; // <--- 1. ДОБАВИЛИ ИМП�
 import '../../../styles/ProfileModal.css';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useGlobalContext } from '../../../contexts/GlobalContext';
+import {GoogleLoginButton} from "@/app/components/Auth/GoogleLoginButton";
 
 interface IProfileModalProps {
     isOpen: boolean;
@@ -210,10 +211,10 @@ const ProfileModal: FC<IProfileModalProps> = ({ isOpen, onClose, anchorRef }) =>
                         <div className="modal-separator-text-middle">або</div>
 
                         <div className="social-login-options">
-                            <button className="social-button">
-                                <Image src="/icons/Group198.jpg" alt="Google" width={20} height={20} />
-                                Продовжити з Google
-                            </button>
+                            <GoogleLoginButton className="social-button">
+                                {/*<Image src="/icons/Group198.jpg" alt="Google" width={20} height={20} />*/}
+                                {/*Продовжити з Google*/}
+                            </GoogleLoginButton>
                         </div>
 
                         <div className="registration-prompt">

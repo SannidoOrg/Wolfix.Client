@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, ReactNode, FC, useContext } from "r
 import { jwtDecode } from "jwt-decode";
 import api from "../lib/api";
 import { useGlobalContext } from "./GlobalContext";
-import { User, RoleRequestDto, TokenRequestDto, RegisterDto } from "../types/auth";
+import {User, RoleRequestDto, TokenRequestDto, RegisterDto, GoogleLoginDto} from "../types/auth";
 
 interface UserRolesResponse {
     accountId: string;
@@ -18,6 +18,7 @@ interface AuthContextType {
     fetchUserRoles: (credentials: RoleRequestDto) => Promise<string[] | null>;
     loginWithRole: (credentials: TokenRequestDto) => Promise<boolean>;
     register: (details: RegisterDto) => Promise<boolean>;
+    continueWithGoogle: (payload: GoogleLoginDto) => Promise<string>;
     logout: () => void;
     assignRole: (data: any) => Promise<boolean>;
     isLoading: boolean;
@@ -164,6 +165,21 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         }
     };
 
+    const continueWithGoogle = async (payload: GoogleLoginDto) => {
+        const response = await api.post('/api/account/customer/google', payload);
+        const token = typeof response.data === 'string' ? response.data : response.data?.token;
+
+        if (response.status !== 200) {
+            const errorText = response.data;
+            throw new Error(errorText || 'Failed to authenticate with Google');
+        }
+
+        if (token) {
+            handleAuthSuccess(token);
+            return token;
+        }
+    }
+
     const assignRole = async (data: any) => {
         console.log("Assign role logic placeholder", data);
         return true;
@@ -175,7 +191,7 @@ export const AuthContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         window.location.href = '/';
     };
 
-    const value = { user, isAuthenticated: !!user, fetchUserRoles, loginWithRole, register, logout, assignRole, isLoading };
+    const value = { user, isAuthenticated: !!user, fetchUserRoles, loginWithRole, register, continueWithGoogle, logout, assignRole, isLoading };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
